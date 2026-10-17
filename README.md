@@ -1,42 +1,78 @@
 # Stockholms prislandskap
 
-3D-karta över bostadspriser i Stockholms län: 12 stadsdelsområden i Stockholms stad och 25 kranskommuner.
+Bostadspriser i Stockholms län på en karta: vad det kostar per kvadratmeter, var en viss budget
+räcker och var priserna rör sig. 12 stadsdelsområden i Stockholms stad och länets 25 övriga kommuner,
+uppdaterat varje månad från Svensk Mäklarstatistik.
 
-- **Kartan:** kr/kvm, "Var har jag råd?" (budget och boarea), största rörelserna och volym. Hela vyn ligger i URL:en.
-- **Områdessidor:** `/omrade/<slug>/` med nyckeltal, länsjämförelse, grannområden, minikarta och delningsbild.
-- **Jämförelse:** två till tre områden sida vid sida, delbart som `/jamfor/?a=sodermalm&b=nacka`.
-- **Delning:** knappen Dela kopierar en länk till `/vy/<vy>/?…`, som har en egen delningsbild per vy.
+**Live:** https://lagerholmdev.github.io/bostadspriser/
 
-## Hur det fungerar
+## Vad sajten gör
 
-- `scripts/scrape.py` hämtar två publika sidor från Svensk Mäklarstatistik och skriver `data/snapshots/ÅÅÅÅ-MM.json`.
-- `scripts/build_site.py` bygger kartan, områdessidorna, vysidorna, delningsbilderna och sitemap från `site/template.html`, geometrin och senaste ögonblicksbilden. Allt det genererade är gitignorerat och byggs om i varje körning.
-- `.github/workflows/update.yml` kör båda den 10:e varje månad och publicerar till GitHub Pages.
-- `scripts/build_geometry.py` bygger `site/omraden.geojson`. Körs bara om indelningen ändras.
+- **Kartan** svarar på tre frågor: pris per kvm, "Var har jag råd?" (budget och boarea) och
+  förändring. Hela läget ligger i adressen, så varje vy går att dela.
+- **Områdessidor** (`/omrade/<slug>/`) med nyckeltal, jämförelse mot länet, grannområden och en
+  egen delningsbild. Det är dem folk hittar via sök.
+- **Jämförelse** (`/jamfor/?omraden=sodermalm,nacka`) av upp till tre områden.
 
-Allt körs i webbläsaren med deck.gl. Ingen server, inga API-nycklar.
+## Så hänger det ihop
 
-## Besöksstatistik
+```
+Mäklarstatistik ──▶ pipeline (Python) ──▶ data/snapshots/   (checkas in, en fil per månad)
+                                   └────▶ web/src/generated/ (export enligt kontraktet)
+                                   └────▶ web/public/og/     (delningsbilder)
+                     web (Astro + TS) ──▶ web/dist ──▶ GitHub Pages
+```
 
-Cookiefri statistik via [GoatCounter](https://www.goatcounter.com) (gratis för icke-kommersiellt bruk). Skapa ett konto, och skriv kodnamnet i `site/config.json` under `"goatcounter"`. Sajten räknar sidvisningar, vilken vy som öppnas först (`forsta-vy/<vy>`), byten av vy och besök via delade länkar (`delning`). Står fältet tomt laddas inget skript.
+| Mapp | Innehåll |
+| --- | --- |
+| [`pipeline/`](pipeline) | Python-paketet `prislandskap`: skrapa, exportera, rita delningsbilder, bygga geometri |
+| [`data/`](data) | Månadsvisa ögonblicksbilder och områdesgeometri |
+| [`web/`](web) | Astro-sajten: kartan, områdessidor, jämförelse |
+| [`docs/`](docs) | [Arkitektur](docs/architecture.md), [design](docs/design.md), [dataformat](docs/data.md) |
 
 ## Kom igång
 
-1. Settings → Pages → Source: **GitHub Actions**.
-2. Actions → "Uppdatera och publicera" → Run workflow.
-
-Lokalt:
+Kräver Python 3.11+ och Node 22.
 
 ```sh
-pip install -r requirements.txt
-python scripts/scrape.py && python scripts/build_site.py
-cd site && python -m http.server   # öppna http://localhost:8000
+# 1. Data
+cd pipeline
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+python -m prislandskap all        # skriver web/src/generated/ och web/public/og/
+
+# 2. Webb
+cd ../web
+npm ci
+npm run dev                       # http://localhost:4321/bostadspriser/
 ```
 
-## Data och begränsningar
+Tester och kontroller:
 
-- Statistik: [Svensk Mäklarstatistik](https://www.maklarstatistik.se/omrade/riket/stockholms-lan/). Får citeras med källhänvisning.
-- Stadsdelsgränser: Stockholms stad via [krasch/stockholm-stadsdelar](https://github.com/krasch/stockholm-stadsdelar) (CC0). Stadens 117 stadsdelar är grupperade till Mäklarstatistiks 12 områden i `scripts/stadsdel_mapping.py`. Mäklarstatistik definierar sina områden med distriktskoder, så gränserna är en nära men inte exakt motsvarighet (Gamla stan är t.ex. lagd under Vasastan-Norrmalm).
-- Kommungränser: SCB:s DeSO, sammanslagna per kommun. Gränserna inkluderar vatten, så skärgårdskommuner ser större ut än sin landyta.
-- Villor redovisas bara per kommun; i villaläget får hela Stockholms stad samma värde.
-- F = färre än 25 försäljningar, N = icke-representativt. Sådana värden visas grå.
+```sh
+cd pipeline && ruff check . && pytest
+cd web && npm run check && npm test && npm run build
+```
+
+## Uppdatering och publicering
+
+GitHub Actions sköter allt (`.github/workflows/`):
+
+- **ci.yml** kör tester och bygger sajten på varje push och pull request.
+- **deploy.yml** körs vid push till `main`, den 10:e varje månad och manuellt. Den hämtar ny data
+  (vid schemalagd och manuell körning), checkar in ögonblicksbilden, bygger och publicerar till Pages.
+
+Engångsinställning: Settings → Pages → Source: **GitHub Actions**.
+
+Besöksstatistik är frivillig och cookiefri: skapa ett konto på [GoatCounter](https://www.goatcounter.com)
+och lägg kodnamnet som repovariabeln `PUBLIC_GOATCOUNTER`.
+
+## Data och licenser
+
+- Statistik: [Svensk Mäklarstatistik](https://www.maklarstatistik.se), citeras med källhänvisning.
+- Stadsdelsgränser: Stockholms stad via [krasch/stockholm-stadsdelar](https://github.com/krasch/stockholm-stadsdelar) (CC0).
+- Kommungränser: SCB:s DeSO-indelning via [stefur/swemaps-data](https://github.com/stefur/swemaps-data).
+- Baskarta: [OpenFreeMap](https://openfreemap.org), © OpenMapTiles, © OpenStreetMaps bidragsgivare.
+- Typsnitt: Familjen Grotesk (SIL Open Font License).
+
+Se [docs/data.md](docs/data.md) för hur områdena är definierade och vad som saknas.
