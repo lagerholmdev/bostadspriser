@@ -742,6 +742,39 @@
    }
   },
   {
+   "slug": "stockholm",
+   "namn": "Stockholm",
+   "typ": "kommun",
+   "br": {
+    "m3": {
+     "antal": 5835,
+     "kvm": 91997,
+     "medelpris": 5443000,
+     "utv": -0.2
+    },
+    "m12": {
+     "antal": 25084,
+     "kvm": 90815,
+     "medelpris": 5439000,
+     "utv": 7.9
+    }
+   },
+   "villa": {
+    "m3": {
+     "antal": 359,
+     "kvm": 75494,
+     "medelpris": 9756000,
+     "utv": 0.2
+    },
+    "m12": {
+     "antal": 1607,
+     "kvm": 73427,
+     "medelpris": 9458000,
+     "utv": 7.7
+    }
+   }
+  },
+  {
    "slug": "sundbyberg",
    "namn": "Sundbyberg",
    "typ": "kommun",
@@ -1077,39 +1110,6 @@
      "kvm": 47197,
      "medelpris": 5988000,
      "utv": 4.7
-    }
-   }
-  },
-  {
-   "slug": "stockholm",
-   "namn": "Stockholm",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 5835,
-     "kvm": 91997,
-     "medelpris": 5443000,
-     "utv": -0.2
-    },
-    "m12": {
-     "antal": 25084,
-     "kvm": 90815,
-     "medelpris": 5439000,
-     "utv": 7.9
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 359,
-     "kvm": 75494,
-     "medelpris": 9756000,
-     "utv": 0.2
-    },
-    "m12": {
-     "antal": 1607,
-     "kvm": 73427,
-     "medelpris": 9458000,
-     "utv": 7.7
     }
    }
   }
