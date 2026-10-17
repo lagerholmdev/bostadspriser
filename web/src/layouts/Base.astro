@@ -1,0 +1,218 @@
+---
+/**
+ * Gemensam ram för alla sidor: metataggar, sidhuvud och sidfot.
+ * `fullBleed` används av kartsidan, som själv styr sin layout under sidhuvudet.
+ */
+import "../styles/base.css";
+import { dataset } from "../lib/data";
+import { date } from "../lib/format";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Sökväg till delningsbild relativt sajtens bas, t.ex. "og/sodermalm.png". */
+  image?: string;
+  fullBleed?: boolean;
+  noindex?: boolean;
+}
+
+const { title, description, image = "og/start.png", fullBleed = false, noindex = false } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(`${base}${image}`, Astro.site).href;
+const path = Astro.url.pathname;
+const nav = [
+  { href: base, label: "Karta", current: path === base },
+  { href: `${base}omrade/`, label: "Områden", current: path.startsWith(`${base}omrade/`) },
+  { href: `${base}om/`, label: "Om datan", current: path.startsWith(`${base}om/`) },
+];
+const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
+---
+
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Stockholms prislandskap" />
+    <meta property="og:locale" content="sv_SE" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f3f4f1" />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <link rel="sitemap" href={`${base}sitemap-index.xml`} />
+    {
+      goatcounter && (
+        <script
+          is:inline
+          async
+          data-goatcounter={`https://${goatcounter}.goatcounter.com/count`}
+          src="https://gc.zgo.at/count.js"
+        />
+      )
+    }
+    <slot name="head" />
+  </head>
+  <body class:list={{ "full-bleed": fullBleed }}>
+    <a class="skip" href="#main">Hoppa till innehållet</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href={base} aria-label="Stockholms prislandskap, till kartan">
+          <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2" y="12" width="5" height="10" rx="1" fill="#dda052"></rect>
+            <rect x="9.5" y="6" width="5" height="16" rx="1" fill="#9c4a2b"></rect>
+            <rect x="17" y="9" width="5" height="13" rx="1" fill="#1f6f5c"></rect>
+          </svg>
+          <span>Stockholms prislandskap</span>
+        </a>
+        <nav aria-label="Huvudmeny">
+          <ul>
+            {
+              nav.map((n) => (
+                <li>
+                  <a href={n.href} aria-current={n.current ? "page" : undefined}>
+                    {n.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    {
+      !fullBleed && (
+        <footer class="site-footer">
+          <div class="wrap">
+            <p>
+              Siffrorna kommer från{" "}
+              <a href={dataset.source.url} rel="noopener">
+                {dataset.source.name}
+              </a>{" "}
+              och uppdaterades {date(dataset.updated)}. De är snittpriser för sålda bostäder; en enskild
+              bostad kan kosta mer eller mindre.
+            </p>
+            <p>
+              <a href={`${base}om/`}>Om datan och metoden</a>
+            </p>
+          </div>
+        </footer>
+      )
+    }
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: var(--sp-3);
+    top: -100px;
+    z-index: 100;
+    background: var(--c-surface);
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+  }
+  .skip:focus {
+    top: var(--sp-3);
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-line);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .site-header-inner {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-left: var(--gutter);
+    padding-right: var(--gutter-r);
+    max-width: none;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    color: var(--c-ink);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: var(--fs-md);
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    flex: none;
+  }
+  nav ul {
+    display: flex;
+    gap: var(--sp-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--radius-sm);
+    color: var(--c-ink-2);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  nav a:hover {
+    color: var(--c-ink);
+    background: var(--c-page);
+  }
+  nav a[aria-current="page"] {
+    color: var(--c-accent);
+    background: var(--c-accent-soft);
+  }
+  .site-footer {
+    border-top: 1px solid var(--c-line);
+    background: var(--c-surface);
+    color: var(--c-ink-2);
+    font-size: var(--fs-sm);
+    margin-top: var(--sp-8);
+  }
+  .site-footer .wrap {
+    padding-block: var(--sp-5) var(--sp-6);
+    display: grid;
+    gap: var(--sp-2);
+    max-width: 72ch;
+    margin-left: max(0px, calc((100% - var(--content-w)) / 2));
+  }
+  @media (max-width: 560px) {
+    .brand span {
+      font-size: var(--fs-sm);
+    }
+    nav a {
+      padding: 0 var(--sp-2);
+    }
+  }
+  @media (max-width: 400px) {
+    .brand span {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,76 @@
+/*
+ * Designsystemet. Allt i gränssnittet hämtar färg, typ och mått härifrån.
+ * Riktning: ljust, sakligt, svenskt. Prisskalan följer Stockholms fasader
+ * (sand, ockra, falurött, oxblod); accenten är irrgrön koppar som på stadens tak.
+ * Se docs/design.md.
+ */
+:root {
+  color-scheme: light;
+
+  /* Ytor och text */
+  --c-page: #f3f4f1; /* sidbakgrund, svagt grågrön */
+  --c-surface: #ffffff; /* kort, paneler */
+  --c-sunken: #eaece7; /* inaktiva fält, spår */
+  --c-ink: #1a1f1c; /* brödtext */
+  --c-ink-2: #4d5650; /* sekundär text */
+  --c-ink-3: #737c76; /* hjälptext, etiketter (4.5:1 mot vitt) */
+  --c-line: #dde0da; /* avdelare */
+  --c-line-strong: #c4c9c2; /* fältkanter */
+
+  /* Accent: interaktion, val, fokus */
+  --c-accent: #1f6f5c;
+  --c-accent-hover: #175747;
+  --c-accent-soft: #e2f0eb;
+  --c-on-accent: #ffffff;
+
+  /* Prisskala, billigt -> dyrt (6 steg) */
+  --c-price-1: #f3e7c4;
+  --c-price-2: #ecc884;
+  --c-price-3: #dda052;
+  --c-price-4: #c4713a;
+  --c-price-5: #9c4a2b;
+  --c-price-6: #652a21;
+
+  /* Förändring: ner (blå) -> oförändrat -> upp (rost) */
+  --c-down: #3d6a9e;
+  --c-flat: #e7e8e3;
+  --c-up: #b0502a;
+
+  /* Budget: räcker / nästan / räcker inte */
+  --c-ok: #2f8a6c;
+  --c-near: #e3a948;
+  --c-no: #d4d7d1;
+
+  /* Saknad data */
+  --c-nodata: #e4e6e1;
+
+  /* Typ */
+  --f-sans: "Familjen Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --fs-xs: 0.75rem; /* 12 */
+  --fs-sm: 0.875rem; /* 14 */
+  --fs-md: 1rem; /* 16 */
+  --fs-lg: 1.25rem; /* 20 */
+  --fs-xl: 1.75rem; /* 28 */
+  --fs-2xl: clamp(2rem, 1.4rem + 2.6vw, 3rem); /* 32–48 */
+  --fs-num: clamp(2.25rem, 1.6rem + 2.8vw, 3.5rem); /* stora siffror */
+  --lh-tight: 1.15;
+  --lh-body: 1.55;
+
+  /* Mått */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 72px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 2px rgb(26 31 28 / 0.06), 0 4px 16px rgb(26 31 28 / 0.06);
+  --header-h: 60px;
+  --content-w: 1080px;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
