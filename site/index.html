@@ -322,14 +322,12 @@ const FONT = '"Familjen Grotesk", "Helvetica Neue", Arial, sans-serif';
 const INNER_KOMMUNER = new Set(["solna", "sundbyberg", "lidingo", "nacka", "danderyd"]);
 let zoomBucket = 1;
 function bucketFor(z) { return z < 9.4 ? 0 : z < 11 ? 1 : 2; }
-function labelData() {
-  return FEATS.filter(f => {
-    const p = f.properties;
-    if (p.slug === state.sel) return true;
-    if (zoomBucket === 0) return p.typ === "kommun";
-    if (zoomBucket === 1) return (p.typ === "stadsdel" && p.slug !== "essingen") || INNER_KOMMUNER.has(p.slug);
-    return p.typ === "stadsdel" || INNER_KOMMUNER.has(p.slug);
-  });
+function labelVisible(f) {
+  const p = f.properties;
+  if (p.slug === state.sel) return true;
+  if (zoomBucket === 0) return p.typ === "kommun";
+  if (zoomBucket === 1) return (p.typ === "stadsdel" && p.slug !== "essingen") || INNER_KOMMUNER.has(p.slug);
+  return p.typ === "stadsdel" || INNER_KOMMUNER.has(p.slug);
 }
 
 function layers() {
@@ -350,14 +348,15 @@ function layers() {
       updateTriggers: { getElevation: trig },
     }),
     state.grow > 0 && new deck.TextLayer({
-      id: "etiketter", data: labelData(), characterSet: CHARS, fontFamily: FONT, fontWeight: 600,
+      id: "etiketter", data: FEATS, characterSet: CHARS, fontFamily: FONT, fontWeight: 600,
       getPosition: f => [...f.properties.lab, elevOf(f) * state.grow + 120],
       getText: f => f.properties.namn,
-      getSize: f => f.properties.slug === state.sel ? 15 : f.properties.typ === "stadsdel" ? 13 : 12,
+      // Samma lista hela tiden; dolda etiketter får storlek 0. Då hör varje etikett alltid till sin yta.
+      getSize: f => !labelVisible(f) ? 0 : f.properties.slug === state.sel ? 15 : f.properties.typ === "stadsdel" ? 13 : 12,
       getColor: f => f.properties.slug === state.sel ? [232, 180, 92, 255] : [236, 230, 216, 235],
       lineHeight: 1.15, outlineWidth: 3, outlineColor: [11, 17, 27, 230], fontSettings: { sdf: true },
       billboard: true, sizeUnits: "pixels",
-      updateTriggers: { getPosition: trig, getSize: [state.sel], getColor: [state.sel] },
+      updateTriggers: { getPosition: trig, getSize: [state.sel, zoomBucket], getColor: [state.sel] },
       transitions: REDUCED ? {} : { getPosition: { duration: 1100, easing: t => 1 - Math.pow(1 - t, 3) } },
     }),
   ].filter(Boolean);
@@ -370,9 +369,9 @@ const CAMS = {
   city:  { longitude: 18.03, latitude: 59.305, zoom: 10.2, pitch: 52, bearing: -18 },
   lan:   { longitude: 18.15, latitude: 59.4, zoom: 8.3, pitch: 42, bearing: -8 },
 };
-// Kameran hålls inom länet: utan gräns kan ett snabbt släpp (tröghet) eller en svep på styrplattan
-// kasta iväg vyn så långt att kartan verkar försvinna.
-const LIMITS = { minZoom: 7.6, maxZoom: 14.5, maxPitch: 70 };
+// Kameran styrs helt av sidan (kontrollerat läge) och hålls inom länet. Ingen tröghet: den gjorde att
+// kameran kunde fortsätta efter släpp och hamna långt bort eller extremt inzoomad.
+const LIMITS = { minZoom: 7.6, maxZoom: 12.8, maxPitch: 65 };
 const BOUNDS = { lon: [17.3, 19.2], lat: [58.85, 60.05] };
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 function cam(name) {
@@ -392,14 +391,18 @@ let viewState = cam("city");
 zoomBucket = bucketFor(viewState.zoom);
 const theDeck = new deck.Deck({
   canvas: "deck-canvas",
-  initialViewState: viewState,
-  controller: { dragRotate: true, touchRotate: true, inertia: 200 },
+  viewState,
+  controller: { dragRotate: true, touchRotate: true, inertia: false, scrollZoom: { speed: 0.01, smooth: false } },
   onViewStateChange: ({ viewState: v }) => {
-    v = { ...v, longitude: clamp(v.longitude, ...BOUNDS.lon), latitude: clamp(v.latitude, ...BOUNDS.lat) };
-    viewState = v;
-    const b = bucketFor(v.zoom);
-    if (b !== zoomBucket) { zoomBucket = b; theDeck.setProps({ layers: layers() }); }
-    return v;
+    viewState = {
+      ...v, ...LIMITS,
+      longitude: clamp(v.longitude, ...BOUNDS.lon), latitude: clamp(v.latitude, ...BOUNDS.lat),
+      zoom: clamp(v.zoom, LIMITS.minZoom, LIMITS.maxZoom), pitch: clamp(v.pitch, 0, LIMITS.maxPitch),
+    };
+    const b = bucketFor(viewState.zoom);
+    const relabel = b !== zoomBucket;
+    zoomBucket = b;
+    theDeck.setProps(relabel ? { viewState, layers: layers() } : { viewState });
   },
   effects: [lighting],
   parameters: { clearColor: [11 / 255, 17 / 255, 27 / 255, 1] },
@@ -415,7 +418,8 @@ const theDeck = new deck.Deck({
 
 function flyTo(name) {
   const target = cam(name);
-  theDeck.setProps({ initialViewState: { ...target, transitionDuration: REDUCED ? 0 : 1600, transitionInterpolator: new deck.FlyToInterpolator() } });
+  viewState = { ...target, transitionDuration: REDUCED ? 0 : 1600, transitionInterpolator: new deck.FlyToInterpolator() };
+  theDeck.setProps({ viewState });
 }
 
 /* ---------- UI ---------- */
