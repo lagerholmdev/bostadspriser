@@ -35,6 +35,16 @@ def slugify(name: str) -> str:
     return t
 
 
+def drop_small_holes(geom, min_area=40_000):
+    """Behåll bara hål (sjöar, vikar) större än min_area m²."""
+    from shapely.geometry import MultiPolygon, Polygon
+    def fix(p):
+        return Polygon(p.exterior, [r for r in p.interiors if Polygon(r).area >= min_area])
+    if geom.geom_type == "Polygon":
+        return fix(geom)
+    return MultiPolygon([fix(p) for p in geom.geoms])
+
+
 def fetch(url: str) -> Path:
     CACHE.mkdir(exist_ok=True)
     p = CACHE / url.rsplit("/", 1)[-1]
@@ -51,6 +61,11 @@ def main() -> None:
         raise SystemExit(f"Omappade stadsdelar: {sorted(missing)}")
     sd["slug"] = sd["name"].map(lookup)
     sd = sd.dissolve(by="slug").reset_index()[["slug", "geometry"]]
+    # Källan har små glipor mellan grannstadsdelar. Slut glipor under ~20 m och ta bort små hål,
+    # annars blir de synliga sprickor när ytorna krymps nedan.
+    sd = sd.to_crs(3006)
+    sd["geometry"] = sd.geometry.buffer(10, join_style="mitre").buffer(-10, join_style="mitre").map(drop_small_holes)
+    sd = sd.to_crs(4326)
     sd["namn"] = sd["slug"].map(STADSDEL_NAMN)
     sd["typ"] = "stadsdel"
 
@@ -69,6 +84,8 @@ def main() -> None:
     # Förenkla i meter (SWEREF99 TM) och tillbaka till WGS84
     allt = allt.to_crs(3006)
     allt["geometry"] = allt.geometry.simplify(25, preserve_topology=True).buffer(0)
+    # Krymp varje yta 15 m så att grannarnas väggar inte sammanfaller i 3D (annars flimmer, z-fighting)
+    allt["geometry"] = allt.geometry.buffer(-15, join_style="mitre").buffer(0)
     # Etikettpunkt: polylabel på största delytan (hamnar inne i ytan även för konstiga former)
     from shapely.ops import polylabel
     def lab(geom):
