@@ -1,0 +1,508 @@
+<title>Stockholms prislandskap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: kartan fyller skärmen; kontroller flyter uppe till vänster, detaljpanel till höger (botten på mobil). */
+:root {
+  color-scheme: dark;
+  --night: #0b111b;      /* vattnet */
+  --land: #162030;       /* ytor utan data */
+  --panel: rgba(13, 20, 32, 0.86);
+  --ink: #ece6d8;
+  --muted: #8e98a9;
+  --line: rgba(236, 230, 216, 0.13);
+  --brass: #e8b45c;      /* accent: valt område, aktiva kontroller */
+  --up: #f0a35b;
+  --down: #6a9be0;
+  --font-ui: "Familjen Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  overflow: hidden;
+}
+#app { position: relative; height: 100%; width: 100%; }
+#deck-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.overlay { position: absolute; z-index: 2; pointer-events: none; }
+.overlay > * { pointer-events: auto; }
+
+.head {
+  top: 0; left: 0;
+  padding-top: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 12px; width: min(380px, 100%);
+}
+.title-block { display: grid; gap: 4px; text-shadow: 0 1px 2px rgba(11, 17, 27, 0.9), 0 0 18px rgba(11, 17, 27, 0.85); }
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+h1 {
+  margin: 0; font-size: 28px; line-height: 1.05; font-weight: 700; letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--brass); }
+
+.controls {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 12px; display: grid; gap: 10px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; width: 100%; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: nowrap; }
+.seg button {
+  font: inherit; font-size: 13px; color: var(--muted); background: transparent; border: 0;
+  padding: 7px 11px; cursor: pointer; white-space: nowrap;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { color: var(--night); background: var(--brass); font-weight: 600; }
+.seg button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+.budget { display: grid; gap: 6px; }
+.budget[hidden] { display: none !important; }
+.budget-top { display: flex; justify-content: space-between; align-items: baseline; }
+.budget-val { font-family: var(--font-num); font-size: 15px; color: var(--ink); }
+input[type="range"] { width: 100%; accent-color: var(--brass); }
+
+.cams { display: flex; gap: 6px; flex-wrap: wrap; }
+.cams button {
+  font: inherit; font-size: 12px; color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; cursor: pointer;
+}
+.cams button:hover { border-color: var(--brass); }
+
+.legend { display: grid; gap: 6px; }
+.legend-bar { height: 8px; border-radius: 4px; }
+.legend-ticks { display: flex; justify-content: space-between; font-family: var(--font-num); font-size: 11px; color: var(--muted); }
+.legend-note { font-size: 11px; color: var(--muted); }
+
+/* Detaljpanel */
+.side {
+  top: 16px; right: max(16px, env(safe-area-inset-right, 0px));
+  width: 320px; max-height: calc(100% - 64px); overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.side h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.side .kind { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.side-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.close {
+  font: inherit; font-size: 13px; color: var(--muted); background: transparent; border: 1px solid var(--line);
+  border-radius: 8px; padding: 4px 9px; cursor: pointer;
+}
+.big { margin-top: 14px; display: flex; align-items: baseline; gap: 6px; }
+.big .n { font-family: var(--font-num); font-size: 34px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.big .u { color: var(--muted); font-size: 13px; }
+.compare { margin-top: 10px; display: grid; gap: 4px; }
+.track { position: relative; height: 6px; background: var(--line); border-radius: 3px; }
+.track .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--brass); }
+.track .mark { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--ink); }
+.compare-cap { font-size: 12px; color: var(--muted); }
+dl.facts { margin: 16px 0 0; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; }
+dl.facts dt { color: var(--muted); font-size: 13px; }
+dl.facts dd { margin: 0; font-family: var(--font-num); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); }
+.callout { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.45; }
+.callout b { font-family: var(--font-num); font-weight: 500; color: var(--brass); }
+.flag { margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+.ranking { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 2px; }
+.ranking li button {
+  width: 100%; display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline;
+  font: inherit; color: var(--ink); background: transparent; border: 0; border-radius: 6px;
+  padding: 6px 6px; cursor: pointer; text-align: left;
+}
+.ranking li button:hover { background: rgba(236, 230, 216, 0.06); }
+.ranking .pos { font-family: var(--font-num); font-size: 11px; color: var(--muted); }
+.ranking .v { font-family: var(--font-num); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ranking .gap { color: var(--muted); font-size: 11px; padding: 2px 6px; }
+.hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.foot {
+  right: 0; bottom: 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-left: 16px;
+  font-size: 11px; color: var(--muted); text-align: right; max-width: 560px;
+}
+.foot a { color: var(--muted); }
+
+.tip {
+  font-family: var(--font-ui); background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.35;
+}
+.tip b { font-size: 13px; }
+.tip .tv { font-family: var(--font-num); color: var(--brass); }
+
+@media (max-width: 760px) {
+  h1 { font-size: 22px; }
+  .head { width: 100%; gap: 8px; padding-top: 10px; }
+  .controls { padding: 10px; gap: 8px; }
+  .seg button { padding: 6px 9px; font-size: 12px; }
+  .side {
+    top: auto; bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px));
+    width: auto; max-height: 38%;
+    padding: 12px 14px;
+  }
+  .side h2 { font-size: 18px; }
+  .big { margin-top: 8px; } .big .n { font-size: 26px; }
+  .foot { display: none; }
+  .legend-note { display: none; }
+  .desk-only { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="app">
+  <canvas id="deck-canvas" aria-label="3D-karta över bostadspriser i Stockholms län"></canvas>
+
+  <div class="overlay head">
+    <div class="title-block">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1>Stockholms <em>prislandskap</em></h1>
+    </div>
+    <div class="controls" role="group" aria-label="Välj vad kartan visar">
+      <div class="row">
+        <div class="seg" id="seg-typ">
+          <button id="b-br" data-v="br" aria-pressed="true">Bostadsrätter</button>
+          <button id="b-villa" data-v="villa" aria-pressed="false">Villor</button>
+        </div>
+        <div class="seg" id="seg-per">
+          <button id="b-m3" data-v="m3" aria-pressed="true">3 mån</button>
+          <button id="b-m12" data-v="m12" aria-pressed="false">12 mån</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="seg" id="seg-vy">
+          <button id="b-pris" data-v="pris" aria-pressed="true">Kr/kvm</button>
+          <button id="b-trend" data-v="trend" aria-pressed="false">Trend</button>
+          <button id="b-budget" data-v="budget" aria-pressed="false">Budget</button>
+          <button id="b-volym" data-v="volym" aria-pressed="false">Volym</button>
+        </div>
+      </div>
+      <div class="budget" id="budget" hidden>
+        <div class="budget-top"><span class="row-label" style="width:auto">Din budget</span><span class="budget-val" id="budget-val"></span></div>
+        <input type="range" id="budget-range" min="1" max="15" step="0.25" value="5" aria-label="Budget i miljoner kronor">
+      </div>
+      <div class="legend">
+        <div class="legend-bar" id="legend-bar"></div>
+        <div class="legend-ticks"><span id="lg-lo"></span><span id="lg-mid"></span><span id="lg-hi"></span></div>
+        <div class="legend-note" id="legend-note"></div>
+      </div>
+      <div class="cams">
+        <button id="cam-inner" data-cam="inner">Innerstan</button>
+        <button id="cam-city" data-cam="city">Stockholms stad</button>
+        <button id="cam-lan" data-cam="lan">Hela länet</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="overlay side" id="side" aria-live="polite"></aside>
+
+  <div class="overlay foot" id="foot"></div>
+</div>
+
+<script src="https://unpkg.com/deck.gl@8.9.35/dist.min.js"></script>
+<script>
+const GEO = /*__GEO__*/null;
+const SNAP = /*__SNAP__*/null;
+
+/* ---------- data ---------- */
+const BY = Object.fromEntries(SNAP.omraden.map(o => [o.slug, o]));
+const FEATS = GEO.features;
+const state = { typ: "br", per: "m3", vy: "pris", budget: 5e6, sel: null, grow: 0 };
+try { const s = JSON.parse(localStorage.getItem("prislandskap") || "{}"); Object.assign(state, pick(s, ["typ", "per", "vy", "budget"])); } catch (e) {}
+function pick(o, ks) { const r = {}; for (const k of ks) if (o[k] !== undefined) r[k] = o[k]; return r; }
+function save() { try { localStorage.setItem("prislandskap", JSON.stringify(pick(state, ["typ", "per", "vy", "budget"]))); } catch (e) {} }
+
+const PERIOD = { m3: SNAP.period.m3, m12: SNAP.period.m12 };
+const TYP_NAMN = { br: "Bostadsrätter", villa: "Villor" };
+
+function rec(f) {
+  const p = f.properties;
+  if (state.typ === "br") return BY[p.slug]?.br?.[state.per] || null;
+  // Villor finns bara per kommun: stadsdelarna får Stockholms stads värde
+  const src = p.typ === "stadsdel" ? BY["stockholm"] : BY[p.slug];
+  return src?.villa?.[state.per] || null;
+}
+function value(f) {
+  const r = rec(f); if (!r) return null;
+  if (state.vy === "pris") return r.kvm;
+  if (state.vy === "trend") return r.utv;
+  if (state.vy === "volym") return r.antal;
+  if (state.vy === "budget") return r.kvm ? state.budget / r.kvm : null;
+  return null;
+}
+function lanRec() { return SNAP.lan[state.typ][state.per]; }
+
+/* ---------- formatering ---------- */
+const nf = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
+const kr = v => v == null ? "–" : nf.format(v);
+const mkr = v => (v / 1e6).toLocaleString("sv-SE", { maximumFractionDigits: 2 }) + " Mkr";
+const pct = v => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+function fmt(v) {
+  if (v == null) return "–";
+  if (state.vy === "pris") return kr(v) + " kr/kvm";
+  if (state.vy === "trend") return pct(v);
+  if (state.vy === "volym") return kr(v) + " sålda";
+  if (state.vy === "budget") return Math.round(v) + " kvm";
+}
+function fmtShort(v) {
+  if (v == null) return "–";
+  if (state.vy === "pris") return v >= 1000 ? Math.round(v / 1000) + "k" : String(v);
+  if (state.vy === "trend") return pct(v);
+  if (state.vy === "volym") return kr(v);
+  if (state.vy === "budget") return Math.round(v) + " kvm";
+}
+
+/* ---------- färg ---------- */
+// Pris: djupt indigo -> havsgrönt -> halm -> bärnsten. Höga priser lyser.
+const RAMP = [[38, 52, 102], [52, 98, 138], [84, 150, 150], [196, 190, 120], [240, 170, 88], [250, 120, 78]];
+const DIV_LO = [106, 155, 224], DIV_MID = [74, 82, 98], DIV_HI = [240, 163, 91];
+function lerp(a, b, t) { return a.map((x, i) => Math.round(x + (b[i] - x) * t)); }
+function ramp(t) {
+  t = Math.max(0, Math.min(1, t));
+  const s = t * (RAMP.length - 1), i = Math.min(RAMP.length - 2, Math.floor(s));
+  return lerp(RAMP[i], RAMP[i + 1], s - i);
+}
+function diverge(t) { // t i [-1,1]
+  t = Math.max(-1, Math.min(1, t));
+  return t < 0 ? lerp(DIV_MID, DIV_LO, -t) : lerp(DIV_MID, DIV_HI, t);
+}
+function domain() {
+  const vals = FEATS.map(value).filter(v => v != null);
+  if (state.vy === "trend") { const m = Math.max(4, ...vals.map(Math.abs)); return [-m, m]; }
+  return [0, Math.max(...vals)];
+}
+let DOM = domain();
+function colorOf(f) {
+  const v = value(f);
+  if (v == null) return [70, 78, 92, 150];
+  if (state.vy === "trend") return [...diverge(v / DOM[1]), 235];
+  const lo = state.vy === "pris" ? 25000 : 0;
+  return [...ramp((v - lo) / (DOM[1] - lo)), 235];
+}
+const MAX_H = 3800; // meter vid högsta värdet
+function elevOf(f) {
+  const v = value(f);
+  if (v == null) return 30;
+  if (state.vy === "trend") return 120 + Math.abs(v) / DOM[1] * 1600;
+  const h = state.vy === "pris" ? MAX_H : 1400; // budget och volym: lägre, så förorterna inte skymmer innerstan
+  return 80 + v / DOM[1] * h;
+}
+
+/* ---------- lager ---------- */
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CHARS = Array.from(new Set(FEATS.map(f => f.properties.namn).join("") + "0123456789 kvm+−±%,.–k")).join("");
+const FONT = '"Familjen Grotesk", "Helvetica Neue", Arial, sans-serif';
+
+function layers() {
+  const trig = [state.typ, state.per, state.vy, state.budget, state.grow];
+  const sel = state.sel ? FEATS.filter(f => f.properties.slug === state.sel) : [];
+  return [
+    new deck.GeoJsonLayer({
+      id: "land", data: GEO, filled: true, stroked: true,
+      getFillColor: [22, 32, 48, 255], getLineColor: [236, 230, 216, 26], lineWidthMinPixels: 1,
+    }),
+    new deck.GeoJsonLayer({
+      id: "priser", data: GEO, extruded: true, filled: true, stroked: false, wireframe: false, pickable: true,
+      autoHighlight: true, highlightColor: [255, 255, 255, 50],
+      getFillColor: colorOf, getElevation: f => elevOf(f) * state.grow,
+      material: { ambient: 0.4, diffuse: 0.65, shininess: 24, specularColor: [50, 52, 60] },
+      transitions: REDUCED ? {} : { getElevation: { duration: 1100, easing: t => 1 - Math.pow(1 - t, 3) }, getFillColor: 600 },
+      updateTriggers: { getFillColor: trig, getElevation: trig },
+    }),
+    new deck.GeoJsonLayer({
+      id: "vald", data: sel, extruded: true, filled: false, wireframe: true, stroked: false,
+      getElevation: f => elevOf(f) * state.grow, getLineColor: [232, 180, 92, 255], lineWidthMinPixels: 2,
+      updateTriggers: { getElevation: trig },
+    }),
+    state.grow > 0 && new deck.TextLayer({
+      id: "etiketter", data: FEATS, characterSet: CHARS, fontFamily: FONT, fontWeight: 600,
+      getPosition: f => [...f.properties.lab, elevOf(f) * state.grow + 120],
+      getText: f => f.properties.namn,
+      getSize: f => f.properties.slug === state.sel ? 15 : f.properties.typ === "stadsdel" ? 13 : 12,
+      getColor: f => f.properties.slug === state.sel ? [232, 180, 92, 255] : [236, 230, 216, 235],
+      lineHeight: 1.15, outlineWidth: 3, outlineColor: [11, 17, 27, 230], fontSettings: { sdf: true },
+      billboard: true, sizeUnits: "pixels",
+      extensions: [new deck.CollisionFilterExtension()], collisionEnabled: true,
+      getCollisionPriority: f => (f.properties.slug === state.sel ? 1000 : 0) + (value(f) ?? 0) / (Math.abs(DOM[1]) || 1) * 100,
+      collisionTestProps: { sizeScale: 1.6 },
+      updateTriggers: { getPosition: trig, getSize: [state.sel], getColor: [state.sel], getCollisionPriority: [...trig, state.sel] },
+      transitions: REDUCED ? {} : { getPosition: { duration: 1100, easing: t => 1 - Math.pow(1 - t, 3) } },
+    }),
+  ].filter(Boolean);
+}
+
+/* ---------- kamera ---------- */
+const narrow = () => window.innerWidth < 760;
+const CAMS = {
+  inner: { longitude: 18.065, latitude: 59.322, zoom: 11.6, pitch: 58, bearing: -24 },
+  city:  { longitude: 18.03, latitude: 59.305, zoom: 10.2, pitch: 52, bearing: -18 },
+  lan:   { longitude: 18.15, latitude: 59.4, zoom: 8.3, pitch: 42, bearing: -8 },
+};
+function cam(name) {
+  const c = { ...CAMS[name] };
+  if (narrow()) { c.zoom -= 0.9; c.latitude -= name === "lan" ? 0.1 : 0.02; }
+  return c;
+}
+
+/* ---------- deck ---------- */
+const lighting = new deck.LightingEffect({
+  ambient: new deck.AmbientLight({ color: [255, 255, 255], intensity: 0.85 }),
+  sun: new deck.DirectionalLight({ color: [255, 236, 214], intensity: 1.15, direction: [-2, -5, -6] }),
+  fill: new deck.DirectionalLight({ color: [150, 180, 255], intensity: 0.35, direction: [4, 3, -2] }),
+});
+
+let viewState = cam("city");
+const theDeck = new deck.Deck({
+  canvas: "deck-canvas",
+  initialViewState: viewState,
+  controller: { dragRotate: true, touchRotate: true, inertia: 300 },
+  onViewStateChange: ({ viewState: v }) => { viewState = v; return v; },
+  effects: [lighting],
+  parameters: { clearColor: [11 / 255, 17 / 255, 27 / 255, 1] },
+  layers: layers(),
+  getCursor: ({ isHovering, isDragging }) => isDragging ? "grabbing" : isHovering ? "pointer" : "grab",
+  getTooltip: ({ object }) => {
+    if (!object || narrow()) return null;
+    const v = value(object);
+    return { html: `<div class="tip"><b>${object.properties.namn}</b><br><span class="tv">${fmt(v)}</span></div>`, style: { background: "none", padding: "0" } };
+  },
+  onClick: ({ object }) => { select(object ? object.properties.slug : null); },
+});
+
+function flyTo(name) {
+  const target = cam(name);
+  theDeck.setProps({ initialViewState: { ...target, transitionDuration: REDUCED ? 0 : 1600, transitionInterpolator: new deck.FlyToInterpolator() } });
+}
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+function render() {
+  DOM = domain();
+  theDeck.setProps({ layers: layers() });
+  for (const [seg, key] of [["seg-typ", "typ"], ["seg-per", "per"], ["seg-vy", "vy"]])
+    for (const b of $(seg).querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.v === state[key]));
+  $("budget").hidden = state.vy !== "budget";
+  $("budget-val").textContent = mkr(state.budget);
+  $("budget-range").value = state.budget / 1e6;
+  const vyNamn = { pris: "kr/kvm", trend: "prisutveckling", budget: "kvm för din budget", volym: "antal sålda" }[state.vy];
+  $("eyebrow").textContent = `${TYP_NAMN[state.typ]} · ${vyNamn} · ${PERIOD[state.per]}`;
+  legend();
+  side();
+  save();
+}
+
+function legend() {
+  const bar = $("legend-bar");
+  if (state.vy === "trend") {
+    bar.style.background = `linear-gradient(90deg, rgb(${DIV_LO}), rgb(${DIV_MID}), rgb(${DIV_HI}))`;
+    $("lg-lo").textContent = pct(DOM[0]); $("lg-mid").textContent = "0"; $("lg-hi").textContent = pct(DOM[1]);
+  } else {
+    bar.style.background = `linear-gradient(90deg, ${RAMP.map(c => `rgb(${c})`).join(",")})`;
+    const lo = state.vy === "pris" ? 25000 : 0;
+    const f = v => state.vy === "pris" ? Math.round(v / 1000) + " 000" : state.vy === "budget" ? Math.round(v) + " kvm" : kr(v);
+    $("lg-lo").textContent = f(lo); $("lg-mid").textContent = f((lo + DOM[1]) / 2); $("lg-hi").textContent = f(DOM[1]);
+  }
+  const notes = {
+    pris: "Höjd och färg visar genomsnittligt pris per kvadratmeter.",
+    trend: "Färg visar prisförändring mot samma period året innan (12 mån) eller föregående kvartal (3 mån).",
+    budget: "Hur stor bostad budgeten räcker till, räknat på områdets snittpris per kvm.",
+    volym: "Höjd visar antal sålda bostäder. Stora kommuner har fler försäljningar.",
+  };
+  $("legend-note").textContent = notes[state.vy] + (state.typ === "villa" ? " Villor redovisas per kommun; Stockholms stad visas som en yta." : "");
+}
+
+function ranked() {
+  // ett värde per yta; i villaläget räknas Stockholms stad en gång
+  const seen = new Set(), out = [];
+  for (const f of FEATS) {
+    const key = state.typ === "villa" && f.properties.typ === "stadsdel" ? "stockholm" : f.properties.slug;
+    if (seen.has(key)) continue; seen.add(key);
+    const v = value(f); if (v == null) continue;
+    out.push({ slug: f.properties.slug, namn: key === "stockholm" ? "Stockholms stad" : f.properties.namn, v });
+  }
+  return out.sort((a, b) => b.v - a.v);
+}
+
+function side() {
+  const el = $("side");
+  const f = state.sel && FEATS.find(x => x.properties.slug === state.sel);
+  if (!f) {
+    const r = ranked();
+    const head = { pris: "Dyrast per kvm", trend: "Störst uppgång", budget: "Mest yta för pengarna", volym: "Flest försäljningar" }[state.vy];
+    const li = (x, i) => `<li><button data-slug="${x.slug}"><span class="pos">${i + 1}</span><span>${x.namn}</span><span class="v">${fmt(x.v)}</span></button></li>`;
+    const top = r.slice(0, narrow() ? 3 : 6).map(li).join("");
+    const bottom = narrow() ? "" : `<li class="gap">…</li>` + r.slice(-3).map((x, j) => li(x, r.length - 3 + j)).join("");
+    el.innerHTML = `<h2>${head}</h2><div class="hint">Klicka på ett område för detaljer.<span class="desk-only"> Högerklicka och dra för att vrida kartan.</span></div><ol class="ranking">${top}${bottom}</ol>`;
+    return;
+  }
+  const p = f.properties, r = rec(f), lan = lanRec();
+  const villaStad = state.typ === "villa" && p.typ === "stadsdel";
+  const namn = villaStad ? "Stockholms stad" : p.namn;
+  const kind = villaStad ? `Villor redovisas för hela kommunen (du klickade på ${p.namn})` : p.typ === "stadsdel" ? "Stadsdelsområde i Stockholms stad" : "Kommun i Stockholms län";
+  const rk = ranked(); const pos = rk.findIndex(x => (villaStad ? x.namn === "Stockholms stad" : x.slug === p.slug)) + 1;
+  if (!r) { el.innerHTML = `<div class="side-top"><div><h2>${namn}</h2><div class="kind">${kind}</div></div><button class="close" id="close">Stäng</button></div><p class="flag">Ingen statistik för perioden.</p>`; return; }
+  const maxKvm = Math.max(...SNAP.omraden.map(o => o[state.typ]?.[state.per]?.kvm || 0));
+  const share = r.kvm ? Math.min(100, r.kvm / maxKvm * 100) : 0, lanShare = lan.kvm / maxKvm * 100;
+  const diff = r.kvm ? Math.round((r.kvm / lan.kvm - 1) * 100) : null;
+  const flagText = r.flaggor ? "Några värden saknas: Mäklarstatistik redovisar inte siffror när underlaget är för litet (färre än 25 försäljningar) eller inte representativt." : "";
+  const kvmFor = r.kvm ? Math.round(state.budget / r.kvm) : null;
+  el.innerHTML = `
+    <div class="side-top"><div><h2>${namn}</h2><div class="kind">${kind}</div></div><button class="close" id="close" aria-label="Stäng detaljer">Stäng</button></div>
+    <div class="big"><span class="n">${kr(r.kvm)}</span><span class="u">kr/kvm</span></div>
+    <div class="compare">
+      <div class="track"><div class="fill" style="width:${share}%"></div><div class="mark" style="left:${lanShare}%"></div></div>
+      <div class="compare-cap">${diff == null ? "" : `${diff >= 0 ? diff + " % över" : -diff + " % under"} länets snitt (${kr(lan.kvm)} kr/kvm)`}</div>
+    </div>
+    <dl class="facts">
+      <dt>Medelpris</dt><dd>${r.medelpris ? kr(r.medelpris) + " kr" : "–"}</dd>
+      <dt>Antal sålda</dt><dd>${kr(r.antal)}</dd>
+      <dt>Prisutveckling</dt><dd class="${r.utv > 0 ? "up" : r.utv < 0 ? "down" : ""}">${pct(r.utv)}</dd>
+      <dt>Placering i länet</dt><dd>${pos ? pos + " av " + rk.length : "–"}</dd>
+    </dl>
+    ${kvmFor ? `<div class="callout">${mkr(state.budget)} räcker till ungefär <b>${kvmFor} kvm</b> här.</div>` : ""}
+    ${flagText ? `<div class="flag">${flagText}</div>` : ""}`;
+}
+
+function select(slug) {
+  state.sel = slug;
+  theDeck.setProps({ layers: layers() });
+  side();
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "close") return select(null);
+  if (b.dataset.slug) return select(b.dataset.slug);
+  if (b.dataset.cam) return flyTo(b.dataset.cam);
+  const seg = b.closest(".seg"); if (!seg) return;
+  const key = { "seg-typ": "typ", "seg-per": "per", "seg-vy": "vy" }[seg.id];
+  state[key] = b.dataset.v; render();
+});
+$("budget-range").addEventListener("input", e => { state.budget = Number(e.target.value) * 1e6; render(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") select(null); });
+
+const upd = new Date(SNAP.uppdaterad + "T12:00:00").toLocaleDateString("sv-SE", { day: "numeric", month: "long", year: "numeric" });
+$("foot").innerHTML = `Källa: <a href="https://www.maklarstatistik.se/omrade/riket/stockholms-lan/" target="_blank" rel="noopener">Svensk Mäklarstatistik</a>, uppdaterad ${upd}. Stadsdelsgränser: Stockholms stad (CC0). Kommungränser: SCB:s DeSO-indelning.`;
+
+render();
+// Låt staden resa sig när typsnittet är laddat
+const rise = () => { state.grow = 1; theDeck.setProps({ layers: layers() }); };
+(document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1500))]) : Promise.resolve())
+  .then(() => setTimeout(rise, REDUCED ? 0 : 250));
+</script>
