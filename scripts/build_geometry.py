@@ -93,6 +93,12 @@ def main() -> None:
         big = max(parts, key=lambda g: g.area)
         return polylabel(big, tolerance=20)
     allt["lab"] = gpd.GeoSeries(allt.geometry.map(lab), crs=3006).to_crs(4326).map(lambda p: [round(p.x, 5), round(p.y, 5)])
+    # Grannar: områden inom 1 km (ytorna är krympta, så de rör aldrig varandra exakt)
+    grannar = []
+    for i, g in enumerate(allt.geometry):
+        near = allt[allt.geometry.distance(g) < 1000].index.tolist()
+        grannar.append([allt.at[j, "slug"] for j in near if j != i])
+    allt["grannar"] = grannar
     allt = allt.to_crs(4326)
 
     gj = json.loads(allt.to_json(drop_id=True))
