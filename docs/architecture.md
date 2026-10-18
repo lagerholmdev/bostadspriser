@@ -86,7 +86,7 @@ npm run format:check && npm run check && npm test && npm run build
 
 ## Publicering
 
-`ci.yml` körs på pull requests och andra grenar än `main`. `deploy.yml` anropar den (workflow_call)
+`ci.yml` körs på pull requests. `deploy.yml` anropar den (workflow_call)
 som första jobb, så kontrollerna inte kan glida isär. Stegen för att installera pipelinen och
 kontrollera och bygga webben ligger i `.github/actions/` och används av båda.
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { typicalRooms } from "./budget";
 import { editDistance, findAreas, suggestArea } from "./aliases";
-import { areas, countyRatio, getArea, parseCompareParams, priceRank, rankWindow } from "./data";
+import { areas, countyRatio, getArea, parseCompareParams, placeInCounty, rankWindow } from "./data";
 import { changeSentence, joinNames, rankPhrase } from "./text";
 import { changeDirection, changeWord, pricier, searchKey } from "./format";
 
@@ -33,10 +33,10 @@ describe("format-tillägg", () => {
 });
 
 describe("data-tillägg", () => {
-  it("priceRank räknar dyrast först", () => {
-    const r = priceRank(getArea("vasastan-norrmalm")!);
+  it("placeInCounty räknar dyrast först", () => {
+    const r = placeInCounty(getArea("vasastan-norrmalm")!, "apartment", "m3");
     expect(r).toEqual({ rank: 1, total: areas.length });
-    expect(priceRank(getArea("sodermalm")!)?.rank).toBe(3);
+    expect(placeInCounty(getArea("sodermalm")!, "apartment", "m3")?.rank).toBe(3);
   });
 
   it("countyRatio jämför med länets snitt", () => {

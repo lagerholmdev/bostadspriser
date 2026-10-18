@@ -7,7 +7,7 @@ import { getArea } from "../../../lib/data";
 import { mkr, mkrSpoken } from "../../../lib/format";
 import type { Html } from "../../../lib/html";
 import { VIEWS, withHousing, withView, type AppState, type View } from "../../../lib/url";
-import { addTo, loadCompare, MAX_COMPARE, removeFrom, saveCompare } from "../compare";
+import { addTo, loadCompare, MAX_COMPARE, removeFrom, saveCompare } from "../compare-tray";
 import { budgetModel, changeModel, mapPaint, priceModel, type SortOrder } from "../model";
 import type { HistoryMode, Store } from "../state";
 import { detail } from "./detail";

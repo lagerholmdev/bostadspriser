@@ -2,7 +2,7 @@
 import { getArea } from "../../../lib/data";
 import { html, type Html } from "../../../lib/html";
 import { compareUrl } from "../../../lib/links";
-import { MAX_COMPARE } from "../compare";
+import { MAX_COMPARE } from "../compare-tray";
 
 export function tray(list: readonly string[]): Html {
   const chips = list.map((slug) => {

@@ -12,7 +12,7 @@ import {
 import type { Housing, Period } from "../../../lib/types";
 import type { View } from "../../../lib/url";
 import { html, type Html } from "../../../lib/html";
-import { CHANGE_LABEL, CITY_HOUSE_NOTE } from "./text";
+import { CHANGE_LABEL, CITY_HOUSE_NOTE } from "./copy";
 
 export interface LegendState {
   view: View;

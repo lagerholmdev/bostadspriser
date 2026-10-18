@@ -28,7 +28,7 @@ import {
   PERIOD_PHRASE,
   salesText,
   thinExplainer,
-} from "./text";
+} from "./copy";
 
 /** En klickbar rad. Raden för Stockholms stad (villor) har inget eget område och är inte klickbar. */
 function row(e: Entry, inner: Html, extraClass = ""): Html {

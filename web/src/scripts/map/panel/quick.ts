@@ -8,7 +8,7 @@ import { getArea, isThin, shownStat } from "../../../lib/data";
 import { change, sqm as fmtSqm } from "../../../lib/format";
 import type { AppState } from "../../../lib/url";
 import { html, type Html } from "../../../lib/html";
-import { CHANGE_LABEL, salesText } from "./text";
+import { CHANGE_LABEL, salesText } from "./copy";
 
 export interface Quick {
   name: string;

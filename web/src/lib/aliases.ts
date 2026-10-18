@@ -3,7 +3,7 @@
  * kartsidans sökruta, områdeslistan och 404-sidan, så att "aspudden" hittar
  * Hägersten-Liljeholmen och "åkersberga" Österåker överallt.
  *
- * Stadsdelarna följer Mäklarstatistiks indelning (pipeline/legacy_scripts/stadsdel_mapping.py);
+ * Stadsdelarna följer Mäklarstatistiks indelning (pipeline/src/prislandskap/mapping.py);
  * orterna är de största i varje kommun.
  */
 import { searchKey } from "./format";

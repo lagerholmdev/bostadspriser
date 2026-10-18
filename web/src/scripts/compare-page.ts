@@ -13,6 +13,7 @@ import {
   KIND_SHORT,
   parseCompareParams,
   similarNeighbours,
+  shownStat,
   stat,
 } from "../lib/data";
 import {
@@ -126,7 +127,7 @@ function rows(list: readonly Area[]): Row[] {
         if (a.houseScope === "city" && firstCity && firstCity.slug !== a.slug) {
           return html`<span class="ref">Samma som ${firstCity.name}</span>`;
         }
-        const s = stat(a, "house", "m3");
+        const s = shownStat(a, "house", "m3");
         if (!s) return missing("0");
         if (s.pricePerSqm == null) return missing(s.missing?.pricePerSqm);
         return html`${sqmHtml(s.pricePerSqm)}${a.houseScope === "city" && html`<span class="cell-sub">Hela Stockholms stad</span>`}`;

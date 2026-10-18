@@ -23,7 +23,8 @@ import {
   dataset,
   isThin,
   KIND_LABEL,
-  priceRank,
+  placeInCounty,
+  shownStat,
   similarNeighbours,
 } from "../../../lib/data";
 import {
@@ -54,7 +55,7 @@ const price = ap3?.pricePerSqm ?? null;
 const county = countyStat("apartment", "m3");
 const ratio = countyRatio(price);
 const thin = isThin(ap3, "m3");
-const rank = priceRank(area);
+const rank = placeInCounty(area, "apartment", "m3");
 const similar = similarNeighbours(area, 3);
 const isDistrict = area.kind === "district";
 const updated = date(dataset.updated);
@@ -83,7 +84,10 @@ const description =
     : `Bostadspriser ${where}: pris per kvm, sålda bostäder och prisförändring från Svensk Mäklarstatistik.`;
 
 const neighboursForCompare = similar.slice(0, 2).map((a) => a.slug);
-const house3 = area.house?.m3 ?? null;
+// Villapriser med under MIN_HOUSE_SALES affärer visas inte (samma regel som kartan).
+const house3 = shownStat(area, "house", "m3");
+const house12 = shownStat(area, "house", "m12");
+const houseStats = house3 && house12 ? { m3: house3, m12: house12 } : null;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -282,9 +286,9 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
           <p>Det finns ingen villastatistik för {area.name}.</p>
         )}
       </div>
-      {area.houseScope === "area" && area.house && (
+      {area.houseScope === "area" && houseStats && (
         <StatsTable
-          stats={area.house}
+          stats={houseStats}
           caption={`Villor ${where}, senaste 3 och 12 månaderna`}
           noun="villor"
         />

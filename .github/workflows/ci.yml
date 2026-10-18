@@ -1,11 +1,9 @@
 name: CI
 
-# Körs på pull requests och pushar till andra grenar än main. deploy.yml anropar samma arbetsflöde
-# (workflow_call) innan den bygger och publicerar, så kontrollerna är desamma i båda.
+# Körs på pull requests. deploy.yml anropar samma arbetsflöde (workflow_call) innan den bygger och
+# publicerar på main, så kontrollerna är desamma i båda.
 on:
   pull_request:
-  push:
-    branches-ignore: [main]
   workflow_call:
 
 permissions:

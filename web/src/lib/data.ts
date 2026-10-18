@@ -98,16 +98,6 @@ export function rankByPrice(housing: Housing, period: Period): Area[] {
     .sort((a, b) => price(b) - price(a));
 }
 
-/** Områdets plats i prislistan (1 = dyrast) och antal områden med värde. */
-export function priceRank(
-  area: Area,
-  housing: Housing = "apartment",
-  period: Period = "m3",
-): { rank: number; total: number } | null {
-  const list = rankByPrice(housing, period);
-  const i = list.findIndex((a) => a.slug === area.slug);
-  return i === -1 ? null : { rank: i + 1, total: list.length };
-}
 
 /**
  * Områdets plats i prislistan (1 = dyrast) bland områden med visat pris. För villor delar

@@ -20,7 +20,7 @@ import {
   HOUSING_MANY,
   months,
   PERIOD_SHORT,
-} from "./text";
+} from "./copy";
 
 type Field = "sales" | "pricePerSqm" | "meanPrice" | "change";
 

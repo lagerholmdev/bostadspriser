@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
 import { DEFAULT_STATE } from "../../lib/url";
-import { addTo, removeFrom } from "./compare";
+import { addTo, removeFrom } from "./compare-tray";
 import { attr, html, raw } from "../../lib/html";
 import {
   composeStyle,

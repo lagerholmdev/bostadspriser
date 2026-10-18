@@ -29,7 +29,11 @@ jobs:
       contents: write # checka in ny ögonblicksbild
       pages: read # configure-pages
     steps:
+      # Bygg toppen av main när jobbet startar, inte den commit som startade körningen. Annars kan
+      # en köad körning publicera om förra månadens data efter att månadsjobbet checkat in ny.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - uses: ./.github/actions/pipeline-setup
 
       - name: Hämta ny statistik

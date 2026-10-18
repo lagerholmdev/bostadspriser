@@ -62,7 +62,7 @@ kräver att `python -m prislandskap export` har körts. Se [docs/architecture.md
 
 GitHub Actions sköter allt (`.github/workflows/`):
 
-- **ci.yml** kör tester och bygger sajten på varje push och pull request (Python 3.11 och 3.12).
+- **ci.yml** kör tester och bygger sajten på varje pull request (Python 3.11 och 3.12).
 - **deploy.yml** körs vid push till `main`, den 10:e varje månad och manuellt. Den kör först samma
   kontroller som ci.yml, hämtar sedan ny data (vid schemalagd och manuell körning), exporterar,
   kontrollerar och bygger webben med den nya datan, och checkar in ögonblicksbilden först när bygget
