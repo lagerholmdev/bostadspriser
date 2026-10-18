@@ -1,7 +1,7 @@
 /**
  * "Dela": systemets delningsmeny på mobilen, annars kopiera länken. Går ingetdera visas
  * länken i ett markerat textfält som man kan kopiera själv. "Kopiera länk" i områdesdetaljen
- * använder samma kopiering (copyLink), utan delningsmenyn.
+ * använder samma kopiering (copyLink) för områdessidans adress, utan delningsmenyn.
  */
 import { track } from "./analytics";
 
@@ -13,8 +13,8 @@ export interface ShareElements {
 }
 
 export interface Sharer {
-  /** Kopiera adressen och skriv resultatet i `status` (eller i delningsknappens statusrad). */
-  copyLink(status?: HTMLElement | null): Promise<void>;
+  /** Kopiera `url` och skriv resultatet i `status` (eller i delningsknappens statusrad). */
+  copyLink(url: string, status?: HTMLElement | null): Promise<void>;
 }
 
 export function initShare(el: ShareElements, beforeShare: () => void): Sharer {
@@ -67,10 +67,9 @@ export function initShare(el: ShareElements, beforeShare: () => void): Sharer {
     });
 
   return {
-    async copyLink(status) {
-      beforeShare();
+    async copyLink(url, status) {
       el.fallback.hidden = true;
-      await copy(location.href, status ?? el.status);
+      await copy(url, status ?? el.status);
     },
   };
 }

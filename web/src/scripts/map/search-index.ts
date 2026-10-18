@@ -4,7 +4,7 @@
  * Rangordnar hårdare än lib/aliases findAreas: exakta å/ä/ö och antal affärer avgör vid lika träff,
  * eftersom sökrutan väljer första träffen med Enter.
  */
-import { ALIASES } from "../../lib/aliases";
+import { ALIASES, matchScore } from "../../lib/aliases";
 import { areas as ALL_AREAS } from "../../lib/data";
 import { searchKey } from "../../lib/format";
 import type { Area } from "../../lib/types";
@@ -60,15 +60,6 @@ function buildIndex(list: readonly Area[]): IndexEntry[] {
 
 const DEFAULT_INDEX = buildIndex(ALL_AREAS);
 
-/** 0 = hela namnet, 1 = början av namnet, 2 = början av ett ord, 3 = inne i ett ord, −1 = ingen träff. */
-function matchType(key: string, q: string): number {
-  if (key === q) return 0;
-  if (key.startsWith(q)) return 1;
-  if (key.split(" ").some((w) => w.startsWith(q))) return 2;
-  if (key.includes(q)) return 3;
-  return -1;
-}
-
 /** Antal sålda bostadsrätter, för att låta större områden gå först vid lika träff. */
 function volume(a: Area): number {
   return a.apartment?.m3.sales ?? 0;
@@ -82,9 +73,9 @@ function volume(a: Area): number {
  * 4. vid lika: flest affärer först.
  */
 function score(e: IndexEntry, q: string, qExact: string): number {
-  const t = matchType(e.key, q);
+  const t = matchScore(e.key, q);
   if (t < 0) return -1;
-  const exact = matchType(e.exact, qExact) === t ? 0 : 1;
+  const exact = matchScore(e.exact, qExact) === t ? 0 : 1;
   return (e.alias ? 100 : 0) + t * 10 + exact;
 }
 
@@ -109,5 +100,3 @@ export function search(query: string, limit = 8, index: IndexEntry[] = DEFAULT_I
     )
     .slice(0, limit);
 }
-
-export { buildIndex as _buildIndex };

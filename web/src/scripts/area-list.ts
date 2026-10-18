@@ -3,7 +3,10 @@
  * och sortering på pris eller namn. Sidan fungerar utan skriptet; då visas listorna
  * sorterade på pris.
  */
-import { findAreas } from "../lib/aliases";
+import { findAreas, suggestArea } from "../lib/aliases";
+import { html } from "../lib/html";
+import { areaUrl } from "../lib/links";
+import { noMatchText } from "../lib/text";
 
 type Sort = "pris" | "namn";
 
@@ -75,11 +78,18 @@ function init(): void {
       if (cap) cap.textContent = sort === "namn" ? "i bokstavsordning" : "dyrast först";
     }
     if (!status) return;
-    status.textContent = !searching
-      ? ""
-      : shown === 0
-        ? `Inget område matchar ”${text}”. Prova en kommun eller stadsdel, till exempel Solna eller Aspudden.`
-        : `${shown} ${shown === 1 ? "område matchar" : "områden matchar"} ”${text}”.`;
+    if (searching && shown === 0) {
+      // Stavfel ("sodermalmm"): föreslå närmaste område, som på 404-sidan.
+      const guess = suggestArea(text, rows);
+      status.innerHTML = guess
+        ? html`Inget område matchar ”${text}”.
+            <a href="${areaUrl(guess.area.slug)}">Menade du ${guess.area.name}?</a>`.value
+        : html`${noMatchText(text)}`.value;
+    } else {
+      status.textContent = searching
+        ? `${shown} ${shown === 1 ? "område matchar" : "områden matchar"} ”${text}”.`
+        : "";
+    }
 
     const url = new URL(location.href);
     if (searching) url.searchParams.set("q", text);

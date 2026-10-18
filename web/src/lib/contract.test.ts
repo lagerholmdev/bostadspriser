@@ -1,6 +1,6 @@
 /**
  * Kontraktstest: validerar den RIKTIGA exporten i src/generated/ mot kontraktet i types.ts och
- * docs/data.md. Övriga tester kör mot en fryst fixtur (se vitest.config.ts); det här testet läser
+ * docs/data.md, och likaså den frysta fixturen i src/test/fixtures/. Övriga tester kör mot en fryst fixtur (se vitest.config.ts); det här testet läser
  * filen med node:fs så att fixtur-omdirigeringen inte når det. Det fångar alltså en ny månads
  * export som bryter formatet, medan värdena får ändras fritt.
  *
@@ -13,6 +13,9 @@ import { describe, expect, it } from "vitest";
 const GENERATED = fileURLToPath(new URL("../generated/", import.meta.url));
 const JSON_FILE = `${GENERATED}areas.json`;
 const GEO_FILE = `${GENERATED}areas.geojson`;
+const FIXTURES = fileURLToPath(new URL("../test/fixtures/", import.meta.url));
+const FIXTURE_JSON = `${FIXTURES}areas.json`;
+const FIXTURE_GEO = `${FIXTURES}areas.geojson`;
 
 const STAT_FIELDS = ["sales", "pricePerSqm", "meanPrice", "change"] as const;
 const INTEGER_FIELDS = new Set(["sales", "pricePerSqm", "meanPrice"]);
@@ -214,6 +217,24 @@ if (!exists) {
     });
   });
 }
+
+// Fixturen som övriga tester kör mot får inte glida isär från kontraktet i types.ts.
+describe("kontraktet: src/test/fixtures/areas.json", () => {
+  const data: unknown = JSON.parse(readFileSync(FIXTURE_JSON, "utf8"));
+
+  it("följer Dataset/Area/Stat i types.ts", () => {
+    expect(validateDataset(data)).toEqual([]);
+  });
+
+  it("har samma ytor som fixturens areas.geojson", () => {
+    const geo = JSON.parse(readFileSync(FIXTURE_GEO, "utf8")) as {
+      features: { properties: { slug: string } }[];
+    };
+    const geoSlugs = geo.features.map((f) => f.properties.slug).sort();
+    const slugs = (data as { areas: { slug: string }[] }).areas.map((a) => a.slug).sort();
+    expect(geoSlugs).toEqual(slugs);
+  });
+});
 
 describe("kontraktsvalideringen själv", () => {
   it("hittar fel i ett trasigt dataset", () => {

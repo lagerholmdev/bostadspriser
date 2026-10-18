@@ -111,6 +111,34 @@ describe("minimapSvg", () => {
     expect(svg).toContain('class="mm-focus"');
     expect(svg).toContain('fill-opacity="0.55"');
     expect(svg.match(/<path/g)!.length).toBe(3);
+    expect(svg).not.toContain("mm-hatch");
+  });
+
+  it("lägger ränder ovanpå områden med få affärer", () => {
+    const m = buildMinimap({ ...toyInput, thin: (s) => s === "b" });
+    expect(m.shapes.find((s) => s.slug === "b")?.thin).toBe(true);
+    expect(m.shapes.find((s) => s.slug === "a")?.thin).toBe(false);
+    const svg = minimapSvg(m, { label: "Karta" });
+    expect(svg).toContain('<pattern id="mm-hatch"');
+    expect(svg).toContain('fill-opacity="0.25"');
+    expect(svg.match(/class="mm-hatch"/g)!.length).toBe(1);
+    // Rändernas lager ligger direkt ovanpå områdets egen yta.
+    const b = m.shapes.find((s) => s.slug === "b")!;
+    expect(svg.indexOf(`class="mm-hatch" d="${b.d}"`)).toBeGreaterThan(svg.indexOf(`d="${b.d}"`));
+  });
+
+  it("randar inte ett område som bara snuddar vid bildens kant", () => {
+    // "edge" ligger precis utanför bilden men inom marginalen där ytor ritas.
+    const edge = square("edge", 18.074, 59.3);
+    const m = buildMinimap({
+      ...toyInput,
+      collection: { features: [...toy.features, edge] },
+      thin: () => true,
+    });
+    const shown = m.shapes.find((s) => s.slug === "edge");
+    expect(m.shapes.find((s) => s.slug === "a")?.thin).toBe(true);
+    expect(shown, "ritas i marginalen").toBeDefined();
+    expect(shown?.thin).toBe(false);
   });
 });
 

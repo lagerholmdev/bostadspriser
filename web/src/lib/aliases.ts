@@ -197,8 +197,11 @@ export interface AreaMatch<T extends Searchable> {
   score: number;
 }
 
-/** Lägre poäng = bättre träff, −1 = ingen träff. */
-function matchScore(key: string, q: string): number {
+/**
+ * Hur bra en sökning träffar en nyckel (båda i searchKey-form eller samma form):
+ * 0 = hela namnet, 1 = början av namnet, 2 = början av ett ord, 3 = inne i ett ord, −1 = ingen träff.
+ */
+export function matchScore(key: string, q: string): number {
   if (key === q) return 0;
   if (key.startsWith(q)) return 1;
   if (key.split(" ").some((w) => w.startsWith(q))) return 2;

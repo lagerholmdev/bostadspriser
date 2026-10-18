@@ -66,6 +66,11 @@ export function rankPhrase(rank: number, total: number): string {
   return `${ordinal(rank)} dyrast ${of}`;
 }
 
+/** Tomt sökresultat, på kartsidan och i områdeslistan. */
+export function noMatchText(query: string): string {
+  return `Inget område matchar ”${query}”. Prova en kommun eller stadsdel, till exempel Solna eller Aspudden.`;
+}
+
 /** "Södermalm", "Södermalm och Nacka", "Södermalm, Kungsholmen och Nacka". */
 export function joinNames(names: readonly string[]): string {
   if (names.length <= 1) return names[0] ?? "";

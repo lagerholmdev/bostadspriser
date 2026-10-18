@@ -4,6 +4,7 @@
  */
 import { BUDGET_RANGE, SIZE_RANGE, typicalRooms } from "../../../lib/budget";
 import { getArea } from "../../../lib/data";
+import { areaUrl } from "../../../lib/links";
 import { mkr, mkrSpoken } from "../../../lib/format";
 import type { Html } from "../../../lib/html";
 import { VIEWS, withHousing, withView, type AppState, type View } from "../../../lib/url";
@@ -37,26 +38,23 @@ const ANNOUNCE_DELAY = 600;
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isWide = () => window.matchMedia("(min-width: 960px)").matches;
 
-export interface PanelOptions {
-  base: string;
-}
-
 export class PanelController {
   private sort: SortOrder = "desc";
   private compare: string[];
+  /** Mobilen: är brickans valda områden utfällda? */
+  private trayOpen = false;
   private trayTimer: number | undefined;
   private announceTimer: number | undefined;
   /** Senast ritade HTML per yta, så att oförändrade delar inte ritas om (och fokus inte tappas). */
   private rendered = new Map<string, string>();
   private readonly baseTitle = document.title;
   private q = <T extends Element = HTMLElement>(sel: string) => this.root.querySelector<T>(sel);
-  /** Kopierar sidans adress; sätts av main.ts när delningen kopplats in. */
-  copyLink: ((status: HTMLElement | null) => void) | null = null;
+  /** Kopierar en adress (områdessidans); sätts av main.ts när delningen kopplats in. */
+  copyLink: ((url: string, status: HTMLElement | null) => void) | null = null;
 
   constructor(
     private readonly root: HTMLElement,
     private readonly store: Store,
-    private readonly opts: PanelOptions,
   ) {
     try {
       const s = sessionStorage.getItem(SORT_KEY);
@@ -148,8 +146,14 @@ export class PanelController {
         this.toggleCompare(slug);
       } else if (action === "remove-compare" && slug) {
         this.removeCompare(slug);
-      } else if (action === "copy-link") {
-        this.copyLink?.(this.q("#copy-status"));
+      } else if (action === "toggle-tray") {
+        // Växla på plats, så att knappen behåller fokus.
+        this.trayOpen = !this.trayOpen;
+        t.setAttribute("aria-expanded", String(this.trayOpen));
+        t.closest(".tray-inner")?.classList.toggle("is-open", this.trayOpen);
+      } else if (action === "copy-link" && slug) {
+        // Områdessidans adress, så att länkförhandsvisningen får områdets delningsbild.
+        this.copyLink?.(new URL(areaUrl(slug), location.origin).href, this.q("#copy-status"));
       } else if (action === "to-filters") {
         e.preventDefault();
         const radio = this.q<HTMLInputElement>("#filters input:checked");
@@ -236,8 +240,9 @@ export class PanelController {
     const status = this.q("#tray-status");
     if (!el) return;
     el.hidden = this.compare.length === 0;
+    if (!this.compare.length) this.trayOpen = false;
     const body = this.q("#tray-body");
-    if (body) body.innerHTML = tray(this.compare).value;
+    if (body) body.innerHTML = tray(this.compare, this.trayOpen).value;
     const note = this.q("#tray-note");
     if (status && message) status.textContent = message;
     if (note) {
@@ -266,7 +271,7 @@ export class PanelController {
     this.check("bostad", s.housing);
     this.check("period", s.period);
     this.check("sortering", this.sort);
-    // I Förändring betyder perioden "på tre månader" eller "på ett år" (se panel/text.ts).
+    // I Förändring betyder perioden "på tre månader" eller "på ett år" (se Panel.astro, data-change-label).
     for (const span of this.root.querySelectorAll<HTMLElement>("[data-change-label]")) {
       const t = (s.view === "forandring" ? span.dataset.changeLabel : span.dataset.label) ?? "";
       if (t && span.textContent !== t) span.textContent = t;
@@ -306,6 +311,7 @@ export class PanelController {
       // Bakåt/Framåt: lägg fokus där innehållet ändrades.
       if (opened) this.revealDetail({ focus: true });
       else if (!s.area && prev.area) this.focusRow(prev.area);
+      else if (s.view !== prev.view) this.keepFocusOnViewChange();
     } else if (opened) {
       // Nytt område (t.ex. från kartan): visa detaljens början, med "Tillbaka till listan".
       this.revealDetail({ focus: false });
@@ -398,20 +404,23 @@ export class PanelController {
   }
 
   private renderActiveView(s: AppState): void {
+    const hasMissing = mapPaint(s).nodata.length > 0;
     if (s.view === "pris") {
       const m = priceModel(s.housing, s.period, this.sort);
       this.slot("price-summary", priceSummary(m, s.housing, s.period));
+      this.slot("price-legend", legend(s, hasMissing));
       this.slot("price-list", priceList(m, s.housing, s.period));
     } else if (s.view === "budget") {
       const m = budgetModel(s.housing, s.period, s.budget, s.sqm);
       this.slot("budget-max", budgetMax(m));
       this.text("[data-slot=budget-headline]", budgetHeadline(m, s.budget, s.sqm));
       this.slot("budget-best", budgetBest(m));
+      this.slot("budget-legend", legend(s, hasMissing));
       this.slotKeepOpen("budget-results", budgetResults(m, s.budget, s.sqm, s.housing));
     } else {
       const m = changeModel(s.housing, s.period);
       this.slot("change-summary", changeSummary(m, s.housing, s.period));
-      this.slot("change-legend", legend(s));
+      this.slot("change-legend", legend(s, hasMissing));
       this.slotKeepOpen("change-lists", changeLists(m, s.housing, s.period));
     }
   }
@@ -422,7 +431,6 @@ export class PanelController {
     this.slot(
       "detail",
       detail(area, s, {
-        base: this.opts.base,
         inCompare: this.compare.includes(area.slug),
         compareFull: this.compare.length >= MAX_COMPARE,
       }),
@@ -462,6 +470,21 @@ export class PanelController {
       }
       if (o.focus) this.q<HTMLElement>("#detail-title")?.focus({ preventScroll: true });
     });
+  }
+
+  /**
+   * Ny vy via Bakåt/Framåt: låg fokus i en vy som nu är dold (eller på en flik som inte längre
+   * är vald), flytta det till den valda fliken.
+   */
+  private keepFocusOnViewChange(): void {
+    const a = document.activeElement as HTMLElement | null;
+    const lost =
+      !a ||
+      a === document.body ||
+      !!a.closest("[hidden]") ||
+      (a.getAttribute("role") === "tab" && a.getAttribute("aria-selected") !== "true");
+    if (!lost) return;
+    this.q<HTMLElement>("[role=tab][aria-selected=true]")?.focus();
   }
 
   private focusRow(slug: string): void {

@@ -103,7 +103,7 @@ const description =
                   Pris per kvm, 3 mån
                 </th>
                 <th scope="col" class="col-chg">
-                  Förändring, 12 mån
+                  Förändring, 1 år
                 </th>
                 <th scope="col" class="col-sales">
                   Sålda, 3 mån
@@ -264,6 +264,9 @@ const description =
     color: var(--c-ink-2);
     max-width: 68ch;
   }
+  .status :global(a) {
+    font-weight: 600;
+  }
   .group {
     margin-top: var(--sp-6);
     max-width: 880px;
@@ -355,13 +358,20 @@ const description =
   .area-table :global(.col-sales .thin-tag) {
     margin-left: var(--sp-2);
   }
-  /* Få affärer: texten behåller full kontrast, bara stapeln bleknar. */
+  /* Få affärer: texten behåller full kontrast, stapeln får kartans ränder. */
   .area-table :global(.is-thin .row-name),
   .area-table :global(.is-thin .price) {
     color: var(--c-ink-2);
   }
   .area-table :global(.is-thin .price-bar > span) {
-    opacity: 0.5;
+    background-image: var(--hatch);
+  }
+  .area-table :global(thead th) {
+    white-space: nowrap;
+  }
+  /* "på ett år" står bara på mobilen, där tabellhuvudet är dolt. */
+  .area-table :global(.chg-unit) {
+    display: none;
   }
   .after {
     display: grid;
@@ -423,6 +433,13 @@ const description =
       border: 0;
       font-size: var(--fs-sm);
       margin-top: 4px;
+      white-space: nowrap;
+    }
+    .area-table :global(.chg-unit) {
+      display: inline;
+      margin-left: 0.3em;
+      font-size: var(--fs-xs);
+      color: var(--c-ink-3);
     }
     .area-table :global(.area-row > td.col-sales) {
       display: none;

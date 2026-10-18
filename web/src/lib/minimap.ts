@@ -30,6 +30,8 @@ export interface MinimapInput {
   focus: string;
   /** Fyllnadsfärg per område (hex). */
   fill: (slug: string) => string;
+  /** Områden med få affärer, som får ränder ovanpå färgen. */
+  thin?: (slug: string) => boolean;
   /** Namn att skriva ut, eller undefined för att hoppa över. */
   name: (slug: string) => string | undefined;
   /** Etikettpunkt [lon, lat] per område. */
@@ -56,6 +58,7 @@ export interface MinimapShape {
   d: string;
   fill: string;
   focus: boolean;
+  thin: boolean;
 }
 
 export interface MinimapLabel {
@@ -126,6 +129,39 @@ function ringPath(
   return "M" + pts.map(([x, y]) => `${r1(x)} ${r1(y)}`).join("L") + "Z";
 }
 
+/** Jämn-udda-regeln: ligger punkten inuti ringarna (hål räknas bort)? */
+function insideRings(x: number, y: number, rings: [number, number][][]): boolean {
+  let inside = false;
+  for (const r of rings) {
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+      const [xi, yi] = r[i];
+      const [xj, yj] = r[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+/**
+ * Syns ytan i bilden? Provar ett rutnät av punkter; ett område som bara snuddar vid
+ * marginalen utanför bilden räknas inte.
+ */
+function coversFrame(
+  rings: [number, number][][],
+  width: number,
+  height: number,
+  step = 16,
+  min = 3,
+): boolean {
+  let hits = 0;
+  for (let y = step / 2; y < height; y += step) {
+    for (let x = step / 2; x < width; x += step) {
+      if (insideRings(x, y, rings) && ++hits >= min) return true;
+    }
+  }
+  return false;
+}
+
 /** Ungefärlig textbredd i px för etikettkrockar. */
 export function textWidth(text: string, fontSize: number): number {
   return text.length * fontSize * 0.56;
@@ -190,15 +226,27 @@ export function buildMinimap(input: MinimapInput): Minimap {
   for (const f of feats) {
     if (!intersects(f.box, view)) continue;
     let d = "";
+    const wantHatch = input.thin?.(f.slug) ?? false;
+    const projected: [number, number][][] = [];
     for (const poly of f.polys) {
       const pb = lonLatBox([poly]);
       if (!pb || !intersects(pb, view)) continue;
-      for (const ring of poly) d += ringPath(ring, project, tolerance);
+      for (const ring of poly) {
+        d += ringPath(ring, project, tolerance);
+        if (wantHatch) projected.push(ring.map(project));
+      }
     }
     if (!d) continue;
     const isFocus = f.slug === input.focus;
     if (isFocus) outline = d;
-    shapes.push({ slug: f.slug, d, fill: input.fill(f.slug), focus: isFocus });
+    shapes.push({
+      slug: f.slug,
+      d,
+      fill: input.fill(f.slug),
+      focus: isFocus,
+      // Ränder bara där de syns, så att förklaringen inte nämner något som ligger utanför bilden.
+      thin: wantHatch && coversFrame(projected, width, height),
+    });
   }
   // Fokusområdet sist, så att det hamnar överst.
   shapes.sort((a, b) => Number(a.focus) - Number(b.focus));
@@ -248,9 +296,18 @@ export interface SvgOptions {
 }
 
 /**
+ * Ränder för områden med få affärer: mörka diagonala linjer (/) med 25 % täckning,
+ * samma utseende som kartans (scripts/map/mapstyle HATCH.thin) och CSS-variabeln --hatch.
+ */
+const HATCH_PATTERN =
+  '<defs><pattern id="mm-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+  '<rect width="1.2" height="5" fill="#1a1f1c" fill-opacity="0.25"/></pattern></defs>';
+
+/**
  * Hela minikartan som en SVG-sträng. Prisfärgerna sätts direkt (från lib/scales);
  * bakgrund, kanter, accent och text styrs med klasserna mm-bg, mm-area, mm-focus och
- * mm-label, så att komponenten kan använda designsystemets tokens.
+ * mm-label, så att komponenten kan använda designsystemets tokens. Områden med få
+ * affärer får ett randigt lager (mm-hatch) ovanpå färgen.
  */
 export function minimapSvg(map: Minimap, o: SvgOptions): string {
   const op = o.neighbourOpacity ?? 0.55;
@@ -258,11 +315,14 @@ export function minimapSvg(map: Minimap, o: SvgOptions): string {
   parts.push(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${map.width} ${map.height}" role="img" aria-label="${escape(o.label)}" preserveAspectRatio="xMidYMid slice">`,
   );
+  if (map.shapes.some((s) => s.thin)) parts.push(HATCH_PATTERN);
   parts.push(`<rect class="mm-bg" width="${map.width}" height="${map.height}"/>`);
   for (const s of map.shapes) {
     parts.push(
       `<path class="mm-area${s.focus ? " mm-area-focus" : ""}" d="${s.d}" fill="${s.fill}"${s.focus ? "" : ` fill-opacity="${op}"`} fill-rule="evenodd"/>`,
     );
+    if (s.thin)
+      parts.push(`<path class="mm-hatch" d="${s.d}" fill="url(#mm-hatch)" fill-rule="evenodd"/>`);
   }
   if (map.outline) parts.push(`<path class="mm-focus" d="${map.outline}" fill="none"/>`);
   for (const l of map.labels) {

@@ -66,20 +66,39 @@ function changeRamp(period: Period): Html {
   );
 }
 
-/** Panelens förklaring. Pris och förändring visas bara på mobilen (på datorn står kartans förklaring alltid bredvid). */
-export function legend(s: LegendState): Html {
-  if (s.view === "budget") {
-    return html`<ul class="legend legend-budget" aria-label="Färgernas betydelse">
-      <li>${sw(BUDGET_COLORS.ok)}<span>Räcker</span></li>
-      <li>
-        ${sw(BUDGET_COLORS.near)}<span>Nästan, högst ${Math.round(NEAR_MARGIN * 100)} % över</span>
-      </li>
-      <li>${sw(BUDGET_COLORS.no)}<span>Räcker inte</span></li>
-    </ul>`;
-  }
-  return html`<div class="legend legend-ramp">
-    ${s.view === "pris" ? priceRamp() : changeRamp(s.period)}
-  </div>`;
+/** Hatch- och 3D-raderna. I 3D syns inte ränderna, så deras rad döljs där (styrs med CSS). */
+function notes(cls: string, hasMissing: boolean, extra: Html | "" = ""): Html {
+  return html`<ul class="${cls}">
+    <li class="note-hatch">
+      <span class="hatch" aria-hidden="true"></span>Randigt = få affärer, osäkert värde
+    </li>
+    ${hasMissing ? html`<li class="note-hatch"><span class="hatch hatch-nodata" aria-hidden="true"></span>Ljusgrått = uppgift saknas</li>` : ""}
+    ${extra}
+    <li class="note-3d">Höjden visar pris per kvm</li>
+  </ul>`;
+}
+
+/**
+ * Panelens förklaring. Pris och förändring visas bara på mobilen (på datorn står kartans
+ * förklaring alltid bredvid). Raderna om ränder och 3D syns bara på små skärmar, där kartans
+ * förklaring är dold (se map-page.css).
+ */
+export function legend(s: LegendState, hasMissing = false): Html {
+  const main =
+    s.view === "budget"
+      ? html`<ul class="legend legend-budget" aria-label="Färgernas betydelse">
+          <li>${sw(BUDGET_COLORS.ok)}<span>Räcker</span></li>
+          <li>
+            ${sw(BUDGET_COLORS.near)}<span
+              >Nästan, högst ${Math.round(NEAR_MARGIN * 100)} % över</span
+            >
+          </li>
+          <li>${sw(BUDGET_COLORS.no)}<span>Räcker inte</span></li>
+        </ul>`
+      : html`<div class="legend legend-ramp">
+          ${s.view === "pris" ? priceRamp() : changeRamp(s.period)}
+        </div>`;
+  return html`${main}${notes("legend-notes", hasMissing)}`;
 }
 
 /**
@@ -94,15 +113,13 @@ export function mapLegend(s: LegendState, hasMissing = false): Html {
         ? changeRamp(s.period)
         : html`<p class="ml-title">Räcker budgeten?</p>
             <ul class="ml-items">
-              <li>${sw(BUDGET_COLORS.ok)}Ja</li>
+              <li>${sw(BUDGET_COLORS.ok)}Räcker</li>
               <li>${sw(BUDGET_COLORS.near)}Nästan</li>
-              <li>${sw(BUDGET_COLORS.no)}Nej</li>
+              <li>${sw(BUDGET_COLORS.no)}Räcker inte</li>
             </ul>`;
-  return html`${main}
-    <ul class="ml-notes">
-      <li><span class="hatch" aria-hidden="true"></span>Randigt = få affärer, osäkert värde</li>
-      ${hasMissing ? html`<li><span class="hatch hatch-nodata" aria-hidden="true"></span>Ljusgrått = uppgift saknas</li>` : ""}
-      ${s.housing === "house" ? html`<li class="ml-note-text">${CITY_HOUSE_NOTE.replace(/\.$/, "")}</li>` : ""}
-      <li class="ml-3d">Höjden visar pris per kvm</li>
-    </ul>`;
+  const house =
+    s.housing === "house"
+      ? html`<li class="ml-note-text">${CITY_HOUSE_NOTE.replace(/\.$/, "")}</li>`
+      : "";
+  return html`${main}${notes("ml-notes", hasMissing, house)}`;
 }

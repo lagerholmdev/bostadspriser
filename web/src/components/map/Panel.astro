@@ -145,7 +145,10 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
         data-view-panel="pris"
       >
         <div data-slot="price-summary" set:html={priceSummary(price, s.housing, s.period).value} />
-        <Fragment set:html={legend({ view: "pris", housing: s.housing, period: s.period }).value} />
+        <div
+          data-slot="price-legend"
+          set:html={legend({ view: "pris", housing: s.housing, period: s.period }).value}
+        />
         <div class="list-head">
           <h2 class="list-title">Alla områden</h2>
           <Segmented
@@ -180,7 +183,8 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
           aria-live="polite"
           aria-atomic="true"
         ></p>
-        <Fragment
+        <div
+          data-slot="budget-legend"
           set:html={legend({ view: "budget", housing: s.housing, period: s.period }).value}
         />
         <div

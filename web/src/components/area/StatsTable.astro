@@ -10,9 +10,10 @@ interface Props {
   caption: string;
   /** Vad som säljs, för radetiketten "Sålda bostadsrätter". */
   noun: string;
+  /** Kolumner att visa (standard båda). */
+  periods?: Period[];
 }
-const { stats, caption, noun } = Astro.props;
-const periods: Period[] = ["m3", "m12"];
+const { stats, caption, noun, periods = ["m3", "m12"] } = Astro.props;
 const head: Record<Period, string> = { m3: "3 mån", m12: "12 mån" };
 const miss = (
   p: Period,

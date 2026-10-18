@@ -277,11 +277,13 @@ const toc = [
   .toc a {
     display: block;
     padding-block: 5px;
-    color: var(--c-ink-2);
+    color: var(--c-accent);
+    font-weight: 600;
     text-decoration: none;
   }
-  .toc a:hover {
-    color: var(--c-accent);
+  .toc a:hover,
+  .toc a:focus-visible {
+    color: var(--c-accent-hover);
     text-decoration: underline;
   }
   .prose {

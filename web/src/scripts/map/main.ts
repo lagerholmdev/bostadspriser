@@ -22,7 +22,6 @@ function start(): void {
   const app = $("app");
   const panelEl = $("panel");
   if (!app || !panelEl) return;
-  const base = app.dataset.base ?? "/";
 
   const parsed = parseAppState(location.search, isKnown);
 
@@ -45,7 +44,7 @@ function start(): void {
     }
   }
 
-  const panel = new PanelController(panelEl, store, { base });
+  const panel = new PanelController(panelEl, store);
   panel.start();
 
   const input = $<HTMLInputElement>("area-search");
@@ -66,7 +65,7 @@ function start(): void {
       { button: shareBtn, status: shareStatus, fallback: shareFallback, fallbackInput: shareInput },
       () => store.flush(),
     );
-    panel.copyLink = (status) => void sharer.copyLink(status);
+    panel.copyLink = (url, status) => void sharer.copyLink(url, status);
   }
 
   trackViewOnce(store.state.view);

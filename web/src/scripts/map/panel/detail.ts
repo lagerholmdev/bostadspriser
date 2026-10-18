@@ -8,7 +8,17 @@ import {
   shownStat,
   similarNeighbours,
 } from "../../../lib/data";
-import { MISSING_TEXT, change, mkr, money, number, relative } from "../../../lib/format";
+import {
+  MISSING_TEXT,
+  change,
+  changeDirection,
+  changeWord,
+  mkr,
+  money,
+  number,
+  relative,
+} from "../../../lib/format";
+import { areaUrl } from "../../../lib/links";
 import { changeSentence, rankPhrase } from "../../../lib/text";
 import type { Area, MissingReason, Period, Stat } from "../../../lib/types";
 import type { AppState } from "../../../lib/url";
@@ -29,6 +39,14 @@ function missingText(s: Stat | null, field: Field): string {
   return reason ? `Saknas, ${MISSING_TEXT[reason]}` : "Saknas";
 }
 
+/** Förändring med tecken, färg och ord, som ChangeValue på områdessidan. */
+function changeValue(v: number): Html {
+  const dir = changeDirection(v) ?? "flat";
+  return html`<span class="${`chg chg-${dir}`}"
+    >${change(v)}<span class="chg-word">${changeWord(v)}</span></span
+  >`;
+}
+
 function fact(label: string, value: Html | string, note?: Html | string): Html {
   return html`<div class="fact">
     <dt>${label}</dt>
@@ -37,7 +55,6 @@ function fact(label: string, value: Html | string, note?: Html | string): Html {
 }
 
 export interface DetailOptions {
-  base: string;
   inCompare: boolean;
   compareFull: boolean;
 }
@@ -57,7 +74,7 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
     const v = changeOf(p);
     return fact(
       CHANGE_LABEL[p],
-      v == null ? missingText(stOf(p), "change") : change(v),
+      v == null ? missingText(stOf(p), "change") : changeValue(v),
       COMPARED_TO[p],
     );
   };
@@ -66,13 +83,13 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
   const neighbours = similarNeighbours(area, 4, housing, period)
     .filter((n) => shownStat(n, housing, period)?.pricePerSqm != null)
     .slice(0, 3);
-  const href = `${opts.base}omrade/${area.slug}/`;
+  const href = areaUrl(area.slug);
 
   return html` <button type="button" class="back" data-action="back">
       <span aria-hidden="true">←</span> Tillbaka till listan
     </button>
     <article class="detail" aria-labelledby="detail-title">
-      <p class="eyebrow">${KIND_LABEL[area.kind]}</p>
+      <p class="kicker">${KIND_LABEL[area.kind]}</p>
       <h2 id="detail-title" tabindex="-1">${area.name}</h2>
       <p class="kpi-context">
         ${capitalize(HOUSING_MANY[housing])}, ${PERIOD_SHORT[period].toLowerCase()}
@@ -123,7 +140,12 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
         >
           ${opts.inCompare ? "Ta bort ur jämförelsen" : "Lägg till i jämförelsen"}
         </button>
-        <button type="button" class="btn btn-quiet-plain" data-action="copy-link">
+        <button
+          type="button"
+          class="btn btn-quiet-plain"
+          data-action="copy-link"
+          data-slug="${area.slug}"
+        >
           Kopiera länk
         </button>
       </div>

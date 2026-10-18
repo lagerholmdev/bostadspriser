@@ -4,6 +4,7 @@
  */
 import { html } from "../../lib/html";
 import { KIND_LABEL } from "../../lib/data";
+import { noMatchText } from "../../lib/text";
 import { search, type SearchHit } from "./search-index";
 
 export interface SearchElements {
@@ -63,10 +64,7 @@ export function initSearch(el: SearchElements, onPick: (slug: string) => void): 
               </li>`.value,
           )
           .join("")
-      : html`<li class="opt-empty" role="presentation">
-          Inget område matchar ”${q}”. Prova en kommun eller stadsdel, till exempel Solna eller
-          Aspudden.
-        </li>`.value;
+      : html`<li class="opt-empty" role="presentation">${noMatchText(q)}</li>`.value;
     status.textContent = hits.length
       ? `${hits.length} ${hits.length === 1 ? "träff" : "träffar"}`
       : "Inga träffar";

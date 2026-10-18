@@ -77,10 +77,17 @@ const imageAlt = `Karta över ${area.name} med pris per kvm i grannområdena`;
 
 // Titel och beskrivning med riktiga siffror, för sökresultatet.
 const title = `Bostadspriser ${where} – ${price != null ? sqm(price) : "pris per kvm"} | Stockholms prislandskap`;
+// Förändringen på ett år, som sajten visar som standard (tre månader om årssiffran saknas).
+const changeText =
+  ap12?.change != null
+    ? `${change(ap12.change)} på ett år`
+    : ap3?.change != null
+      ? `${change(ap3.change)} på tre månader`
+      : null;
 const description =
   price != null && ap3
     ? `Bostadsrätter ${where} kostar i snitt ${sqm(price)} (${dataset.periods.m3}), ${relSentence} länets snitt. ` +
-      `${number(ap3.sales)} sålda, ${change(ap3.change)} på tre månader. Grannområden, karta och vad 5 mkr räcker till.`
+      `${number(ap3.sales)} sålda${changeText ? `, ${changeText}` : ""}. Grannområden, karta och vad 5 mkr räcker till.`
     : `Bostadspriser ${where}: pris per kvm, sålda bostäder och prisförändring från Svensk Mäklarstatistik.`;
 
 const neighboursForCompare = similar.slice(0, 2).map((a) => a.slug);
@@ -88,6 +95,13 @@ const neighboursForCompare = similar.slice(0, 2).map((a) => a.slug);
 const house3 = shownStat(area, "house", "m3");
 const house12 = shownStat(area, "house", "m12");
 const houseStats = house3 && house12 ? { m3: house3, m12: house12 } : null;
+// För få villaaffärer på tre månader men siffror för tolv: visa bara tolv månader, med en förklaring
+// i stället för en kolumn full av "för få affärer".
+const houseOnlyYear =
+  area.houseScope === "area" &&
+  house3?.pricePerSqm == null &&
+  house3?.missing?.pricePerSqm === "F" &&
+  house12?.pricePerSqm != null;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -276,6 +290,18 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
             {money(house3.meanPrice)}. Svensk Mäklarstatistik delar inte upp villapriserna på
             stadsdelsområden, så siffran gäller hela staden och inte bara {area.name}.
           </p>
+        ) : houseOnlyYear && house12 ? (
+          <>
+            <p>
+              En villa {where} kostade i snitt {sqm(house12.pricePerSqm)} de senaste 12 månaderna,{" "}
+              {relative(countyRatio(house12.pricePerSqm, "house", "m12"))} länets snitt för villor.
+            </p>
+            <p class="house-note" role="note">
+              För få villaaffärer de senaste 3 månaderna
+              {house3?.sales != null && ` (${number(house3.sales)} sålda)`} för ett pålitligt snitt.
+              Se siffrorna för 12 månader i tabellen.
+            </p>
+          </>
         ) : area.houseScope === "area" && area.house ? (
           <p>
             {house3?.pricePerSqm != null
@@ -289,7 +315,12 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
       {area.houseScope === "area" && houseStats && (
         <StatsTable
           stats={houseStats}
-          caption={`Villor ${where}, senaste 3 och 12 månaderna`}
+          periods={houseOnlyYear ? ["m12"] : undefined}
+          caption={
+            houseOnlyYear
+              ? `Villor ${where}, senaste 12 månaderna`
+              : `Villor ${where}, senaste 3 och 12 månaderna`
+          }
           noun="villor"
         />
       )}
@@ -431,6 +462,29 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
   }
   .hero-actions {
     margin-top: var(--sp-1);
+  }
+  /*
+   * Bred skärm: knapparna och "Har jag råd här?" på en rad. Kartan får en fast bredd
+   * (minst 477 px, annars döljs grannetiketterna, se Minimap.astro) och texten resten.
+   */
+  @media (min-width: 1080px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 480px;
+      gap: var(--sp-5);
+    }
+    .hero-actions {
+      column-gap: var(--sp-3);
+    }
+    .hero-actions :global(.btn) {
+      padding-inline: 14px;
+    }
+  }
+  .house-note {
+    background: var(--c-sunken);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--c-ink);
   }
   .tertiary {
     font-size: var(--fs-sm);

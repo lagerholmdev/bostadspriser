@@ -27,6 +27,8 @@
 .app .map-wrap {
   order: -1;
   position: relative;
+  /* Egen staplingsordning: MapLibres överlägg (z-index 99999) stannar inom kartan och hamnar under sidhuvudet. */
+  isolation: isolate;
   height: 52vh;
   height: 42svh;
   min-height: 280px;
@@ -471,6 +473,29 @@
   flex-wrap: wrap;
   gap: var(--sp-2) var(--sp-4);
 }
+/* Ränder och 3D förklaras i panelen bara på små skärmar, där kartans förklaring är dold. */
+.app .legend-notes {
+  display: none;
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  font-size: var(--fs-xs);
+  color: var(--c-ink-2);
+  gap: 3px;
+}
+.app .legend-notes li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+@media (max-width: 720px) {
+  .app .legend-notes {
+    display: grid;
+  }
+  .app .map-wrap .map-legend {
+    display: none !important;
+  }
+}
 
 .app .list-head {
   display: flex;
@@ -886,13 +911,32 @@
   font-weight: 700;
   scroll-margin-top: calc(var(--header-h) + var(--sp-4));
 }
-.app .detail h2:focus {
+/* Rubriken får fokus av skriptet (tabindex=-1) men går inte att använda: ingen fokusram. */
+.app .detail h2:focus,
+.app .detail h2:focus-visible {
   outline: none;
 }
-.app .detail h2:focus-visible {
-  outline: 2px solid var(--c-accent);
-  outline-offset: 4px;
-  border-radius: 2px;
+.app .detail .kicker {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-2);
+}
+.app .fact .chg {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.app .fact .chg-up {
+  color: var(--c-up);
+}
+.app .fact .chg-down {
+  color: var(--c-down);
+}
+.app .fact .chg-flat {
+  color: var(--c-ink-2);
+}
+.app .fact .chg-word {
+  font-weight: 400;
+  color: var(--c-ink-2);
+  margin-left: 0.3em;
 }
 .app .kpi-context {
   margin-top: var(--sp-4);
@@ -1134,17 +1178,76 @@
   flex: none;
   margin-left: auto;
 }
-@media (max-width: 479px) {
+.app .tray-toggle {
+  display: none;
+}
+/*
+ * Mobilen: brickan ligger fast längst ner, hopfälld till en rad med antal och "Jämför".
+ * Knappen med antalet fäller ut de valda områdena ovanför raden.
+ */
+@media (max-width: 959px) {
+  .app .tray-inner {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "chips chips"
+      "toggle go";
+    gap: var(--sp-2) var(--sp-3);
+  }
+  .app .tray-toggle {
+    grid-area: toggle;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: var(--tap);
+    padding: 0 var(--sp-3);
+    margin-left: calc(var(--sp-3) * -1);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--c-ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  @media (hover: hover) {
+    .app .tray-toggle:hover {
+      background: var(--c-page);
+    }
+  }
+  .app .tray-chevron {
+    color: var(--c-accent);
+    transition: transform 0.15s;
+  }
+  .app .tray-inner.is-open .tray-chevron {
+    transform: rotate(180deg);
+  }
+  .app .chips {
+    grid-area: chips;
+    display: none;
+  }
+  .app .tray-inner.is-open .chips {
+    display: flex;
+  }
   .app .tray-go {
-    flex: 1 0 100%;
-    justify-content: center;
+    grid-area: go;
+    justify-self: end;
     margin-left: 0;
+  }
+  .app .tray-hint {
+    grid-area: go;
+    line-height: 1.35;
   }
 }
 /* Brickan ligger fast längst ner på mobilen: håll fokuserade element ovanför den. */
 @media (max-width: 959px) {
   html:has(.app .tray:not([hidden])) {
-    scroll-padding-bottom: 88px;
+    scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+  html:has(.app .tray:not([hidden]) .tray-inner.is-open) {
+    scroll-padding-bottom: calc(190px + env(safe-area-inset-bottom, 0px));
   }
 }
 .app .tray-hint {
@@ -1259,14 +1362,17 @@
   align-items: center;
   gap: 6px;
 }
-.app .ml-notes .ml-3d {
+.app .ml-notes .note-3d,
+.app .legend-notes .note-3d {
   display: none;
 }
-.app .map-wrap.is-3d .ml-notes .ml-3d {
+.app .map-wrap.is-3d .ml-notes .note-3d,
+.app:has(.map-wrap.is-3d) .legend-notes .note-3d {
   display: flex;
 }
 /* I 3D syns inte ränderna, så deras förklaring döljs. */
-.app .map-wrap.is-3d .ml-notes li:has(.hatch) {
+.app .map-wrap.is-3d .ml-notes .note-hatch,
+.app:has(.map-wrap.is-3d) .legend-notes .note-hatch {
   display: none;
 }
 .app .hatch {

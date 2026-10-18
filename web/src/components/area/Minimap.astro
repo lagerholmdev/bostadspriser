@@ -4,7 +4,7 @@
  * Ritas i bygget som ren SVG, ingen kartmotor behövs.
  */
 import geo from "../../generated/areas.geojson?raw";
-import { bySlug } from "../../lib/data";
+import { bySlug, isThin } from "../../lib/data";
 import { sqm } from "../../lib/format";
 import { buildMinimap, minimapSvg, type MinimapCollection } from "../../lib/minimap";
 import { priceColor } from "../../lib/scales";
@@ -22,6 +22,11 @@ const map = buildMinimap({
   collection,
   focus: area.slug,
   fill: (slug) => priceColor(price(slug)),
+  // Få affärer och ett visat pris: ränder, som på kartan.
+  thin: (slug) => {
+    const s = bySlug.get(slug)?.apartment?.m3 ?? null;
+    return s?.pricePerSqm != null && isThin(s, "m3");
+  },
   name: (slug) => bySlug.get(slug)?.name,
   labelPoint: (slug) => bySlug.get(slug)?.label,
   neighbours: [...area.neighbours].sort(
@@ -35,6 +40,7 @@ const map = buildMinimap({
 });
 
 const shown = map.labels.filter((l) => !l.focus).map((l) => l.text);
+const hasThin = map.shapes.some((s) => s.thin);
 const names = area.neighbours.map((s) => bySlug.get(s)?.name).filter(Boolean) as string[];
 const label =
   `Karta över ${area.name} och områdena runt omkring` +
@@ -49,6 +55,11 @@ const svg = minimapSvg(map, { label });
     <PriceLegend title="Pris per kvm, tusen kr" />
     {shown.length > 0 && (
       <p class="mm-note">{area.name} har grön kant. Grannområdena visas blekare.</p>
+    )}
+    {hasThin && (
+      <p class="mm-note mm-note-hatch">
+        <span class="mm-hatch-key" aria-hidden="true"></span>Randigt = få affärer, osäkert värde
+      </p>
     )}
   </figcaption>
 </figure>
@@ -123,5 +134,19 @@ const svg = minimapSvg(map, { label });
   .mm-note {
     font-size: var(--fs-xs);
     color: var(--c-ink-3);
+  }
+  .mm-note-hatch {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .mm-hatch-key {
+    flex: none;
+    width: 14px;
+    height: 12px;
+    border-radius: 3px;
+    background-color: var(--c-price-3);
+    background-image: var(--hatch);
+    box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.08);
   }
 </style>

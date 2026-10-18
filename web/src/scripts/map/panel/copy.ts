@@ -32,17 +32,9 @@ export function changeBasis(period: Period): string {
     ? `${dataset.periods.m3} jämfört med ${sameMonthsLastYear()}`
     : `${dataset.periods.m3} jämfört med de tre månaderna före`;
 }
-export const HOUSING_ONE: Record<Housing, string> = {
-  apartment: "en bostadsrätt",
-  house: "en villa",
-};
 export const HOUSING_MANY: Record<Housing, string> = {
   apartment: "bostadsrätter",
   house: "villor",
-};
-export const HOUSING_SHORT: Record<Housing, string> = {
-  apartment: "Bostadsrätter",
-  house: "Villor",
 };
 
 export const CITY_HOUSE_NOTE = "Villor redovisas för hela Stockholms stad.";

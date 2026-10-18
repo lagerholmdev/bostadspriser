@@ -43,11 +43,12 @@ const width = price ? Math.max(2, (price / max) * 100).toFixed(1) : "0";
   <td class="col-price">
     <span class="price">{price != null ? sqm(price) : "saknas"}</span>
     <span class="price-bar" aria-hidden="true">
-      <span style={`width:${width}%;background:${priceColor(price)}`}></span>
+      <span style={`width:${width}%;background-color:${priceColor(price)}`}></span>
     </span>
   </td>
   <td class="col-chg">
     <ChangeValue value={s12?.change} missing={s12?.missing?.change} />
+    {s12?.change != null && <span class="chg-unit">på ett år</span>}
   </td>
   <td class="col-sales">
     {s3?.sales != null ? number(s3.sales) : "–"}

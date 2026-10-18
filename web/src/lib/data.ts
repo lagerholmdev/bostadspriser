@@ -9,15 +9,6 @@ export const dataset = raw as unknown as Dataset;
 export const areas: Area[] = dataset.areas;
 export const bySlug: ReadonlyMap<string, Area> = new Map(areas.map((a) => [a.slug, a]));
 
-export const HOUSING_LABEL: Record<Housing, string> = {
-  apartment: "Bostadsrätter",
-  house: "Villor",
-};
-export const PERIOD_LABEL: Record<Period, string> = {
-  m3: "Senaste 3 månaderna",
-  m12: "Senaste 12 månaderna",
-};
-
 /** Vad för slags område, i klartext. */
 export const KIND_LABEL: Record<Area["kind"], string> = {
   district: "Stadsdelsområde i Stockholms stad",
@@ -97,7 +88,6 @@ export function rankByPrice(housing: Housing, period: Period): Area[] {
     })
     .sort((a, b) => price(b) - price(a));
 }
-
 
 /**
  * Områdets plats i prislistan (1 = dyrast) bland områden med visat pris. För villor delar
