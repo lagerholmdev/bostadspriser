@@ -1,0 +1,113 @@
+---
+/** Senaste 3 och 12 månaderna sida vid sida. Mätvärden som rader, så att tabellen får plats på mobil. */
+import { dataset, isThin } from "../../lib/data";
+import { money, number, sqm, MISSING_TEXT } from "../../lib/format";
+import type { MissingReason, Period, StatsByPeriod } from "../../lib/types";
+import ChangeValue from "../common/ChangeValue.astro";
+
+interface Props {
+  stats: StatsByPeriod;
+  caption: string;
+  /** Vad som säljs, för radetiketten "Sålda bostadsrätter". */
+  noun: string;
+}
+const { stats, caption, noun } = Astro.props;
+const periods: Period[] = ["m3", "m12"];
+const head: Record<Period, string> = { m3: "Senaste 3 mån", m12: "Senaste 12 mån" };
+const miss = (p: Period, f: "sales" | "pricePerSqm" | "meanPrice" | "change"): MissingReason | undefined =>
+  stats[p].missing?.[f];
+const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "saknas");
+---
+
+<div class="table-box">
+  <table class="data-table stats-table">
+    <caption class="visually-hidden">{caption}</caption>
+    <thead>
+      <tr>
+        <td></td>
+        {
+          periods.map((p) => (
+            <th scope="col">
+              {head[p]}
+              <span class="per">{dataset.periods[p]}</span>
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Pris per kvm</th>
+        {
+          periods.map((p) => (
+            <td class:list={{ "thin-value": isThin(stats[p], p) }}>
+              {stats[p].pricePerSqm == null ? <span class="chg-none">{missText(miss(p, "pricePerSqm"))}</span> : sqm(stats[p].pricePerSqm)}
+            </td>
+          ))
+        }
+      </tr>
+      <tr>
+        <th scope="row">Medelpris</th>
+        {
+          periods.map((p) => (
+            <td class:list={{ "thin-value": isThin(stats[p], p) }}>
+              {stats[p].meanPrice == null ? <span class="chg-none">{missText(miss(p, "meanPrice"))}</span> : money(stats[p].meanPrice)}
+            </td>
+          ))
+        }
+      </tr>
+      <tr>
+        <th scope="row">Sålda {noun}</th>
+        {
+          periods.map((p) => (
+            <td>
+              {stats[p].sales == null ? <span class="chg-none">{missText(miss(p, "sales"))}</span> : number(stats[p].sales)}
+              {isThin(stats[p], p) && stats[p].sales != null && <span class="thin-tag">få affärer</span>}
+            </td>
+          ))
+        }
+      </tr>
+      <tr>
+        <th scope="row">Förändring</th>
+        {
+          periods.map((p) => (
+            <td>
+              <ChangeValue value={stats[p].change} missing={miss(p, "change")} />
+            </td>
+          ))
+        }
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .per {
+    display: block;
+    font-weight: 400;
+    color: var(--c-ink-3);
+    font-size: var(--fs-xs);
+  }
+  .stats-table td {
+    white-space: nowrap;
+  }
+  .stats-table .thin-tag {
+    margin-left: var(--sp-2);
+  }
+  @media (max-width: 480px) {
+    .stats-table th,
+    .stats-table td {
+      padding: var(--sp-3) var(--sp-3);
+      font-size: var(--fs-sm);
+    }
+    .stats-table td {
+      white-space: normal;
+    }
+    .stats-table .thin-tag {
+      margin-left: 0;
+      display: table;
+      margin-left: auto;
+      margin-top: 2px;
+    }
+  }
+</style>

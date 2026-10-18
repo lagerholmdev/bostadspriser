@@ -58,3 +58,47 @@ const PA = new Set(["sodermalm", "ostermalm", "kungsholmen", "essingen", "liding
 export function inArea(slug: string, name: string): string {
   return `${PA.has(slug) ? "på" : "i"} ${name}`;
 }
+
+/* Tillägg för områdessidorna, jämförelsen och listan. */
+
+/** Sökbar form utan diakritiska tecken: "Hägersten-Liljeholmen" -> "hagersten liljeholmen". */
+export function searchKey(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[-–\s]+/g, " ")
+    .trim();
+}
+
+/** Riktning för en förändring i procent, avrundad till en decimal som den visas. */
+export function changeDirection(v: number | null | undefined): "up" | "down" | "flat" | null {
+  if (v == null) return null;
+  const r = Math.round(v * 10) / 10;
+  return r > 0 ? "up" : r < 0 ? "down" : "flat";
+}
+
+/** Ord som beskriver förändringen, så att färgen inte är enda signalen. */
+export function changeWord(v: number | null | undefined): string {
+  const d = changeDirection(v);
+  return d === "up" ? "upp" : d === "down" ? "ner" : d === "flat" ? "oförändrat" : "";
+}
+
+/** 0.12 -> "12 % dyrare", -0.3 -> "30 % billigare", 0 -> "samma pris" */
+export function pricier(ratio: number | null | undefined): string {
+  if (ratio == null) return "–";
+  const p = Math.round(Math.abs(ratio) * 100);
+  if (p === 0) return "samma pris";
+  return `${p}${NBSP}% ${ratio > 0 ? "dyrare" : "billigare"}`;
+}
+
+/** Varför ett värde saknas, i klartext. Se MissingReason i types.ts. */
+export const MISSING_TEXT = { F: "för få affärer", N: "inte representativt", "0": "inga affärer" } as const;
+
+/* Tillägg för kartsidan. */
+
+/** 5000000 -> "5 mkr", 5250000 -> "5,25 mkr" (för budgetreglaget, upp till två decimaler). */
+export function mkr(v: number): string {
+  const m = Math.round((v / 1_000_000) * 100) / 100;
+  return `${m.toLocaleString("sv-SE", { maximumFractionDigits: 2 })}${NBSP}mkr`;
+}

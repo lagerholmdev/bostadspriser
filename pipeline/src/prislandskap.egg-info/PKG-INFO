@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: prislandskap
+Version: 2.0.0
+Summary: Datapipeline för Stockholms prislandskap: hämtar, exporterar och ritar delningsbilder.
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.32
+Requires-Dist: beautifulsoup4>=4.12
+Requires-Dist: pillow>=11
+Provides-Extra: geo
+Requires-Dist: geopandas>=1.0; extra == "geo"
+Requires-Dist: shapely>=2.0; extra == "geo"
+Requires-Dist: pyarrow>=15; extra == "geo"
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: ruff>=0.6; extra == "dev"

@@ -1,0 +1,153 @@
+---
+/**
+ * "Plats i länet": alla områden som tunna liggande staplar, dyrast överst.
+ * Området självt är markerat i accentfärg och namngivet; länets snitt är en lodrät linje.
+ * Skärmläsare får en vanlig numrerad lista i stället för bilden.
+ */
+import { countyStat, rankByPrice, stat } from "../../lib/data";
+import { sqm } from "../../lib/format";
+import type { Area } from "../../lib/types";
+import { areaUrl } from "../common/links";
+
+interface Props {
+  area: Area;
+}
+const { area } = Astro.props;
+const list = rankByPrice("apartment", "m3");
+const price = (a: Area) => stat(a, "apartment", "m3")?.pricePerSqm ?? 0;
+const max = Math.max(...list.map(price));
+const county = countyStat("apartment", "m3").pricePerSqm ?? 0;
+const pct = (v: number) => `${((v / max) * 100).toFixed(2)}%`;
+const myIndex = list.findIndex((a) => a.slug === area.slug);
+// Namnge första, sista och området självt, så att skalan går att läsa.
+const named = new Set([0, list.length - 1, myIndex]);
+---
+
+<div class="rank">
+  <div class="rank-plot" aria-hidden="true">
+    <div class="rank-county" style={`left:${pct(county)}`}>
+      <span>Länets snitt</span>
+    </div>
+    {
+      list.map((a, i) => (
+        <div class:list={["rank-row", { me: a.slug === area.slug, named: named.has(i) }]}>
+          <div class="rank-bar" style={`width:${pct(price(a))}`} />
+          {named.has(i) && (
+            <span class="rank-label" style={price(a) / max > 0.6 ? `right:calc(100% - ${pct(price(a))} + 8px)` : `left:calc(${pct(price(a))} + 8px)`}>
+              {a.name} <span class="rank-val">{sqm(price(a))}</span>
+            </span>
+          )}
+        </div>
+      ))
+    }
+  </div>
+  <details class="rank-list">
+    <summary>Visa alla {list.length} områden som lista</summary>
+    <ol>
+      {
+        list.map((a) => (
+          <li class:list={{ me: a.slug === area.slug }}>
+            {a.slug === area.slug ? (
+              <strong>{a.name}</strong>
+            ) : (
+              <a href={areaUrl(a.slug)}>{a.name}</a>
+            )}
+            <span>{sqm(price(a))}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </details>
+</div>
+
+<style>
+  .rank {
+    display: grid;
+    gap: var(--sp-4);
+  }
+  .rank-plot {
+    position: relative;
+    display: grid;
+    gap: 3px;
+    padding-top: 26px;
+  }
+  .rank-row {
+    position: relative;
+    height: 7px;
+  }
+  .rank-row.named {
+    height: 7px;
+  }
+  .rank-bar {
+    height: 100%;
+    background: var(--c-line-strong);
+    border-radius: 0 2px 2px 0;
+  }
+  .rank-row.me .rank-bar {
+    background: var(--c-accent);
+  }
+  .rank-row.me {
+    height: 11px;
+    margin-block: 4px;
+  }
+  .rank-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--fs-xs);
+    color: var(--c-ink-2);
+    white-space: nowrap;
+    line-height: 1;
+    background: var(--c-page);
+    padding: 1px 2px;
+  }
+  .rank-row.me .rank-label {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--c-accent);
+  }
+  .rank-val {
+    font-weight: 400;
+    color: var(--c-ink-2);
+  }
+  .rank-county {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed var(--c-ink-3);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .rank-county span {
+    position: absolute;
+    top: 0;
+    left: 6px;
+    font-size: var(--fs-xs);
+    color: var(--c-ink-3);
+    white-space: nowrap;
+  }
+  .rank-list summary {
+    cursor: pointer;
+    color: var(--c-accent);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .rank-list ol {
+    margin: var(--sp-2) 0 0;
+    padding-left: 2.2em;
+    font-size: var(--fs-sm);
+    columns: 2 260px;
+    column-gap: var(--sp-6);
+  }
+  .rank-list li {
+    break-inside: avoid;
+    padding-block: 2px;
+  }
+  .rank-list li span {
+    color: var(--c-ink-3);
+    margin-left: var(--sp-2);
+  }
+</style>

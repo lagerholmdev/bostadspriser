@@ -1,0 +1,150 @@
+/*
+ * Små klasser som delas av komponenterna och av klientskripten (jämförelsen
+ * och områdeslistan), som skriver ut samma markup i webbläsaren.
+ */
+
+/* Förändring: tecken, färg och ord */
+.chg {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chg-up {
+  color: var(--c-up);
+}
+.chg-down {
+  color: var(--c-down);
+}
+.chg-flat {
+  color: var(--c-ink-2);
+}
+.chg-none {
+  color: var(--c-ink-3);
+  font-weight: 400;
+}
+.chg-word {
+  font-weight: 400;
+  color: var(--c-ink-2);
+  margin-left: 0.3em;
+}
+
+/* Färgruta för prisskalan */
+.swatch {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.12);
+  flex: none;
+}
+
+/* Osäkra värden: blekare och märkta i klartext */
+.thin-value {
+  color: var(--c-ink-3);
+}
+.thin-tag {
+  display: inline-block;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--c-ink-2);
+  background: var(--c-sunken);
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* Hjälptext under tabeller och diagram */
+.fineprint {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-2);
+  max-width: 68ch;
+}
+
+/* Sektioner på innehållssidorna */
+.page-section {
+  margin-top: var(--sp-8);
+}
+.page-section > h2,
+.section-head h2 {
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+.section-head {
+  display: grid;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-5);
+  max-width: 68ch;
+}
+.section-head p {
+  color: var(--c-ink-2);
+}
+@media (max-width: 640px) {
+  .page-section {
+    margin-top: var(--sp-7);
+  }
+  .page-section > h2,
+  .section-head h2 {
+    font-size: var(--fs-lg);
+  }
+}
+
+/* Tabeller */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--c-surface);
+  font-size: var(--fs-md);
+}
+.data-table caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--sp-3);
+  caption-side: top;
+}
+.data-table th,
+.data-table td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--c-line);
+  text-align: right;
+  vertical-align: baseline;
+}
+.data-table th:first-child,
+.data-table td:first-child {
+  text-align: left;
+}
+.data-table thead th {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-ink-2);
+  border-bottom-color: var(--c-line-strong);
+}
+.data-table tbody th {
+  font-weight: 500;
+}
+.table-box {
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--c-surface);
+}
+.table-box .data-table tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* Knapprad */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-4);
+}
+@media (max-width: 640px) {
+  .actions .btn {
+    min-height: 44px;
+  }
+}
+
+.chg-none .miss {
+  margin-left: 0.4em;
+  font-size: var(--fs-sm);
+}

@@ -67,3 +67,46 @@ export function similarNeighbours(area: Area, n = 3, housing: Housing = "apartme
   const price = (a: Area) => stat(a, housing, period)?.pricePerSqm ?? 0;
   return candidates.sort((a, b) => Math.abs(price(a) - me) - Math.abs(price(b) - me)).slice(0, n);
 }
+
+/* Tillägg för områdessidorna och jämförelsen. */
+
+/** Områdets plats i prislistan (1 = dyrast) och antal områden med värde. */
+export function priceRank(
+  area: Area,
+  housing: Housing = "apartment",
+  period: Period = "m3",
+): { rank: number; total: number } | null {
+  const list = rankByPrice(housing, period);
+  const i = list.findIndex((a) => a.slug === area.slug);
+  return i === -1 ? null : { rank: i + 1, total: list.length };
+}
+
+/** Kvot mot länets snitt: 0.65 = 65 % över. */
+export function countyRatio(value: number | null | undefined, housing: Housing = "apartment", period: Period = "m3"): number | null {
+  const c = countyStat(housing, period).pricePerSqm;
+  return value == null || !c ? null : value / c - 1;
+}
+
+/** Läser områden att jämföra ur adressen: ?omraden=a,b,c, äldre ?jamfor=a,b och ?a=&b=&c=. */
+export function parseCompareParams(params: URLSearchParams, max = 3, known: (slug: string) => boolean = (s) => bySlug.has(s)): string[] {
+  const raw: string[] = [];
+  for (const key of ["omraden", "jamfor"]) {
+    for (const v of params.getAll(key)) raw.push(...v.split(","));
+  }
+  for (const key of ["a", "b", "c"]) {
+    const v = params.get(key);
+    if (v) raw.push(v);
+  }
+  const out: string[] = [];
+  for (const s of raw.map((x) => x.trim().toLowerCase())) {
+    if (s && known(s) && !out.includes(s)) out.push(s);
+    if (out.length === max) break;
+  }
+  return out;
+}
+
+/** Vad för slags område, i klartext. */
+export const KIND_LABEL: Record<Area["kind"], string> = {
+  district: "Stadsdelsområde i Stockholms stad",
+  municipality: "Kommun i Stockholms län",
+};

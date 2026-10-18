@@ -33,3 +33,13 @@ export function budgetStatus(budget: number, sqm: number, pricePerSqm: number | 
   if (pricePerSqm <= max * (1 + NEAR_MARGIN)) return "near";
   return "no";
 }
+
+/** Ungefär vilken lägenhet en boarea motsvarar, för att göra kvm begripliga. */
+export function typicalRooms(sqm: number): string {
+  if (sqm < 22) return "mindre än en etta";
+  if (sqm < 38) return "en etta";
+  if (sqm < 58) return "en tvåa";
+  if (sqm < 78) return "en trea";
+  if (sqm < 98) return "en fyra";
+  return "en femma eller större";
+}
