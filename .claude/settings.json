@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/*.geojson)",
+      "Read(./web/package-lock.json)",
+      "Read(./web/src/generated/**)",
+      "Read(./pipeline/tests/fixtures/**)",
+      "Read(**/node_modules/**)",
+      "Read(./web/dist/**)"
+    ]
+  }
+}
