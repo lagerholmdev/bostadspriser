@@ -1,0 +1,346 @@
+---
+/** Alla områden, i två grupper sorterade på pris. Sök och sortering läggs på med JavaScript. */
+import Base from "../../layouts/Base.astro";
+import AreaRow from "../../components/common/AreaRow.astro";
+import PriceLegend from "../../components/common/PriceLegend.astro";
+import { mapUrl } from "../../components/common/links";
+import "../../components/common/common.css";
+import { areas, countyStat, dataset, stat } from "../../lib/data";
+import { date, sqm } from "../../lib/format";
+import type { Area } from "../../lib/types";
+
+const price = (a: Area) => stat(a, "apartment", "m3")?.pricePerSqm ?? -1;
+const byPrice = (list: Area[]) => [...list].sort((a, b) => price(b) - price(a));
+const max = Math.max(...areas.map(price));
+const groups = [
+  {
+    id: "stad",
+    title: "Stockholms stad",
+    note: "Mäklarstatistik delar in staden i 12 stadsdelsområden.",
+    list: byPrice(areas.filter((a) => a.kind === "district")),
+  },
+  {
+    id: "kommuner",
+    title: "Kommuner i länet",
+    note: "De övriga 25 kommunerna i Stockholms län, var och en som en helhet.",
+    list: byPrice(areas.filter((a) => a.kind === "municipality")),
+  },
+];
+const county = countyStat("apartment", "m3");
+const cheapest = byPrice(areas).filter((a) => price(a) > 0).at(-1)!;
+const dearest = byPrice(areas)[0]!;
+
+const title = "Bostadspriser i Stockholms län, område för område | Stockholms prislandskap";
+const description = `Pris per kvm för bostadsrätter i alla ${areas.length} områden i Stockholms län, ${dataset.periods.m3}. Från ${sqm(price(cheapest))} i ${cheapest.name} till ${sqm(price(dearest))} i ${dearest.name}.`;
+---
+
+<Base title={title} description={description} image="og/start.png">
+  <div class="wrap list-page">
+    <header class="intro">
+      <p class="eyebrow">Uppdaterad {date(dataset.updated)}</p>
+      <h1>Bostadspriser i Stockholms län, område för område</h1>
+      <p class="lead">
+        Snittpris per kvm för bostadsrätter i {areas.length} områden, sålda {dataset.periods.m3}. Länets snitt är {
+          sqm(county.pricePerSqm)
+        }. Välj ett område för att se fler siffror, grannområden och vad din budget räcker till.
+      </p>
+    </header>
+
+    <div class="toolbar" data-list-tools hidden>
+      <div class="search">
+        <label for="area-search">Sök område</label>
+        <input
+          id="area-search"
+          type="search"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Till exempel Hägersten eller Nacka"
+          aria-describedby="search-status"
+        />
+      </div>
+      <fieldset class="sort">
+        <legend>Sortera</legend>
+        <div class="seg">
+          <label><input type="radio" name="sort" value="pris" checked /> <span>Pris</span></label>
+          <label><input type="radio" name="sort" value="namn" /> <span>Namn</span></label>
+        </div>
+      </fieldset>
+    </div>
+    <p id="search-status" class="status" aria-live="polite"></p>
+
+    {
+      groups.map((g) => (
+        <section class="group" aria-labelledby={`g-${g.id}`} data-group>
+          <div class="group-head">
+            <h2 id={`g-${g.id}`}>{g.title}</h2>
+            <p>{g.note}</p>
+          </div>
+          <div class="table-box">
+            <table class="data-table area-table">
+              <caption class="visually-hidden">
+                {g.title}: pris per kvm för bostadsrätter de senaste 3 månaderna, <span data-sort-caption>dyrast först</span>
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Område</th>
+                  <th scope="col" class="col-price">Pris per kvm, 3 mån</th>
+                  <th scope="col" class="col-chg">Förändring, 12 mån</th>
+                  <th scope="col" class="col-sales">Sålda, 3 mån</th>
+                </tr>
+              </thead>
+              <tbody>
+                {g.list.map((a) => (
+                  <AreaRow area={a} max={max} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))
+    }
+
+    <div class="after">
+      <PriceLegend title="Färgerna i staplarna, pris per kvm i kr" />
+      <p class="fineprint">
+        Förändring är prisutvecklingen de senaste 12 månaderna jämfört med de 12 månaderna innan. Områden med få
+        affärer visas blekare, eftersom snittet där kan svänga mycket. Källa: <a href={dataset.source.url} rel="noopener"
+          >{dataset.source.name}</a
+        >.
+      </p>
+      <p><a class="btn" href={mapUrl()}>Visa alla områden på kartan</a></p>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import "../../scripts/area-list";
+</script>
+
+<style>
+  .list-page {
+    padding-top: var(--sp-7);
+  }
+  .intro {
+    display: grid;
+    gap: var(--sp-3);
+    max-width: 68ch;
+  }
+  .intro h1 {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+  }
+  .lead {
+    font-size: var(--fs-lg);
+    color: var(--c-ink-2);
+    line-height: 1.45;
+    margin-top: var(--sp-2);
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--sp-4) var(--sp-6);
+    margin-top: var(--sp-6);
+  }
+  .toolbar[hidden] {
+    display: none;
+  }
+  .search {
+    display: grid;
+    gap: var(--sp-1);
+    flex: 1 1 280px;
+    max-width: 420px;
+  }
+  .search label,
+  .sort legend {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink-2);
+  }
+  .search input {
+    font: inherit;
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    color: var(--c-ink);
+    width: 100%;
+  }
+  .search input::placeholder {
+    color: var(--c-ink-3);
+  }
+  .search input:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 0;
+    border-color: var(--c-accent);
+  }
+  .sort {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--sp-1);
+  }
+  .sort legend {
+    padding: 0;
+    margin-bottom: var(--sp-1);
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg label {
+    position: relative;
+    cursor: pointer;
+  }
+  .seg input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .seg span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink-2);
+  }
+  .seg input:checked + span {
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+  }
+  .seg input:focus-visible + span {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+  }
+  .status {
+    min-height: 1.5em;
+    margin-top: var(--sp-3);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-2);
+  }
+  .group {
+    margin-top: var(--sp-6);
+  }
+  .group[hidden] {
+    display: none;
+  }
+  .group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-1) var(--sp-4);
+    margin-bottom: var(--sp-4);
+  }
+  .group-head h2 {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+  }
+  .group-head p {
+    color: var(--c-ink-3);
+    font-size: var(--fs-sm);
+  }
+  .area-table :global(.area-row) {
+    position: relative;
+  }
+  .area-table :global(.area-row:hover) {
+    background: var(--c-page);
+  }
+  .area-table :global(.area-row th a) {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--c-ink);
+  }
+  .area-table :global(.area-row:hover th a) {
+    color: var(--c-accent);
+    text-decoration: underline;
+  }
+  /* Hela raden klickbar */
+  .area-table :global(.area-row th a::after) {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .area-table :global(.area-row th a:focus-visible) {
+    outline: none;
+  }
+  .area-table :global(.area-row:has(a:focus-visible)) {
+    outline: 2px solid var(--c-accent);
+    outline-offset: -2px;
+  }
+  .area-table :global(.row-sub) {
+    display: none;
+    font-size: var(--fs-xs);
+    color: var(--c-ink-3);
+    font-weight: 400;
+  }
+  .area-table :global(.col-price) {
+    width: 38%;
+  }
+  .area-table :global(td.col-price) {
+    text-align: left;
+  }
+  .area-table :global(th.col-price) {
+    text-align: left;
+  }
+  .area-table :global(.price) {
+    display: block;
+    font-weight: 600;
+  }
+  .area-table :global(.bar) {
+    display: block;
+    height: 6px;
+    margin-top: 6px;
+    background: var(--c-sunken);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .area-table :global(.bar > span) {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+  }
+  .area-table :global(.col-sales .thin-tag) {
+    margin-left: var(--sp-2);
+  }
+  .after {
+    display: grid;
+    gap: var(--sp-4);
+    margin-top: var(--sp-6);
+  }
+  @media (max-width: 640px) {
+    .list-page {
+      padding-top: var(--sp-5);
+    }
+    .lead {
+      font-size: var(--fs-md);
+    }
+    .area-table :global(.col-sales) {
+      display: none;
+    }
+    .area-table :global(.row-sub) {
+      display: block;
+    }
+    .area-table :global(th),
+    .area-table :global(td) {
+      padding: var(--sp-3);
+      font-size: var(--fs-sm);
+    }
+    .area-table :global(.col-price) {
+      width: 44%;
+    }
+    .group-head h2 {
+      font-size: var(--fs-lg);
+    }
+  }
+</style>

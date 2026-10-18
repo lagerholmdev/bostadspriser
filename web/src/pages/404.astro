@@ -1,0 +1,136 @@
+---
+/** Sidan finns inte. Hjälp vidare till ett område eller kartan. */
+import Base from "../layouts/Base.astro";
+import { areasUrl, areaUrl, mapUrl } from "../components/common/links";
+import { rankByPrice } from "../lib/data";
+
+const popular = ["sodermalm", "kungsholmen", "hagersten-liljeholmen", "nacka", "solna"];
+const known = new Set(rankByPrice("apartment", "m3").map((a) => a.slug));
+const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slug) && known.has(a.slug));
+---
+
+<Base title="Sidan finns inte | Stockholms prislandskap" description="Sidan du letade efter finns inte." noindex>
+  <div class="wrap nf">
+    <p class="eyebrow">Fel 404</p>
+    <h1>Sidan finns inte</h1>
+    <p class="lead">
+      Adressen kan vara felstavad, eller så har sidan flyttat. Områdessidorna ligger under
+      <code>/omrade/</code> och har namnet utan å, ä och ö, till exempel <a href={areaUrl("sodermalm")}>/omrade/sodermalm/</a>.
+    </p>
+    <form class="nf-search" action={areasUrl()} method="get" role="search">
+      <label for="nf-q">Sök område</label>
+      <div class="nf-row">
+        <input id="nf-q" name="q" type="search" placeholder="Till exempel Hägersten eller Nacka" autocomplete="off" />
+        <button class="btn btn-primary" type="submit">Sök</button>
+      </div>
+    </form>
+    <div class="nf-links">
+      <a class="btn" href={mapUrl()}>Till kartan</a>
+      <a class="btn" href={areasUrl()}>Alla 37 områden</a>
+    </div>
+    {
+      list.length > 0 && (
+        <section class="nf-pop" aria-labelledby="nf-pop-title">
+          <h2 id="nf-pop-title">Områden många tittar på</h2>
+          <ul>
+            {list.map((a) => (
+              <li>
+                <a href={areaUrl(a.slug)}>Bostadspriser {a.name}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .nf {
+    padding-top: var(--sp-8);
+    display: grid;
+    gap: var(--sp-4);
+    max-width: calc(60ch + var(--gutter) + var(--gutter-r));
+    margin-left: max(0px, calc((100% - var(--content-w)) / 2));
+  }
+  h1 {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+  }
+  .lead {
+    font-size: var(--fs-lg);
+    color: var(--c-ink-2);
+    line-height: 1.45;
+  }
+  code {
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+  .nf-search {
+    display: grid;
+    gap: var(--sp-1);
+    margin-top: var(--sp-3);
+  }
+  .nf-search label {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink-2);
+  }
+  .nf-row {
+    display: flex;
+    gap: var(--sp-2);
+  }
+  .nf-row input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    color: var(--c-ink);
+  }
+  .nf-row input:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 0;
+    border-color: var(--c-accent);
+  }
+  .nf-row .btn {
+    min-height: 44px;
+  }
+  .nf-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .nf-links .btn {
+    min-height: 44px;
+  }
+  .nf-pop {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+  }
+  .nf-pop h2 {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    margin-bottom: var(--sp-2);
+  }
+  .nf-pop ul {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+  .nf-pop li {
+    padding-block: 4px;
+  }
+  @media (max-width: 640px) {
+    .nf {
+      padding-top: var(--sp-6);
+    }
+    .lead {
+      font-size: var(--fs-md);
+    }
+  }
+</style>

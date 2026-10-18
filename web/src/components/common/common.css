@@ -148,3 +148,14 @@
   margin-left: 0.4em;
   font-size: var(--fs-sm);
 }
+
+/* Ram runt tabeller som behöver en klistrig rubrikrad (overflow: clip skapar ingen skrollyta). */
+.table-clip {
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  overflow: clip;
+  background: var(--c-surface);
+}
+.table-clip .data-table tr:last-child > * {
+  border-bottom: 0;
+}

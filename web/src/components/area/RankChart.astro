@@ -25,18 +25,25 @@ const named = new Set([0, list.length - 1, myIndex]);
 
 <div class="rank">
   <div class="rank-plot" aria-hidden="true">
-    <div class="rank-county" style={`left:${pct(county)}`}>
-      <span>Länets snitt</span>
+    <div class="rank-axis">
+      <span />
+      <div class="rank-track">
+        <span class="rank-county-label" style={`left:${pct(county)}`}>Länets snitt {sqm(county)}</span>
+      </div>
     </div>
     {
       list.map((a, i) => (
         <div class:list={["rank-row", { me: a.slug === area.slug, named: named.has(i) }]}>
-          <div class="rank-bar" style={`width:${pct(price(a))}`} />
-          {named.has(i) && (
-            <span class="rank-label" style={price(a) / max > 0.6 ? `right:calc(100% - ${pct(price(a))} + 8px)` : `left:calc(${pct(price(a))} + 8px)`}>
-              {a.name} <span class="rank-val">{sqm(price(a))}</span>
-            </span>
-          )}
+          <span class="rank-name">{named.has(i) ? a.name : ""}</span>
+          <div class="rank-track">
+            <div class="rank-bar" style={`width:${pct(price(a))}`} />
+            {named.has(i) && (
+              <span class="rank-val" style={`left:calc(${pct(price(a))} + 6px)`}>
+                {sqm(price(a))}
+              </span>
+            )}
+            <span class="rank-county" style={`left:${pct(county)}`} />
+          </div>
         </div>
       ))
     }
@@ -64,64 +71,85 @@ const named = new Set([0, list.length - 1, myIndex]);
   .rank {
     display: grid;
     gap: var(--sp-4);
+    max-width: 760px;
   }
   .rank-plot {
-    position: relative;
+    --name-w: 11rem;
     display: grid;
-    gap: 3px;
-    padding-top: 26px;
+  }
+  .rank-row,
+  .rank-axis {
+    display: grid;
+    grid-template-columns: var(--name-w) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-3);
+  }
+  .rank-axis {
+    height: 22px;
+  }
+  .rank-track {
+    position: relative;
+    height: 100%;
+    margin-right: 7.5rem;
   }
   .rank-row {
-    position: relative;
-    height: 7px;
+    height: 9px;
   }
   .rank-row.named {
-    height: 7px;
+    height: 26px;
   }
   .rank-bar {
-    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 1px;
+    bottom: 1px;
     background: var(--c-line-strong);
     border-radius: 0 2px 2px 0;
   }
+  .rank-row.named .rank-bar {
+    top: 7px;
+    bottom: 7px;
+  }
   .rank-row.me .rank-bar {
+    top: 5px;
+    bottom: 5px;
     background: var(--c-accent);
   }
-  .rank-row.me {
-    height: 11px;
-    margin-block: 4px;
+  .rank-name {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-2);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .rank-label {
+  .rank-row.me .rank-name {
+    font-weight: 700;
+    color: var(--c-accent);
+  }
+  .rank-val {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     font-size: var(--fs-xs);
     color: var(--c-ink-2);
     white-space: nowrap;
-    line-height: 1;
-    background: var(--c-page);
-    padding: 1px 2px;
   }
-  .rank-row.me .rank-label {
+  .rank-row.me .rank-val {
     font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--c-accent);
-  }
-  .rank-val {
-    font-weight: 400;
-    color: var(--c-ink-2);
+    font-weight: 600;
+    color: var(--c-ink);
   }
   .rank-county {
     position: absolute;
     top: 0;
     bottom: 0;
     border-left: 1px dashed var(--c-ink-3);
-    z-index: 1;
-    pointer-events: none;
   }
-  .rank-county span {
+  .rank-county-label {
     position: absolute;
-    top: 0;
-    left: 6px;
+    bottom: 4px;
+    transform: translateX(-50%);
     font-size: var(--fs-xs);
     color: var(--c-ink-3);
     white-space: nowrap;
@@ -149,5 +177,19 @@ const named = new Set([0, list.length - 1, myIndex]);
   .rank-list li span {
     color: var(--c-ink-3);
     margin-left: var(--sp-2);
+  }
+  @media (max-width: 560px) {
+    .rank-plot {
+      --name-w: 7.5rem;
+    }
+    .rank-name {
+      font-size: var(--fs-xs);
+    }
+    .rank-track {
+      margin-right: 6rem;
+    }
+    .rank-row.me .rank-val {
+      font-size: var(--fs-xs);
+    }
   }
 </style>
