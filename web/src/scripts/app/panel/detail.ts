@@ -1,12 +1,12 @@
 /** Områdesdetaljen i panelen: nyckeltal, fakta och vägar vidare. */
 import { budgetStatus, estimatedCost, affordableSize } from "../../../lib/budget";
 import { countyStat, isThin, similarNeighbours, stat } from "../../../lib/data";
-import { MISSING_TEXT, change, inArea, mkr, money, number, ordinal, relative } from "../../../lib/format";
+import { MISSING_TEXT, change, mkr, money, number, ordinal, relative } from "../../../lib/format";
 import type { Area, MissingReason, Period, Stat } from "../../../lib/types";
 import type { AppState } from "../../../lib/url";
 import { html, attr, type Html } from "../html";
 import { rankOf } from "../model";
-import { CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, months, PERIOD_SHORT } from "./text";
+import { CHANGE_LABEL, CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, months, PERIOD_SHORT } from "./text";
 
 export const KIND_LABEL = {
   district: "Stadsdelsområde i Stockholms stad",
@@ -44,7 +44,7 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
   const changeOther = stat(area, housing, other)?.change ?? null;
   const changeFact = (p: Period, v: number | null) =>
     fact(
-      `Förändring, ${PERIOD_SHORT[p].toLowerCase()}`,
+      CHANGE_LABEL[p],
       v == null ? missingText(stat(area, housing, p), "change") : change(v),
       COMPARED_TO[p],
     );
@@ -74,8 +74,8 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
           st?.sales == null ? missingText(st, "sales") : number(st.sales),
           thin && st?.sales != null ? "få affärer" : undefined,
         )}
-        ${changeFact(period, changeNow)}
-        ${changeFact(other, changeOther)}
+        ${changeFact("m3", period === "m3" ? changeNow : changeOther)}
+        ${changeFact("m12", period === "m12" ? changeNow : changeOther)}
         ${fact(
           "Plats i länet",
           rank ? `${rank.rank === 1 ? "Dyrast" : `${ordinal(rank.rank)} dyrast`} av ${rank.total}` : "Saknas",
@@ -99,7 +99,6 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
             </ul>
           </div>`
         : ""}
-      <p class="note">Läs mer om priserna ${inArea(area.slug, area.name)}, prisutvecklingen och grannområdena på områdessidan.</p>
     </article>`;
 }
 

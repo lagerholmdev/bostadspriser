@@ -1,0 +1,13 @@
+---
+/** Kartytan. MapLibre fylls i av scripts/app/map.ts; förklaringen renderas redan vid bygget. */
+import { mapLegend } from "../../scripts/app/panel/legend";
+---
+
+<div class="map-wrap" id="map-wrap">
+  <div id="map" class="map" role="region" aria-label="Karta över områdena. Allt som visas på kartan finns också i listan."></div>
+  <div class="map-labels" id="map-labels" aria-hidden="true"></div>
+  <div class="map-tooltip" id="map-tooltip" hidden></div>
+  <div class="map-legend" data-slot="map-legend" aria-hidden="true" set:html={mapLegend("pris").value} />
+  <p class="map-message" id="map-message" hidden></p>
+  <noscript><p class="map-message">Kartan behöver JavaScript. Alla siffror finns i listan.</p></noscript>
+</div>

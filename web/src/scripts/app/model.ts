@@ -154,8 +154,16 @@ export interface ChangeModel {
   missing: Entry[];
 }
 
+/**
+ * Båda förändringarna räknas av Mäklarstatistik på de senaste tre månaderna (m12 = mot samma
+ * månader året innan). Antal affärer och osäkerhet tas därför alltid från tremånadersperioden.
+ */
 export function changeModel(housing: Housing, period: Period, top = 5): ChangeModel {
-  const list = entries(housing, period);
+  const base = new Map(entries(housing, "m3").map((e) => [e.slug, e]));
+  const list = entries(housing, period).map((e) => {
+    const b = base.get(e.slug);
+    return b ? { ...e, stat: { ...e.stat, sales: b.stat.sales }, thin: b.thin } : e;
+  });
   const withValue = list.filter((e) => e.stat.change != null);
   const all = [...withValue].sort((a, b) => b.stat.change! - a.stat.change! || collator.compare(a.name, b.name));
   const rounded = (e: Entry) => Math.round(e.stat.change! * 10) / 10;
@@ -207,7 +215,9 @@ export function mapPaint(s: Pick<AppState, "view" | "housing" | "period" | "budg
     const st = stat(a, s.housing, s.period);
     color[a.slug] = areaColor(s.view, st, s.budget, s.sqm);
     const hasValue = s.view === "forandring" ? st?.change != null : st?.pricePerSqm != null;
-    opacity[a.slug] = !hasValue ? 0.5 : isThin(st, s.period) ? THIN_OPACITY : FILL_OPACITY;
+    // Förändringen bygger alltid på de senaste tre månaderna, så osäkerheten gör det också.
+    const thin = s.view === "forandring" ? isThin(stat(a, s.housing, "m3"), "m3") : isThin(st, s.period);
+    opacity[a.slug] = !hasValue ? 0.5 : thin ? THIN_OPACITY : FILL_OPACITY;
     price[a.slug] = st?.pricePerSqm ?? 0;
   }
   return { color, opacity, price };

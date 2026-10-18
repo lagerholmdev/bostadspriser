@@ -1,0 +1,80 @@
+---
+/** Reglagen i "Var har jag råd?": skjutreglage med synligt värde och plus/minus-knappar. */
+import { BUDGET_RANGE, SIZE_RANGE, typicalRooms } from "../../lib/budget";
+import { mkr } from "../../lib/format";
+
+const b = BUDGET_RANGE;
+const z = SIZE_RANGE;
+const controls = [
+  {
+    id: "budget",
+    label: "Budget",
+    out: mkr(b.default),
+    hint: "Vad du kan lägga på bostaden",
+    min: b.min / 1e6,
+    max: b.max / 1e6,
+    step: b.step / 1e6,
+    value: b.default / 1e6,
+    ends: [mkr(b.min), mkr(b.max)],
+    less: "Minska budgeten med 250 000 kr",
+    more: "Öka budgeten med 250 000 kr",
+  },
+  {
+    id: "size",
+    label: "Boarea",
+    out: `${z.default} kvm`,
+    hint: `ungefär ${typicalRooms(z.default)}`,
+    min: z.min,
+    max: z.max,
+    step: z.step,
+    value: z.default,
+    ends: [`${z.min} kvm`, `${z.max} kvm`],
+    less: "Minska boarean med 5 kvm",
+    more: "Öka boarean med 5 kvm",
+  },
+];
+---
+
+<div class="controls">
+  {
+    controls.map((c) => (
+      <div class="control">
+        <div class="control-head">
+          <label for={`${c.id}-range`}>{c.label}</label>
+          <output id={`${c.id}-out`} for={`${c.id}-range`}>
+            {c.out}
+          </output>
+        </div>
+        <div class="control-row">
+          <button type="button" class="step" data-action="step" data-control={c.id} data-dir="-1" aria-label={c.less}>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+          <input
+            type="range"
+            id={`${c.id}-range`}
+            min={c.min}
+            max={c.max}
+            step={c.step}
+            value={c.value}
+            aria-describedby={`${c.id}-hint`}
+            aria-valuetext={c.out}
+            style={`--p:${((c.value - c.min) / (c.max - c.min)) * 100}%`}
+          />
+          <button type="button" class="step" data-action="step" data-control={c.id} data-dir="1" aria-label={c.more}>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <p class="control-foot">
+          <span id={`${c.id}-hint`}>{c.hint}</span>
+          <span class="control-ends" aria-hidden="true">
+            {c.ends[0]}–{c.ends[1]}
+          </span>
+        </p>
+      </div>
+    ))
+  }
+</div>

@@ -13,7 +13,7 @@ import {
   type Entry,
   type PriceModel,
 } from "../model";
-import { CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, months, PERIOD_PHRASE, salesText, thinExplainer } from "./text";
+import { CITY_HOUSE_NOTE, changeBasis, HOUSING_MANY, months, PERIOD_PHRASE, salesText, thinExplainer } from "./text";
 
 /** En klickbar rad. Raden för Stockholms stad (villor) har inget eget område och är inte klickbar. */
 function row(e: Entry, inner: Html, extraClass = ""): Html {
@@ -66,9 +66,10 @@ export function budgetMax(m: BudgetModel): Html {
 
 export function budgetHeadline(m: BudgetModel, budget: number, sqm: number): string {
   const n = m.ok.length;
-  if (n === 0) return `${mkr(budget)} räcker inte till ${sqm} kvm i något område`;
-  if (n === m.total) return `${mkr(budget)} räcker till ${sqm} kvm i alla ${m.total} områden`;
-  return `${mkr(budget)} räcker till ${sqm} kvm i ${n} av ${m.total} områden`;
+  const size = `${sqm}\u00a0kvm`;
+  if (n === 0) return `${mkr(budget)} räcker inte till ${size} i något område`;
+  if (n === m.total) return `${mkr(budget)} räcker till ${size} i alla ${m.total}\u00a0områden`;
+  return `${mkr(budget)} räcker till ${size} i ${n}\u00a0av ${m.total}\u00a0områden`;
 }
 
 function budgetRow(e: BudgetEntry, sqm: number): Html {
@@ -124,16 +125,18 @@ export function budgetResults(m: BudgetModel, budget: number, sqm: number, housi
 /* ---------- Förändring ---------- */
 
 export function changeSummary(m: ChangeModel, housing: Housing, period: Period): Html {
+  const span = period === "m12" ? "på ett år" : "på tre månader";
   if (m.county == null) {
-    return html`<p class="summary">Förändringen för länet saknas ${PERIOD_PHRASE[period]}.</p>`;
+    return html`<p class="summary">Förändringen ${span} saknas för länet.</p>`;
   }
   const dir = changeWord(m.county);
   const what = HOUSING_MANY[housing];
+  const pct = `${Math.abs(m.county).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}\u00a0%`;
   const lead =
     dir === "oförändrat"
-      ? html`Priset på ${what} i länet är i stort sett ${strong("oförändrat")} ${COMPARED_TO[period]}.`
-      : html`Priset på ${what} i länet har gått ${dir} ${strong(change(m.county))} ${COMPARED_TO[period]}.`;
-  return html`<p class="summary">${lead} ${m.countUp} områden har gått upp och ${m.countDown} ner.</p>`;
+      ? html`Priset på ${what} i länet är i stort sett ${strong("oförändrat")} ${span}`
+      : html`Priset på ${what} i länet har gått ${dir} ${strong(pct)} ${span}`;
+  return html`<p class="summary">${lead} (${changeBasis(period)}). ${m.countUp} områden har gått upp och ${m.countDown} ner.</p>`;
 }
 
 function changeRow(e: Entry): Html {
@@ -148,7 +151,7 @@ function changeRow(e: Entry): Html {
   );
 }
 
-export function changeLists(m: ChangeModel, housing: Housing, period: Period): Html {
+export function changeLists(m: ChangeModel, housing: Housing): Html {
   return html`
     <section class="group" aria-labelledby="g-up">
       <h3 class="group-title" id="g-up">Ökat mest</h3>
@@ -166,6 +169,6 @@ export function changeLists(m: ChangeModel, housing: Housing, period: Period): H
       ? html`<p class="note">Förändring saknas för ${m.missing.map((e) => e.name).join(", ")}, för få affärer.</p>`
       : ""}
     ${housing === "house" ? html`<p class="note">${CITY_HOUSE_NOTE}</p>` : ""}
-    <p class="note">Små områden svänger mer av en slump, eftersom några få affärer kan flytta snittet. ${thinExplainer(period)}</p>`;
+    <p class="note">Små områden svänger mer av en slump, eftersom några få affärer kan flytta snittet. Antalet affärer gäller de senaste tre månaderna, som förändringen bygger på. ${thinExplainer("m3")}</p>`;
 }
 

@@ -51,7 +51,7 @@ export function initSearch(el: SearchElements, onPick: (slug: string) => void): 
           .map(
             (h, i) => html`<li role="option" id="${optionId(i)}" data-slug="${h.area.slug}" aria-selected="false">
               <span class="opt-name">${h.area.name}</span>
-              <span class="opt-meta">${h.via ? `${h.via} ligger här · ` : ""}${KIND_LABEL[h.area.kind]}</span>
+              <span class="opt-meta">${h.via ? `${h.via} ligger här` : KIND_LABEL[h.area.kind]}</span>
             </li>`.value,
           )
           .join("")
