@@ -1,5 +1,5 @@
 /** Liten etikett som följer muspekaren över kartan (bara med mus, inte på pekskärm). */
-import type { Html } from "./html";
+import type { Html } from "../../lib/html";
 
 export class Tooltip {
   private current: string | null = null;

@@ -4,7 +4,7 @@ import { countyStat, isThin, similarNeighbours, stat } from "../../../lib/data";
 import { MISSING_TEXT, change, mkr, money, number, ordinal, relative } from "../../../lib/format";
 import type { Area, MissingReason, Period, Stat } from "../../../lib/types";
 import type { AppState } from "../../../lib/url";
-import { html, attr, type Html } from "../html";
+import { html, attr, type Html } from "../../../lib/html";
 import { rankOf } from "../model";
 import { CHANGE_LABEL, CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, months, PERIOD_SHORT } from "./text";
 

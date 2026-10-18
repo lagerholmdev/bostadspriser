@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { LayerSpecification, StyleSpecification } from "@maplibre/maplibre-gl-style-spec";
 import { DEFAULT_STATE } from "../../lib/url";
 import { addTo, compareHref, removeFrom } from "./compare";
-import { attr, html, raw } from "./html";
+import { attr, html, raw } from "../../lib/html";
 import { composeStyle, firstSymbolIndex, LAYER, matchBySlug, PLACE_LABEL_MINZOOM, waterIndex } from "./mapstyle";
 import { mapPaint } from "./model";
 import { search } from "./search-index";

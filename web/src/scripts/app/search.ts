@@ -2,7 +2,7 @@
  * Sökrutan, enligt ARIA:s mönster för kombinationsruta med lista:
  * pil upp/ner flyttar, Enter väljer, Escape stänger (och tömmer vid andra tryck).
  */
-import { html } from "./html";
+import { html } from "../../lib/html";
 import { KIND_LABEL } from "./panel/detail";
 import { search, type SearchHit } from "./search-index";
 

@@ -13,9 +13,9 @@
   --c-sunken: #eaece7; /* inaktiva fält, spår */
   --c-ink: #1a1f1c; /* brödtext */
   --c-ink-2: #4d5650; /* sekundär text */
-  --c-ink-3: #737c76; /* hjälptext, etiketter (4.5:1 mot vitt) */
+  --c-ink-3: #5f6762; /* hjälptext, etiketter (5,8:1 mot vitt, 5,3:1 mot sidan) */
   --c-line: #dde0da; /* avdelare */
-  --c-line-strong: #c4c9c2; /* fältkanter */
+  --c-line-strong: #858c87; /* kanter på fält och reglage (3,4:1 mot vitt) */
 
   /* Accent: interaktion, val, fokus */
   --c-accent: #1f6f5c;
@@ -24,7 +24,7 @@
   --c-on-accent: #ffffff;
 
   /* Prisskala, billigt -> dyrt (6 steg) */
-  --c-price-1: #f3e7c4;
+  --c-price-1: #efdba6;
   --c-price-2: #ecc884;
   --c-price-3: #dda052;
   --c-price-4: #c4713a;
@@ -33,13 +33,13 @@
 
   /* Förändring: ner (blå) -> oförändrat -> upp (rost) */
   --c-down: #3d6a9e;
-  --c-flat: #e7e8e3;
+  --c-flat: #d9d6cf;
   --c-up: #b0502a;
 
   /* Budget: räcker / nästan / räcker inte */
-  --c-ok: #2f8a6c;
+  --c-ok: #2e7f86;
   --c-near: #e3a948;
-  --c-no: #d4d7d1;
+  --c-no: #b9bdb6;
 
   /* Saknad data */
   --c-nodata: #e4e6e1;
@@ -70,7 +70,14 @@
   --radius-lg: 14px;
   --shadow: 0 1px 2px rgb(26 31 28 / 0.06), 0 4px 16px rgb(26 31 28 / 0.06);
   --header-h: 60px;
+  --tap: 40px; /* minsta klickyta; 44px på pekskärm */
   --content-w: 1080px;
   --gutter: max(16px, env(safe-area-inset-left, 0px));
   --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+
+@media (pointer: coarse), (max-width: 959px) {
+  :root {
+    --tap: 44px;
+  }
 }

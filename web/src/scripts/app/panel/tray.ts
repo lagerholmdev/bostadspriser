@@ -1,6 +1,6 @@
 /** Jämförelsebrickan längst ner i panelen. */
 import { getArea } from "../../../lib/data";
-import { html, type Html } from "../html";
+import { html, type Html } from "../../../lib/html";
 import { compareHref, MAX_COMPARE } from "../compare";
 
 export function tray(list: readonly string[], base: string): Html {

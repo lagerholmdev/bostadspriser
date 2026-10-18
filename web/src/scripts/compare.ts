@@ -8,7 +8,7 @@ import { bySlug, countyRatio, dataset, isThin, parseCompareParams, similarNeighb
 import { change, changeDirection, changeWord, MISSING_TEXT, money, number, pricier, relative } from "../lib/format";
 import { priceColor } from "../lib/scales";
 import type { Area, MissingReason, Stat } from "../lib/types";
-import { areaUrl, compareUrl } from "../components/common/links";
+import { areaUrl, compareUrl } from "../lib/links";
 
 const MAX = 3;
 const BUDGET = 5_000_000;

@@ -5,7 +5,7 @@ import { NEAR_MARGIN } from "../../../lib/budget";
 import { change, changeWord, mkr, money, number, sqm as fmtSqm } from "../../../lib/format";
 import { BUDGET_COLORS, changeColor, priceColor } from "../../../lib/scales";
 import type { Housing, Period } from "../../../lib/types";
-import { html, type Html } from "../html";
+import { html, type Html } from "../../../lib/html";
 import {
   type BudgetEntry,
   type BudgetModel,

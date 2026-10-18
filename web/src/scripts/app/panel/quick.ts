@@ -6,7 +6,7 @@ import { affordableSize, budgetStatus } from "../../../lib/budget";
 import { getArea, isThin, stat } from "../../../lib/data";
 import { change, sqm as fmtSqm } from "../../../lib/format";
 import type { AppState } from "../../../lib/url";
-import { html, type Html } from "../html";
+import { html, type Html } from "../../../lib/html";
 import { CHANGE_LABEL, salesText } from "./text";
 
 export interface Quick {

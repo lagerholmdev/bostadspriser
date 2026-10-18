@@ -3,16 +3,16 @@
  * men som hex här eftersom MapLibre-uttryck och SVG inte läser CSS-variabler.
  */
 
-export const PRICE_COLORS = ["#f3e7c4", "#ecc884", "#dda052", "#c4713a", "#9c4a2b", "#652a21"] as const;
+export const PRICE_COLORS = ["#efdba6", "#ecc884", "#dda052", "#c4713a", "#9c4a2b", "#652a21"] as const;
 
 /** Klassgränser i kr/kvm. Fasta, så kartan och förklaringen inte flyttar sig mellan månader. */
 export const PRICE_BREAKS = [35_000, 50_000, 65_000, 85_000, 110_000] as const;
 
-export const CHANGE_COLORS = { down: "#3d6a9e", flat: "#e7e8e3", up: "#b0502a" } as const;
+export const CHANGE_COLORS = { down: "#3d6a9e", flat: "#d9d6cf", up: "#b0502a" } as const;
 /** Förändring i procent där färgen når full styrka. */
 export const CHANGE_MAX = 10;
 
-export const BUDGET_COLORS = { ok: "#2f8a6c", near: "#e3a948", no: "#d4d7d1" } as const;
+export const BUDGET_COLORS = { ok: "#2e7f86", near: "#e3a948", no: "#b9bdb6" } as const;
 export const NODATA_COLOR = "#e4e6e1";
 
 export function priceColor(v: number | null | undefined): string {

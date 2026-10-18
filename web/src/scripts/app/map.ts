@@ -15,7 +15,7 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import geojsonUrl from "../../generated/areas.geojson?url";
 import type { StyleSpecification } from "@maplibre/maplibre-gl-style-spec";
 import { areas as ALL_AREAS } from "../../lib/data";
-import type { Html } from "./html";
+import type { Html } from "../../lib/html";
 import { AreaLabels } from "./labels";
 import { composeStyle, heightExpression, LAYER, matchBySlug, slugFilter } from "./mapstyle";
 import { unionBbox, type Paint } from "./model";

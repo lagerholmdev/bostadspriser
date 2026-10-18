@@ -2,7 +2,7 @@
 import { BUDGET_COLORS, CHANGE_MAX, PRICE_BREAKS, PRICE_COLORS, changeColor, priceLegend } from "../../../lib/scales";
 import { NEAR_MARGIN } from "../../../lib/budget";
 import type { View } from "../../../lib/url";
-import { html, type Html } from "../html";
+import { html, type Html } from "../../../lib/html";
 
 const sw = (color: string) => html`<span class="swatch" style="${`--c:${color}`}" aria-hidden="true"></span>`;
 
