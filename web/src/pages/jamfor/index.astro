@@ -251,6 +251,8 @@ const slots = [1, 2, 3];
   .suggest .btn {
     min-height: 44px;
     text-align: left;
+    padding-block: var(--sp-2);
+    line-height: 1.35;
   }
   .source {
     margin-top: var(--sp-6);
@@ -350,10 +352,21 @@ const slots = [1, 2, 3];
     #compare-table :global(th),
     #compare-table :global(td) {
       border-bottom: 0;
-      padding: var(--sp-2) var(--sp-3);
+      padding: var(--sp-2) var(--sp-2);
       text-align: left;
       font-size: var(--fs-sm);
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      min-width: 0;
+    }
+    #compare-table :global(tr > :first-child) {
+      padding-left: var(--sp-3);
+    }
+    #compare-table :global(.unit) {
+      display: block;
+      font-size: var(--fs-xs);
+      font-weight: 400;
+      color: var(--c-ink-3);
     }
     #compare-table :global(thead .label-col) {
       display: none;
@@ -370,7 +383,7 @@ const slots = [1, 2, 3];
       padding-block: var(--sp-3);
     }
     #compare-table :global(.col-head a) {
-      font-size: var(--fs-md);
+      font-size: var(--fs-sm);
     }
     #compare-table :global(tbody th) {
       grid-column: 1 / -1;

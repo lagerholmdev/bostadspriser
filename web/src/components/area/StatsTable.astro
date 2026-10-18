@@ -13,7 +13,7 @@ interface Props {
 }
 const { stats, caption, noun } = Astro.props;
 const periods: Period[] = ["m3", "m12"];
-const head: Record<Period, string> = { m3: "Senaste 3 mån", m12: "Senaste 12 mån" };
+const head: Record<Period, string> = { m3: "3 mån", m12: "12 mån" };
 const miss = (p: Period, f: "sales" | "pricePerSqm" | "meanPrice" | "change"): MissingReason | undefined =>
   stats[p].missing?.[f];
 const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "saknas");
@@ -28,7 +28,7 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
         {
           periods.map((p) => (
             <th scope="col">
-              {head[p]}
+              <span class="long">Senaste </span>{head[p]}
               <span class="per">{dataset.periods[p]}</span>
             </th>
           ))
@@ -95,6 +95,9 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
     margin-left: var(--sp-2);
   }
   @media (max-width: 480px) {
+    .long {
+      display: none;
+    }
     .stats-table th,
     .stats-table td {
       padding: var(--sp-3) var(--sp-3);

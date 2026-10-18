@@ -190,10 +190,10 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
             >
               {ap3.sales != null ? number(ap3.sales) : <span class="chg-none">{missingNote(ap3.missing?.sales)}</span>}
             </StatCard>
-            <StatCard label="Förändring 3 mån" note="mot de tre månaderna innan">
+            <StatCard label="Förändring 3 mån" note="mot de tre månaderna före">
               <ChangeValue value={ap3.change} missing={ap3.missing?.change} word />
             </StatCard>
-            <StatCard label="Förändring 12 mån" note="mot de tolv månaderna innan">
+            <StatCard label="Förändring 12 mån" note="mot samma månader året innan">
               <ChangeValue value={ap12?.change} missing={ap12?.missing?.change} word />
             </StatCard>
           </dl>

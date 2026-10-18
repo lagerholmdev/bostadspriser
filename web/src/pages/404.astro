@@ -2,7 +2,8 @@
 /** Sidan finns inte. Hjälp vidare till ett område eller kartan. */
 import Base from "../layouts/Base.astro";
 import { areasUrl, areaUrl, mapUrl } from "../components/common/links";
-import { rankByPrice } from "../lib/data";
+import { areas, rankByPrice } from "../lib/data";
+import { inArea } from "../lib/format";
 
 const popular = ["sodermalm", "kungsholmen", "hagersten-liljeholmen", "nacka", "solna"];
 const known = new Set(rankByPrice("apartment", "m3").map((a) => a.slug));
@@ -14,7 +15,7 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
     <p class="eyebrow">Fel 404</p>
     <h1>Sidan finns inte</h1>
     <p class="lead">
-      Adressen kan vara felstavad, eller så har sidan flyttat. Områdessidorna ligger under
+      Adressen kan vara felstavad, eller så har sidan flyttat. Områdessidorna ligger under{" "}
       <code>/omrade/</code> och har namnet utan å, ä och ö, till exempel <a href={areaUrl("sodermalm")}>/omrade/sodermalm/</a>.
     </p>
     <form class="nf-search" action={areasUrl()} method="get" role="search">
@@ -26,7 +27,7 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
     </form>
     <div class="nf-links">
       <a class="btn" href={mapUrl()}>Till kartan</a>
-      <a class="btn" href={areasUrl()}>Alla 37 områden</a>
+      <a class="btn" href={areasUrl()}>Alla {areas.length} områden</a>
     </div>
     {
       list.length > 0 && (
@@ -35,7 +36,7 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
           <ul>
             {list.map((a) => (
               <li>
-                <a href={areaUrl(a.slug)}>Bostadspriser {a.name}</a>
+                <a href={areaUrl(a.slug)}>Bostadspriser {inArea(a.slug, a.name)}</a>
               </li>
             ))}
           </ul>

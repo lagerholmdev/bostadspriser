@@ -96,7 +96,9 @@ Att köra den igen samma månad ändrar inget.
 ```
 
 `Stat` har samma form som i kontraktet nedan. `m3` och `m12` är de 3 respektive 12 senaste hela
-månaderna före publiceringsmånaden. Prisutvecklingen jämför med samma period ett år tidigare.
+månaderna före publiceringsmånaden. Prisutvecklingen (`change`) räknas i båda fallen på de senaste tre
+månaderna: `m3.change` mot de tre månaderna innan, `m12.change` mot samma tre månader året innan
+(Mäklarstatistiks metod, glidande tremånadersmedel).
 
 Schema 1 (svenska nycklar, före oktober 2026) finns inte kvar. Den enda filen migrerades med
 oförändrade siffror.

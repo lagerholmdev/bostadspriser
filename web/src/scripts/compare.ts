@@ -5,7 +5,7 @@
  */
 import { affordableSize } from "../lib/budget";
 import { bySlug, countyRatio, dataset, isThin, parseCompareParams, similarNeighbours, stat } from "../lib/data";
-import { change, changeDirection, changeWord, MISSING_TEXT, money, number, pricier, relative, sqm } from "../lib/format";
+import { change, changeDirection, changeWord, MISSING_TEXT, money, number, pricier, relative } from "../lib/format";
 import { priceColor } from "../lib/scales";
 import type { Area, MissingReason, Stat } from "../lib/types";
 import { areaUrl, compareUrl } from "../components/common/links";
@@ -25,6 +25,11 @@ function changeHtml(s: Stat | null | undefined): string {
   const dir = changeDirection(v);
   if (!dir) return missing(s?.missing?.change);
   return `<span class="chg chg-${dir}">${esc(change(v))}<span class="chg-word">${changeWord(v)}</span></span>`;
+}
+
+/** "116 680 kr/kvm" med enheten i ett eget element, så att den kan brytas snyggt på mobil. */
+function sqmHtml(v: number): string {
+  return `${esc(number(v))}<span class="unit">&nbsp;kr/kvm</span>`;
 }
 
 function names(list: Area[]): string {
@@ -48,7 +53,7 @@ function rows(list: Area[]): Row[] {
       cell: (a) => {
         const s = p3(a);
         if (s?.pricePerSqm == null) return missing(s?.missing?.pricePerSqm);
-        return `<span class="val-main${thin(a) ? " thin-value" : ""}"><span class="swatch" style="background:${priceColor(s.pricePerSqm)}"></span>${esc(sqm(s.pricePerSqm))}</span>`;
+        return `<span class="val-main${thin(a) ? " thin-value" : ""}"><span class="swatch" style="background:${priceColor(s.pricePerSqm)}"></span>${sqmHtml(s.pricePerSqm)}</span>`;
       },
     },
     {
@@ -90,7 +95,7 @@ function rows(list: Area[]): Row[] {
         if (!s) return missing("0");
         if (s.pricePerSqm == null) return missing(s.missing?.pricePerSqm);
         const note = a.houseScope === "city" ? '<span class="cell-sub">hela Stockholms stad</span>' : "";
-        return `${esc(sqm(s.pricePerSqm))}${note}`;
+        return `${sqmHtml(s.pricePerSqm)}${note}`;
       },
     },
     {
@@ -169,7 +174,7 @@ function init(): void {
       table!.innerHTML = tableHtml(list);
       const parts: string[] = [
         `Siffrorna gäller bostadsrätter sålda ${dataset.periods.m3} om inget annat anges.`,
-        "Förändringen jämför med perioden innan: tre månader mot de tre månaderna före, tolv månader mot de tolv före.",
+        "Förändringen gäller de senaste tre månaderna: 3 mån mot de tre månaderna före, 12 mån mot samma månader året innan.",
       ];
       if (list.some((a) => a.houseScope === "city"))
         parts.push("Villor redovisas bara för hela Stockholms stad, inte per stadsdelsområde.");

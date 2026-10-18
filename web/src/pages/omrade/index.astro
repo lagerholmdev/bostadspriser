@@ -102,7 +102,7 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     <div class="after">
       <PriceLegend title="Färgerna i staplarna, pris per kvm i kr" />
       <p class="fineprint">
-        Förändring är prisutvecklingen de senaste 12 månaderna jämfört med de 12 månaderna innan. Områden med få
+        Förändring är prisutvecklingen på ett år: de senaste tre månaderna jämfört med samma månader året innan. Områden med få
         affärer visas blekare, eftersom snittet där kan svänga mycket. Källa: <a href={dataset.source.url} rel="noopener"
           >{dataset.source.name}</a
         >.
@@ -231,6 +231,7 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
   }
   .group {
     margin-top: var(--sp-6);
+    max-width: 880px;
   }
   .group[hidden] {
     display: none;
