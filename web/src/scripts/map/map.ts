@@ -18,6 +18,13 @@ import { areas as ALL_AREAS } from "../../lib/data";
 import type { Html } from "../../lib/html";
 import { AreaLabels } from "./labels";
 import {
+  ghostIcons,
+  ghostImage,
+  GHOST_LAYER,
+  parseGhostImageId,
+  type LabelBox,
+} from "./basemap-labels";
+import {
   composeStyle,
   HATCH,
   hatchImage,
@@ -103,7 +110,7 @@ export class AreaMap {
     readonly basemap: boolean,
   ) {
     this.selected = opts.selected;
-    this.labels = new AreaLabels(map, opts.labels, ALL_AREAS);
+    this.labels = new AreaLabels(map, opts.labels, ALL_AREAS, (boxes) => this.reserve(boxes));
     this.labels.setSelected(this.selected);
     this.tooltip = new Tooltip(opts.tooltip, opts.wrap);
     this.addControls();
@@ -113,7 +120,11 @@ export class AreaMap {
 
   static async create(opts: AreaMapOptions): Promise<AreaMap> {
     const base = await opts.baseStyle;
-    const { style, basemap } = composeStyle(base, geojsonUrl, opts.paint);
+    const { style, basemap } = composeStyle(base, geojsonUrl, opts.paint, {
+      areas: ALL_AREAS,
+      // "Stockholm" står mitt i innerstaden, som redan har sina stadsdelsområden utskrivna.
+      hideNames: [...ALL_AREAS.map((a) => a.name), "Stockholm"],
+    });
     const selectedArea = opts.selected
       ? ALL_AREAS.find((a) => a.slug === opts.selected)
       : undefined;
@@ -140,6 +151,11 @@ export class AreaMap {
     // Rändermönstren ritas här i stället för att laddas som bilder.
     const ratio = window.devicePixelRatio || 1;
     map.setMissingStyleImageResolver((id) => {
+      const ghost = parseGhostImageId(id);
+      if (ghost) {
+        if (!map.hasImage(id)) map.addImage(id, ghostImage(ghost.width, ghost.height));
+        return;
+      }
       const kind = (Object.keys(HATCH) as HatchKind[]).find((k) => HATCH[k].id === id);
       if (kind && !map.hasImage(id))
         map.addImage(id, hatchImage(kind, ratio), { pixelRatio: Math.max(1, Math.round(ratio)) });
@@ -157,7 +173,19 @@ export class AreaMap {
       map.loaded() ? resolve() : map.once("load", () => resolve()),
     );
     instance.setSelected(opts.selected, false);
+    instance.ready = true;
+    instance.reserve(instance.pendingBoxes);
     return instance;
+  }
+
+  private ready = false;
+  private pendingBoxes: LabelBox[] = [];
+
+  /** Reservera platsen för våra synliga namn, så att baskartans etiketter inte ritas över dem. */
+  private reserve(boxes: LabelBox[]): void {
+    this.pendingBoxes = boxes;
+    if (!this.basemap || !this.ready || !this.map.getLayer(GHOST_LAYER)) return;
+    this.map.setLayoutProperty(GHOST_LAYER, "icon-image", ghostIcons(boxes));
   }
 
   private static warned = false;

@@ -3,9 +3,13 @@
  * (även i reservstilen) och använder sajtens eget typsnitt. Ett namn visas bara när området är
  * stort nog på skärmen och inte krockar med ett viktigare namn; det valda området går först.
  * Namn som skulle hamna under kartans knappar eller förklaring visas inte.
+ *
+ * Vilka namn som syns och hur stora de är rapporteras till `onLayout`, så att baskartans etiketter
+ * kan vika undan för dem (se basemap-labels.ts).
  */
 import type { Map as MlMap } from "maplibre-gl";
 import type { Area } from "../../lib/types";
+import type { LabelBox } from "./basemap-labels";
 
 interface Label {
   area: Area;
@@ -25,11 +29,13 @@ export class AreaLabels {
   private selected: string | null = null;
   private visible = true;
   private frame = 0;
+  private reported = "";
 
   constructor(
     private readonly map: MlMap,
     private readonly layer: HTMLElement,
     list: readonly Area[],
+    private readonly onLayout: (boxes: LabelBox[]) => void = () => {},
   ) {
     this.labels = list.map((area) => {
       const el = document.createElement("span");
@@ -65,6 +71,14 @@ export class AreaLabels {
     this.visible = v;
     this.layer.hidden = !v;
     if (v) this.schedule();
+    else this.report([]);
+  }
+
+  private report(boxes: LabelBox[]): void {
+    const key = boxes.map((b) => `${b.slug}:${b.w}x${b.h}`).join(",");
+    if (key === this.reported) return;
+    this.reported = key;
+    this.onLayout(boxes);
   }
 
   private measure(): void {
@@ -122,6 +136,7 @@ export class AreaLabels {
       return b.size - a.size;
     });
     const placed: Box[] = this.obstacles();
+    const shown: LabelBox[] = [];
     for (const { l, p, width } of items) {
       const isSel = l.area.slug === this.selected;
       const x0 = p.x - l.w / 2 - PAD;
@@ -134,9 +149,11 @@ export class AreaLabels {
       const show = inView && bigEnough && free;
       if (show) {
         placed.push([x0, y0, x1, y1]);
+        shown.push({ slug: l.area.slug, w: l.w + 2 * PAD, h: l.h + 2 * PAD });
         l.el.style.transform = `translate(${Math.round(p.x - l.w / 2)}px, ${Math.round(p.y - l.h / 2)}px)`;
       }
       l.el.classList.toggle("is-shown", show);
     }
+    this.report(shown);
   }
 }
