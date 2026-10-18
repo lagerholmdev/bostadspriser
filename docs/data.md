@@ -105,7 +105,7 @@ oförändrade siffror.
 
 ## Geometri: `data/geo/areas.geojson`
 
-Byggs av `python -m prislandskap geometry` (kräver `pip install -e "pipeline[geo]"`) och checkas in.
+Byggs av `python -m prislandskap geometry` (kräver `pip install -c requirements.lock -e ".[dev,geo]"` i `pipeline/`) och checkas in.
 Körs bara när indelningen ändras. Varje feature har egenskaperna:
 
 | Fält | Typ | Innehåll |
@@ -187,4 +187,12 @@ checkas inte in.
 | `pris.png`, `budget.png`, `forandring.png` | En bild per vy: dyrast område, hur många områden 5 mkr räcker i för 60 kvm, största prisökningen |
 | `<slug>.png` | Ett område: kr/kvm, jämfört med länets snitt, antal affärer och karta med grannarna |
 
-Färgerna och prisklasserna är desamma som i `web/src/lib/scales.ts` och finns i `palette.py`.
+Alla bilder har märket (tre gavlar, som `Logo.astro`) bredvid sajtnamnet. Färgerna, prisklasserna,
+förändringens fem steg och budgetens marginal läses från `design/scales.json`, samma fil som
+`web/src/lib/scales.ts` importerar, så bilderna och kartan visar samma färger.
+
+- **Få affärer:** färre än 60 sålda bostadsrätter på tre månader (samma gräns som `THIN_SALES.m3` i
+  `web/src/lib/data.ts`) ger raden "Få affärer, osäkert värde".
+- **Avlägsna kommuner:** har kommunen högst två grannar (som Nykvarn) visas ett vidare utsnitt med de
+  närmaste områdena utmärkta, så att man ser var den ligger.
+- **Förändring** visas i fem steg som på kartan (gränser ±1 och ±4 % på ett år).

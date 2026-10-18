@@ -27,8 +27,9 @@
 .app .map-wrap {
   order: -1;
   position: relative;
-  height: 52svh;
-  min-height: 300px;
+  height: 52vh;
+  height: 42svh;
+  min-height: 280px;
   background: var(--map-bg);
   overflow: hidden;
   border-bottom: 1px solid var(--c-line);
@@ -121,7 +122,7 @@
 }
 .app .peek-go {
   flex: none;
-  min-height: 44px;
+  min-height: var(--tap);
 }
 @media (min-width: 960px) {
   .app .peek {
@@ -225,9 +226,7 @@
   border-color: var(--c-ink-3);
 }
 .app #area-search:focus {
-  outline: none;
   border-color: var(--c-accent);
-  box-shadow: 0 0 0 3px var(--c-accent-soft);
 }
 .app .search-list {
   position: absolute;
@@ -259,6 +258,9 @@
 }
 .app .search-list [role="option"][aria-selected="true"] {
   background: var(--c-accent-soft);
+  box-shadow: inset 3px 0 0 var(--c-accent);
+  outline: 2px solid var(--c-accent);
+  outline-offset: -2px;
 }
 .app .opt-name {
   font-weight: 600;
@@ -355,6 +357,7 @@
 }
 .app .seg-options {
   display: inline-flex;
+  flex-wrap: wrap;
   padding: 3px;
   gap: 2px;
   background: var(--c-page);
@@ -365,17 +368,18 @@
   position: relative;
   display: inline-flex;
 }
+/* Radioknappen täcker även ramens luft, så att klickytan blir hela --tap hög. */
 .app .seg-option input {
   position: absolute;
   opacity: 0;
-  inset: 0;
+  inset: -4px -1px;
   margin: 0;
   cursor: pointer;
 }
-.app .seg-option span {
+.app .seg-face {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  min-height: calc(var(--tap) - 8px);
   padding: 0 var(--sp-3);
   border-radius: 7px;
   font-size: var(--fs-sm);
@@ -384,19 +388,23 @@
   white-space: nowrap;
   pointer-events: none;
 }
-.app .seg-option:hover span {
+.app .seg-short {
+  display: none;
+}
+.app .seg-option:hover .seg-face {
   color: var(--c-ink);
 }
-.app .seg-option input:checked + span {
+/* Valt läge: vit tumme med accentram (3:1 mot omgivningen), samma för alla segmenterade val. */
+.app .seg-option input:checked + .seg-face {
   background: var(--c-surface);
   color: var(--c-accent);
   box-shadow:
-    0 0 0 1px var(--c-line-strong),
+    0 0 0 2px var(--c-accent),
     0 1px 2px rgb(26 31 28 / 0.08);
 }
-.app .seg-option input:focus-visible + span {
+.app .seg-option input:focus-visible + .seg-face {
   outline: 2px solid var(--c-accent);
-  outline-offset: 1px;
+  outline-offset: 3px;
 }
 .app .filter-note {
   font-size: var(--fs-sm);
@@ -449,33 +457,19 @@
   align-items: center;
   gap: var(--sp-2);
 }
-.app .legend-price {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--sp-2) var(--sp-3);
+/* Färgrampen i panelen behövs bara på mobilen; på datorn står kartans förklaring alltid bredvid. */
+.app .legend-ramp {
+  display: none;
+}
+@media (max-width: 959px) {
+  .app .legend-ramp {
+    display: block;
+  }
 }
 .app .legend-budget {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2) var(--sp-4);
-}
-.app .legend-change {
-  max-width: 260px;
-}
-.app .legend-steps {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
-}
-.app .legend-steps .swatch {
-  width: auto;
-  height: 10px;
-  border-radius: 2px;
-}
-.app .legend-ticks {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
 }
 
 .app .list-head {
@@ -491,8 +485,7 @@
   font-size: var(--fs-md);
   font-weight: 700;
 }
-.app .seg-small .seg-option span {
-  min-height: 30px;
+.app .seg-small .seg-face {
   padding: 0 var(--sp-2);
   font-size: var(--fs-xs);
 }
@@ -554,11 +547,13 @@
   font-weight: 400;
   color: var(--c-ink-3);
 }
+/* Vitt spår med tunn kant, och en mörk kant på stapeln, så att även den ljusaste prisfärgen syns. */
 .app .row-bar {
   grid-area: bar;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--c-sunken);
+  height: 8px;
+  border-radius: 4px;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-line);
   overflow: hidden;
 }
 .app .row-bar > span {
@@ -566,7 +561,8 @@
   height: 100%;
   width: var(--w);
   background: var(--c);
-  border-radius: 3px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.18);
 }
 .app .row-meta {
   grid-area: meta;
@@ -575,11 +571,18 @@
   text-align: right;
   white-space: nowrap;
 }
-.app .row.is-thin .row-name,
-.app .row.is-thin .row-value,
-.app .row.is-thin .row-bar,
+/* Få affärer: texten står kvar i full kontrast; bara färgen bleknar och får kartans ränder. */
+.app .row.is-thin .row-name {
+  color: var(--c-ink-2);
+}
+.app .row.is-thin .row-bar > span,
 .app .row.is-thin .swatch {
-  opacity: 0.55;
+  opacity: 0.6;
+  background-image: repeating-linear-gradient(135deg, rgb(26 31 28 / 0.35) 0 1px, transparent 1px 4px);
+}
+.app .row-value.is-missing {
+  font-weight: 400;
+  color: var(--c-ink-2);
 }
 
 .app .row-budget {
@@ -634,6 +637,21 @@
   font-size: var(--fs-md);
   font-weight: 700;
   margin: 0 0 var(--sp-1);
+}
+.app .group-hint {
+  margin: calc(var(--sp-1) * -1) 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  color: var(--c-ink-3);
+}
+.app .budget-best {
+  margin-top: var(--sp-2);
+  color: var(--c-ink-2);
+}
+.app .budget-best:empty {
+  display: none;
+}
+.app .budget-best strong {
+  color: var(--c-ink);
 }
 .app .group-sub {
   font-weight: 400;
@@ -734,7 +752,7 @@
 }
 .app .control-row {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  grid-template-columns: var(--tap) minmax(0, 1fr) var(--tap);
   align-items: center;
   gap: var(--sp-3);
   margin-top: var(--sp-1);
@@ -742,8 +760,8 @@
 .app .step {
   display: inline-grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: var(--tap);
+  height: var(--tap);
   padding: 0;
   border: 1px solid var(--c-line-strong);
   border-radius: var(--radius);
@@ -751,10 +769,10 @@
   color: var(--c-ink);
   cursor: pointer;
 }
-.app .step:hover:not(:disabled) {
+.app .step:hover:not([aria-disabled="true"]) {
   border-color: var(--c-ink-3);
 }
-.app .step:disabled {
+.app .step[aria-disabled="true"] {
   opacity: 0.4;
   cursor: default;
 }
@@ -834,7 +852,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0 var(--sp-2);
   margin-left: calc(var(--sp-2) * -1);
   border: 0;
@@ -969,12 +987,36 @@
   margin-top: var(--sp-5);
 }
 .app .actions .btn {
-  min-height: 44px;
+  min-height: var(--tap);
 }
-.app .actions .btn[aria-pressed="true"] {
+.app .actions .btn.is-on {
   border-color: var(--c-accent);
   color: var(--c-accent);
   background: var(--c-accent-soft);
+}
+.app .btn-quiet-plain {
+  border-color: transparent;
+  background: transparent;
+  color: var(--c-accent);
+}
+.app .btn-quiet-plain:hover {
+  background: var(--c-accent-soft);
+  border-color: transparent;
+  color: var(--c-accent-hover);
+}
+.app .copy-status {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-accent);
+}
+.app .copy-status:empty {
+  display: none;
+}
+.app .change-sentence {
+  margin-top: var(--sp-3);
+  color: var(--c-ink-2);
+  max-width: 60ch;
 }
 .app .neighbours {
   margin-top: var(--sp-5);
@@ -992,7 +1034,7 @@
   gap: var(--sp-2);
 }
 .app .link-btn {
-  min-height: 36px;
+  min-height: var(--tap);
   padding: 0;
   border: 0;
   background: none;
@@ -1021,7 +1063,27 @@
   color: var(--c-ink-3);
 }
 .app .panel-foot a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
   margin-left: var(--sp-1);
+}
+/* "Till filtren": syns när den får fokus från tangentbordet, efter den långa listan. */
+.app .to-filters {
+  position: absolute;
+  left: -9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  margin-top: var(--sp-3);
+  padding: 0 var(--sp-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.app .to-filters:focus {
+  position: static;
 }
 
 .app .tray {
@@ -1042,38 +1104,49 @@
 }
 .app .tray-inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-2) var(--sp-3);
 }
-/* Valda områden på en rad som går att svepa i sidled; knappen står kvar till höger. */
+/* Valda områden radbryts; inget göms bakom sidledsscroll. */
 .app .chips {
   display: flex;
+  flex-wrap: wrap;
   flex: 0 1 auto;
   min-width: 0;
   gap: var(--sp-2);
   list-style: none;
   margin: 0;
   padding: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.app .chips::-webkit-scrollbar {
-  display: none;
 }
 .app .tray-go {
   flex: none;
   margin-left: auto;
+}
+@media (max-width: 479px) {
+  .app .tray-go {
+    flex: 1 0 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+}
+/* Brickan ligger fast längst ner på mobilen: håll fokuserade element ovanför den. */
+@media (max-width: 959px) {
+  html:has(.app .tray:not([hidden])) {
+    scroll-padding-bottom: 88px;
+  }
 }
 .app .tray-hint {
   flex: 1 1 10rem;
 }
 .app .chip {
   flex: none;
+  max-width: 100%;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  min-height: 36px;
+  min-height: var(--tap);
   padding-left: var(--sp-3);
   background: var(--c-page);
   border: 1px solid var(--c-line);
@@ -1084,8 +1157,8 @@
 .app .chip-x {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--tap);
+  height: var(--tap);
   padding: 0;
   border: 0;
   background: none;
@@ -1161,6 +1234,42 @@
 .app .ml-ticks > span {
   white-space: nowrap;
 }
+.app .ml-notes {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--c-line);
+  display: grid;
+  gap: 3px;
+  max-width: 15rem;
+}
+.app .ml-notes li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app .ml-notes .ml-3d {
+  display: none;
+}
+.app .map-wrap.is-3d .ml-notes .ml-3d {
+  display: flex;
+}
+/* I 3D syns inte ränderna, så deras förklaring döljs. */
+.app .map-wrap.is-3d .ml-notes li:has(.hatch) {
+  display: none;
+}
+.app .hatch {
+  flex: none;
+  width: 14px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--c-price-3) repeating-linear-gradient(135deg, rgb(26 31 28 / 0.45) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.08);
+}
+.app .hatch-nodata {
+  background-color: var(--c-nodata);
+  background-image: repeating-linear-gradient(135deg, rgb(95 103 98 / 0.6) 0 1px, transparent 1px 4px);
+}
 .app .ml-items {
   display: flex;
   gap: var(--sp-3);
@@ -1190,11 +1299,16 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--c-ink);
+  /* Skarp vit kant på 1,25 px åt alla håll, utan oskärpa. */
   text-shadow:
-    0 0 2px #fff,
-    0 0 2px #fff,
-    0 0 4px #fff,
-    0 0 6px rgb(255 255 255 / 0.9);
+    1.25px 0 0 #fff,
+    -1.25px 0 0 #fff,
+    0 1.25px 0 #fff,
+    0 -1.25px 0 #fff,
+    0.9px 0.9px 0 #fff,
+    -0.9px 0.9px 0 #fff,
+    0.9px -0.9px 0 #fff,
+    -0.9px -0.9px 0 #fff;
   opacity: 0;
   transition: opacity 0.15s;
   will-change: transform;
@@ -1271,8 +1385,8 @@
   overflow: hidden;
 }
 .app .maplibregl-ctrl-group button {
-  width: 36px;
-  height: 36px;
+  width: var(--tap);
+  height: var(--tap);
 }
 .app .maplibregl-ctrl-top-right .maplibregl-ctrl {
   margin: 12px 12px 0 0;
@@ -1298,8 +1412,15 @@
 .app .map-ctrl-text button[aria-pressed="true"]:hover {
   background: var(--c-accent-hover);
 }
-.app .maplibregl-ctrl button:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--c-accent);
+/* Sajtens fokusring, med högre specificitet än MapLibres egen (blå skugga). */
+.app .maplibregl-ctrl.maplibregl-ctrl-group button:focus:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--c-accent);
+  outline-offset: -4px;
+  border-radius: var(--radius-sm);
+}
+.app .maplibregl-ctrl.maplibregl-ctrl-group button:focus:not(:focus-visible) {
+  box-shadow: none;
 }
 .app .maplibregl-ctrl-attrib {
   font-family: var(--f-sans);
@@ -1313,31 +1434,43 @@
 /* ---------- Mobil: större klickytor ---------- */
 
 @media (max-width: 959px) {
-  .app .seg-option span,
-  .app .seg-small .seg-option span {
-    min-height: 40px;
+  /* Bostad och period på en rad, med korta texter. */
+  .app .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-2);
   }
-  .app .step {
-    width: 44px;
-    height: 44px;
+  .app .filters .seg-legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
-  .app .control-row {
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  .app .filters .seg-full {
+    display: none;
+  }
+  .app .filters .seg-short {
+    display: inline;
+  }
+  .app .filters .seg-face {
+    padding: 0 10px;
+  }
+  .app .filter-note {
+    flex: 1 0 100%;
+    padding-left: 0;
   }
   .app .row {
     min-height: 56px;
   }
   .app .chip,
   .app .chip-x {
-    min-height: 44px;
+    min-height: var(--tap);
   }
   .app .chip-x {
-    width: 44px;
-    height: 44px;
-  }
-  .app .maplibregl-ctrl-group button {
-    width: 44px;
-    height: 44px;
+    width: var(--tap);
+    height: var(--tap);
   }
   .app .map-legend {
     left: 8px;

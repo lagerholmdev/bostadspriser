@@ -4,71 +4,74 @@
  * med replaceState, så att länken alltid går att dela.
  */
 import { affordableSize } from "../lib/budget";
-import { bySlug, countyRatio, dataset, isThin, parseCompareParams, similarNeighbours, stat } from "../lib/data";
+import { areasFor, bySlug, countyRatio, dataset, isThin, KIND_SHORT, parseCompareParams, similarNeighbours, stat } from "../lib/data";
 import { change, changeDirection, changeWord, MISSING_TEXT, money, number, pricier, relative } from "../lib/format";
-import { priceColor } from "../lib/scales";
-import type { Area, MissingReason, Stat } from "../lib/types";
+import { html, type Html } from "../lib/html";
 import { areaUrl, compareUrl } from "../lib/links";
+import { priceColor } from "../lib/scales";
+import { joinNames } from "../lib/text";
+import type { Area, MissingReason, Stat } from "../lib/types";
 
 const MAX = 3;
 const BUDGET = 5_000_000;
+const SITE = "Stockholms prislandskap";
 
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-function missing(reason: MissingReason | undefined): string {
-  return `<span class="chg chg-none"><span aria-hidden="true">–</span><span class="miss">${reason ? MISSING_TEXT[reason] : "saknas"}</span></span>`;
+function missing(reason: MissingReason | undefined): Html {
+  return html`<span class="chg chg-none"><span aria-hidden="true">–</span><span class="miss">${reason ? MISSING_TEXT[reason] : "saknas"}</span></span>`;
 }
 
-function changeHtml(s: Stat | null | undefined): string {
+function changeHtml(s: Stat | null | undefined): Html {
   const v = s?.change;
   const dir = changeDirection(v);
   if (!dir) return missing(s?.missing?.change);
-  return `<span class="chg chg-${dir}">${esc(change(v))}<span class="chg-word">${changeWord(v)}</span></span>`;
+  return html`<span class="chg chg-${dir}">${change(v)}<span class="chg-word">${changeWord(v)}</span></span>`;
 }
 
 /** "116 680 kr/kvm" med enheten i ett eget element, så att den kan brytas snyggt på mobil. */
-function sqmHtml(v: number): string {
-  return `${esc(number(v))}<span class="unit">&nbsp;kr/kvm</span>`;
+function sqmHtml(v: number): Html {
+  return html`${number(v)}<span class="unit">&nbsp;kr/kvm</span>`;
 }
 
-function names(list: Area[]): string {
-  const n = list.map((a) => a.name);
-  return n.length > 1 ? `${n.slice(0, -1).join(", ")} och ${n.at(-1)}` : (n[0] ?? "");
-}
+/** "Stadsdelsområde" med mjukt bindestreck, så att ordet bryts rätt i smala kolumner. */
+const kindLabel = (a: Area) => KIND_SHORT[a.kind].replace("Stadsdels", "Stadsdels\u00ad");
+
+const names = (list: readonly Area[]) => joinNames(list.map((a) => a.name));
 
 interface Row {
   label: string;
-  cell: (a: Area, i: number) => string;
+  cell: (a: Area, i: number) => Html;
 }
 
-function rows(list: Area[]): Row[] {
-  const first = list[0]!;
+function rows(list: readonly Area[]): Row[] {
+  const first = list[0];
+  if (!first) return [];
   const p3 = (a: Area) => stat(a, "apartment", "m3");
   const firstPrice = p3(first)?.pricePerSqm ?? null;
   const thin = (a: Area) => isThin(p3(a), "m3");
+  // Villor finns bara för hela Stockholms stad: visa siffran en gång, vid första stadsdelen.
+  const firstCity = list.find((a) => a.houseScope === "city");
   return [
     {
       label: "Pris per kvm, 3 mån",
       cell: (a) => {
         const s = p3(a);
         if (s?.pricePerSqm == null) return missing(s?.missing?.pricePerSqm);
-        return `<span class="val-main${thin(a) ? " thin-value" : ""}"><span class="swatch" style="background:${priceColor(s.pricePerSqm)}"></span>${sqmHtml(s.pricePerSqm)}</span>`;
+        return html`<span class="${thin(a) ? "val-main thin-value" : "val-main"}"><span class="swatch" style="${`background:${priceColor(s.pricePerSqm)}`}"></span>${sqmHtml(s.pricePerSqm)}</span>`;
       },
     },
     {
       label: "Mot länets snitt",
       cell: (a) => {
         const r = countyRatio(p3(a)?.pricePerSqm);
-        return r == null ? missing(undefined) : esc(relative(r));
+        return r == null ? missing(undefined) : html`${relative(r)}`;
       },
     },
     {
       label: `Mot ${first.name}`,
       cell: (a, i) => {
-        if (i === 0) return `<span class="ref">jämförs med</span>`;
+        if (i === 0) return html`<span class="ref" aria-hidden="true">–</span><span class="visually-hidden">jämförs med</span>`;
         const p = p3(a)?.pricePerSqm;
-        return p == null || !firstPrice ? missing(undefined) : esc(pricier(p / firstPrice - 1));
+        return p == null || !firstPrice ? missing(undefined) : html`${pricier(p / firstPrice - 1)}`;
       },
     },
     { label: "Förändring, 3 mån", cell: (a) => changeHtml(p3(a)) },
@@ -78,53 +81,52 @@ function rows(list: Area[]): Row[] {
       cell: (a) => {
         const s = p3(a);
         if (s?.sales == null) return missing(s?.missing?.sales);
-        return `${esc(number(s.sales))}${thin(a) ? ' <span class="thin-tag">få affärer</span>' : ""}`;
+        return html`${number(s.sales)}${thin(a) && html` <span class="thin-tag">få affärer</span>`}`;
       },
     },
     {
       label: "Medelpris, 3 mån",
       cell: (a) => {
         const s = p3(a);
-        return s?.meanPrice == null ? missing(s?.missing?.meanPrice) : esc(money(s.meanPrice));
+        return s?.meanPrice == null ? missing(s?.missing?.meanPrice) : html`${money(s.meanPrice)}`;
       },
     },
     {
       label: "Villor, pris per kvm",
       cell: (a) => {
+        if (a.houseScope === "city" && firstCity && firstCity.slug !== a.slug) {
+          return html`<span class="ref">Samma som ${firstCity.name}</span>`;
+        }
         const s = stat(a, "house", "m3");
         if (!s) return missing("0");
         if (s.pricePerSqm == null) return missing(s.missing?.pricePerSqm);
-        const note = a.houseScope === "city" ? '<span class="cell-sub">hela Stockholms stad</span>' : "";
-        return `${sqmHtml(s.pricePerSqm)}${note}`;
+        return html`${sqmHtml(s.pricePerSqm)}${a.houseScope === "city" && html`<span class="cell-sub">Hela Stockholms stad</span>`}`;
       },
     },
     {
       label: "5 mkr räcker till",
       cell: (a) => {
         const p = p3(a)?.pricePerSqm;
-        return p == null ? missing(undefined) : `ca ${esc(number(Math.round(affordableSize(BUDGET, p))))}&nbsp;kvm`;
+        return p == null ? missing(undefined) : html`ca ${number(Math.round(affordableSize(BUDGET, p)))}&nbsp;kvm`;
       },
     },
   ];
 }
 
-function tableHtml(list: Area[]): string {
-  const head = list
-    .map(
-      (a) =>
-        `<th scope="col" class="col-head"><a href="${areaUrl(a.slug)}">${esc(a.name)}</a><span class="col-kind">${a.kind === "district" ? "Stadsdelsområde" : "Kommun"}</span></th>`,
-    )
-    .join("");
-  const body = rows(list)
-    .map(
-      (r) =>
-        `<tr><th scope="row">${esc(r.label)}</th>${list.map((a, i) => `<td>${r.cell(a, i)}</td>`).join("")}</tr>`,
-    )
-    .join("");
-  return `<div class="table-clip"><table class="data-table" style="--n:${list.length}">
-<caption class="visually-hidden">Jämförelse av ${esc(names(list))}. Bostadsrätter om inget annat anges.</caption>
-<thead><tr><td class="label-col"></td>${head}</tr></thead>
-<tbody>${body}</tbody></table></div>`;
+function tableHtml(list: readonly Area[]): Html {
+  return html`<div class="table-clip"><table class="data-table" style="${`--n:${list.length}`}">
+<caption class="visually-hidden">Jämförelse av ${names(list)}. Bostadsrätter om inget annat anges.</caption>
+<thead><tr><td class="label-col"></td>${list.map(
+    (a) =>
+      html`<th scope="col" class="col-head"><a href="${areaUrl(a.slug)}">${a.name}</a><span class="col-kind">${kindLabel(a)}</span></th>`,
+  )}</tr></thead>
+<tbody>${rows(list).map((r) => html`<tr><th scope="row">${r.label}</th>${list.map((a, i) => html`<td>${r.cell(a, i)}</td>`)}</tr>`)}</tbody>
+</table></div>`;
+}
+
+function suggestionHtml(list: readonly Area[]): Html {
+  const slugs = list.map((a) => a.slug);
+  return html`<li><a class="btn" href="${compareUrl(slugs)}" data-suggest="${slugs.join(",")}">${names(list)}</a></li>`;
 }
 
 function init(): void {
@@ -134,44 +136,45 @@ function init(): void {
   const notes = document.querySelector<HTMLElement>("#compare-notes");
   const empty = document.querySelector<HTMLElement>("#compare-empty");
   const suggest = document.querySelector<HTMLElement>("#compare-suggest");
-  const share = document.querySelector<HTMLElement>("[data-share]");
-  const copyBtn = document.querySelector<HTMLButtonElement>("#copy-link");
-  const copyStatus = document.querySelector<HTMLElement>("#copy-status");
-  if (!form || !result || !table || !notes || !empty || !suggest || !share || !copyBtn || !copyStatus) return;
+  const resultTitle = document.querySelector<HTMLElement>("#result-title");
+  if (!form || !result || !table || !notes || !empty || !suggest || !resultTitle) return;
 
   const selects = Array.from(form.querySelectorAll<HTMLSelectElement>("select"));
   const removes = Array.from(form.querySelectorAll<HTMLButtonElement>("[data-remove]"));
+  const emptyTitle = empty.querySelector("h2");
   const staticSuggest = suggest.innerHTML;
+  const baseTitle = document.title;
   form.addEventListener("submit", (e) => e.preventDefault());
 
   let chosen = parseCompareParams(new URLSearchParams(location.search), MAX);
 
-  function render(): void {
+  // Pilfunktion (inte function-deklaration), så att TypeScript behåller kontrollen ovan.
+  const render = (): void => {
     // Väljarna
     selects.forEach((sel, i) => {
-      sel.value = chosen[i] ?? "";
-      sel.classList.toggle("empty-select", !chosen[i]);
+      const slug = chosen[i];
+      sel.value = slug ?? "";
+      sel.classList.toggle("empty-select", !slug);
       for (const opt of Array.from(sel.options)) {
         if (!opt.value) continue;
-        opt.disabled = chosen.includes(opt.value) && chosen[i] !== opt.value;
+        opt.disabled = chosen.includes(opt.value) && slug !== opt.value;
       }
       const rm = removes[i];
       if (rm) {
-        rm.hidden = !chosen[i];
-        const nameEl = rm.querySelector("[data-remove-name]");
-        if (nameEl) nameEl.textContent = chosen[i] ? ` ${bySlug.get(chosen[i]!)?.name ?? ""}` : "";
+        rm.hidden = !slug;
+        rm.setAttribute("aria-label", slug ? `Ta bort ${bySlug.get(slug)?.name ?? ""}` : "Ta bort");
       }
     });
 
-    const list = chosen.map((s) => bySlug.get(s)!).filter(Boolean);
+    const list = areasFor(chosen);
     const enough = list.length >= 2;
-    result!.hidden = !enough;
-    empty!.hidden = enough;
-    share!.hidden = !enough;
-    copyStatus!.textContent = "";
+    result.hidden = !enough;
+    empty.hidden = enough;
+    document.title = enough ? `${names(list)} jämförda | ${SITE}` : baseTitle;
 
     if (enough) {
-      table!.innerHTML = tableHtml(list);
+      resultTitle.textContent = names(list);
+      table.innerHTML = tableHtml(list).value;
       const parts: string[] = [
         `Siffrorna gäller bostadsrätter sålda ${dataset.periods.m3} om inget annat anges.`,
         "Förändringen gäller de senaste tre månaderna: 3 mån mot de tre månaderna före, 12 mån mot samma månader året innan.",
@@ -179,33 +182,30 @@ function init(): void {
       if (list.some((a) => a.houseScope === "city"))
         parts.push("Villor redovisas bara för hela Stockholms stad, inte per stadsdelsområde.");
       if (list.some((a) => isThin(stat(a, "apartment", "m3"), "m3")))
-        parts.push("Värden med få affärer visas blekare, eftersom snittet där kan svänga mycket.");
-      notes!.textContent = parts.join(" ");
+        parts.push("Värden med få affärer är märkta, eftersom snittet där kan svänga mycket.");
+      notes.textContent = parts.join(" ");
     } else {
-      table!.innerHTML = "";
-      const h = empty!.querySelector("h2");
-      if (list.length === 1) {
-        const a = list[0]!;
-        const sim = similarNeighbours(a, 2);
-        if (h) h.textContent = `Välj ett område till att jämföra med ${a.name}`;
-        const own = sim.length
-          ? `<li><a class="btn" href="${compareUrl([a.slug, ...sim.map((s) => s.slug)])}" data-suggest="${[a.slug, ...sim.map((s) => s.slug)].join(",")}">${esc(names([a, ...sim]))}</a></li>`
-          : "";
-        suggest!.innerHTML = own + staticSuggest;
+      table.innerHTML = "";
+      const only = list[0];
+      if (only) {
+        const sim = similarNeighbours(only, 2);
+        if (emptyTitle) emptyTitle.textContent = `Välj ett område till att jämföra med ${only.name}`;
+        suggest.innerHTML = (sim.length ? suggestionHtml([only, ...sim]).value : "") + staticSuggest;
       } else {
-        if (h) h.textContent = "Välj minst två områden";
-        suggest!.innerHTML = staticSuggest;
+        if (emptyTitle) emptyTitle.textContent = "Välj minst två områden";
+        suggest.innerHTML = staticSuggest;
       }
     }
 
     const url = new URL(location.href);
     for (const k of ["omraden", "jamfor", "a", "b", "c"]) url.searchParams.delete(k);
     if (chosen.length) url.searchParams.set("omraden", chosen.join(","));
-    history.replaceState(null, "", url.pathname + (url.search ? url.search.replace(/%2C/g, ",") : "") + url.hash);
-  }
+    history.replaceState(null, "", url.pathname + url.search.replace(/%2C/g, ",") + url.hash);
+  };
 
   form.addEventListener("change", (e) => {
-    const sel = e.target as HTMLSelectElement;
+    const sel = e.target;
+    if (!(sel instanceof HTMLSelectElement)) return;
     const i = selects.indexOf(sel);
     if (i === -1) return;
     const next = [...chosen];
@@ -226,23 +226,14 @@ function init(): void {
   );
 
   suggest.addEventListener("click", (e) => {
-    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-suggest]");
+    const target = e.target instanceof Element ? e.target : null;
+    const a = target?.closest<HTMLAnchorElement>("a[data-suggest]");
     if (!a) return;
     e.preventDefault();
     chosen = parseCompareParams(new URLSearchParams({ omraden: a.dataset.suggest ?? "" }), MAX);
     render();
-    result.querySelector<HTMLElement>("h2")?.scrollIntoView({ block: "nearest" });
+    resultTitle.scrollIntoView({ block: "nearest" });
     selects[0]?.focus({ preventScroll: true });
-  });
-
-  copyBtn.addEventListener("click", async () => {
-    const href = location.href;
-    try {
-      await navigator.clipboard.writeText(href);
-      copyStatus.textContent = "Länken är kopierad.";
-    } catch {
-      copyStatus.textContent = `Kopiera länken: ${href}`;
-    }
   });
 
   render();

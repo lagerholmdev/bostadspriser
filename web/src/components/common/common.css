@@ -138,10 +138,28 @@
   align-items: center;
   gap: var(--sp-3) var(--sp-4);
 }
-@media (max-width: 640px) {
-  .actions .btn {
-    min-height: 44px;
-  }
+
+/* Rad ovanför rubriken: vanlig skiftläge, inte versaler (ersätter .eyebrow på innehållssidorna) */
+.kicker {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-2);
+}
+
+/* Stapel för pris per kvm: vitt spår med kant, och stapeln har egen kant så att
+ * även den ljusaste prisfärgen syns mot spåret. */
+.price-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-line);
+  overflow: hidden;
+}
+.price-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.22);
 }
 
 .chg-none .miss {

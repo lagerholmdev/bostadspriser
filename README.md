@@ -32,13 +32,13 @@ Mäklarstatistik ──▶ pipeline (Python) ──▶ data/snapshots/   (checka
 
 ## Kom igång
 
-Kräver Python 3.11+ och Node 22.
+Kräver Python 3.11+ och Node 22 (`.nvmrc`). Kör från repots rot, i samma terminal:
 
 ```sh
 # 1. Data
 cd pipeline
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -c requirements.lock -e ".[dev]"   # låsta versioner, samma som i Actions
 python -m prislandskap all        # skriver web/src/generated/ och web/public/og/
 
 # 2. Webb
@@ -47,20 +47,26 @@ npm ci
 npm run dev                       # http://localhost:4321/bostadspriser/
 ```
 
-Tester och kontroller:
+Tester och kontroller, från repots rot:
 
 ```sh
-cd pipeline && ruff check . && pytest
-cd web && npm run check && npm test && npm run build
+(cd pipeline && ruff check . && ruff format --check . && pytest)
+(cd web && npm run format:check && npm run check && npm test && npm run build)
 ```
+
+Webbens tester kör mot en fryst kopia av datasetet (`web/src/test/fixtures/`), så de går igenom
+oavsett månad. Kontraktstestet `web/src/lib/contract.test.ts` kontrollerar den riktiga exporten och
+kräver att `python -m prislandskap export` har körts. Se [docs/architecture.md](docs/architecture.md#tester).
 
 ## Uppdatering och publicering
 
 GitHub Actions sköter allt (`.github/workflows/`):
 
-- **ci.yml** kör tester och bygger sajten på varje push och pull request.
-- **deploy.yml** körs vid push till `main`, den 10:e varje månad och manuellt. Den hämtar ny data
-  (vid schemalagd och manuell körning), checkar in ögonblicksbilden, bygger och publicerar till Pages.
+- **ci.yml** kör tester och bygger sajten på varje push och pull request (Python 3.11 och 3.12).
+- **deploy.yml** körs vid push till `main`, den 10:e varje månad och manuellt. Den kör först samma
+  kontroller som ci.yml, hämtar sedan ny data (vid schemalagd och manuell körning), exporterar,
+  kontrollerar och bygger webben med den nya datan, och checkar in ögonblicksbilden först när bygget
+  har gått igenom. Sist publiceras sajten till Pages.
 
 Engångsinställning: Settings → Pages → Source: **GitHub Actions**.
 
@@ -74,5 +80,6 @@ och lägg kodnamnet som repovariabeln `PUBLIC_GOATCOUNTER`.
 - Kommungränser: SCB:s DeSO-indelning via [stefur/swemaps-data](https://github.com/stefur/swemaps-data).
 - Baskarta: [OpenFreeMap](https://openfreemap.org), © OpenMapTiles, © OpenStreetMaps bidragsgivare.
 - Typsnitt: Familjen Grotesk (SIL Open Font License).
+- Koden: MIT, se [LICENSE](LICENSE). Data, kartbilder och typsnitt följer källornas villkor.
 
 Se [docs/data.md](docs/data.md) för hur områdena är definierade och vad som saknas.

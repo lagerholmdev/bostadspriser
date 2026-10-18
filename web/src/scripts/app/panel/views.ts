@@ -2,9 +2,9 @@
  * Innehållet i de tre vyerna. Rena renderfunktioner: samma kod ger HTML vid bygget och i webbläsaren.
  */
 import { NEAR_MARGIN } from "../../../lib/budget";
-import { change, changeWord, mkr, money, number, sqm as fmtSqm } from "../../../lib/format";
-import { BUDGET_COLORS, changeColor, priceColor } from "../../../lib/scales";
-import type { Housing, Period } from "../../../lib/types";
+import { MISSING_TEXT, change, changeWord, mkr, money, number, sqm as fmtSqm } from "../../../lib/format";
+import { BUDGET_COLORS, changeStepColor, priceColor } from "../../../lib/scales";
+import type { Housing, Period, Stat } from "../../../lib/types";
 import { html, type Html } from "../../../lib/html";
 import {
   type BudgetEntry,
@@ -22,6 +22,12 @@ function row(e: Entry, inner: Html, extraClass = ""): Html {
     return html`<li><div class="${`${cls} is-static`}">${inner}</div></li>`;
   }
   return html`<li><button type="button" class="${cls}" data-slug="${e.slug}">${inner}</button></li>`;
+}
+
+/** Kort text för ett pris som saknas: "för få affärer", annars "saknas". */
+function missingShort(st: Stat): string {
+  const r = st.missing?.pricePerSqm;
+  return r ? MISSING_TEXT[r] : "saknas";
 }
 
 function strong(s: string): Html {
@@ -48,7 +54,7 @@ export function priceList(m: PriceModel, housing: Housing, period: Period): Html
     return row(
       e,
       html`<span class="row-name">${e.name}</span>
-        <span class="row-value">${v == null ? "saknas" : number(v)}${v == null ? "" : html` <small>kr/kvm</small>`}</span>
+        <span class="${`row-value${v == null ? " is-missing" : ""}`}">${v == null ? missingShort(e.stat) : number(v)}${v == null ? "" : html` <small>kr/kvm</small>`}</span>
         <span class="row-bar" aria-hidden="true"><span style="${`--w:${w}%;--c:${priceColor(v)}`}"></span></span>
         <span class="row-meta">${e.slug ? salesText(e.stat.sales, e.thin) : `Hela staden, ${salesText(e.stat.sales, e.thin)}`}</span>`,
     );
@@ -70,6 +76,13 @@ export function budgetHeadline(m: BudgetModel, budget: number, sqm: number): str
   if (n === 0) return `${mkr(budget)} räcker inte till ${size} i något område`;
   if (n === m.total) return `${mkr(budget)} räcker till ${size} i alla ${m.total}\u00a0områden`;
   return `${mkr(budget)} räcker till ${size} i ${n}\u00a0av ${m.total}\u00a0områden`;
+}
+
+/** Raden under rubriken: "Dyrast du har råd med: Hägersten-Liljeholmen (ca 62 kvm)." */
+export function budgetBest(m: BudgetModel): Html {
+  const best = m.ok[0];
+  if (!best) return html``;
+  return html`Dyrast du har råd med: ${strong(best.name)} (ca ${Math.floor(best.size)}\u00a0kvm).`;
 }
 
 function budgetRow(e: BudgetEntry, sqm: number): Html {
@@ -99,16 +112,18 @@ export function budgetResults(m: BudgetModel, budget: number, sqm: number, housi
       : "";
   return html`
     ${empty}
-    ${m.ok.length
-      ? html`<section class="group" aria-labelledby="g-ok">
-          <h3 class="group-title" id="g-ok"><span class="swatch" style="${`--c:${BUDGET_COLORS.ok}`}" aria-hidden="true"></span>Räcker <span class="count">${m.ok.length}</span></h3>
-          <ul class="rows">${m.ok.map((e) => budgetRow(e, sqm))}</ul>
-        </section>`
-      : ""}
     ${m.near.length
       ? html`<section class="group" aria-labelledby="g-near">
           <h3 class="group-title" id="g-near"><span class="swatch" style="${`--c:${BUDGET_COLORS.near}`}" aria-hidden="true"></span>Nästan <span class="group-sub">(högst ${pct} % över)</span> <span class="count">${m.near.length}</span></h3>
+          <p class="group-hint">Närmast din budget först</p>
           <ul class="rows">${m.near.map((e) => budgetRow(e, sqm))}</ul>
+        </section>`
+      : ""}
+    ${m.ok.length
+      ? html`<section class="group" aria-labelledby="g-ok">
+          <h3 class="group-title" id="g-ok"><span class="swatch" style="${`--c:${BUDGET_COLORS.ok}`}" aria-hidden="true"></span>Räcker <span class="count">${m.ok.length}</span></h3>
+          <p class="group-hint">Dyrast först, närmast din budget</p>
+          <ul class="rows">${m.ok.map((e) => budgetRow(e, sqm))}</ul>
         </section>`
       : ""}
     ${m.no.length
@@ -117,7 +132,9 @@ export function budgetResults(m: BudgetModel, budget: number, sqm: number, housi
           <ul class="rows">${m.no.map((e) => budgetRow(e, sqm))}</ul>
         </details>`
       : ""}
-    ${m.missing.length ? html`<p class="note">Pris saknas för ${m.missing.map((e) => e.name).join(", ")}.</p>` : ""}
+    ${m.missing.length
+      ? html`<p class="note">Pris saknas för ${m.missing.map((e) => (e.stat.missing?.pricePerSqm === "F" ? `${e.name} (för få affärer)` : e.name)).join(", ")}.</p>`
+      : ""}
     ${housing === "house" ? html`<p class="note">${CITY_HOUSE_NOTE} Staden räknas därför som ett område.</p>` : ""}
     <p class="note">Räknat på snittpriser. Enskilda bostäder varierar, och avgift, skick och läge påverkar priset.</p>`;
 }
@@ -139,31 +156,33 @@ export function changeSummary(m: ChangeModel, housing: Housing, period: Period):
   return html`<p class="summary">${lead} (${changeBasis(period)}). ${m.countUp} områden har gått upp och ${m.countDown} ner.</p>`;
 }
 
-function changeRow(e: Entry): Html {
+function changeRow(e: Entry, period: Period): Html {
   const v = e.stat.change;
   const dir = changeWord(v);
   return row(
     e,
-    html`<span class="row-name"><span class="swatch" style="${`--c:${changeColor(v)}`}" aria-hidden="true"></span>${e.name}</span>
+    html`<span class="row-name"><span class="swatch" style="${`--c:${changeStepColor(v, period)}`}" aria-hidden="true"></span>${e.name}</span>
       <span class="${`row-value is-${dir === "upp" ? "up" : dir === "ner" ? "down" : "flat"}`}">${change(v)}</span>
       <span class="row-meta">${e.slug ? salesText(e.stat.sales, e.thin) : `Hela staden, ${salesText(e.stat.sales, e.thin)}`}</span>`,
     "row-change",
   );
 }
 
-export function changeLists(m: ChangeModel, housing: Housing): Html {
+export function changeLists(m: ChangeModel, housing: Housing, period: Period): Html {
+  const r = (e: Entry) => changeRow(e, period);
   return html`
+    <h2 class="visually-hidden">Förändring per område</h2>
     <section class="group" aria-labelledby="g-up">
       <h3 class="group-title" id="g-up">Ökat mest</h3>
-      ${m.up.length ? html`<ol class="rows">${m.up.map(changeRow)}</ol>` : html`<p class="note">Inget område har gått upp.</p>`}
+      ${m.up.length ? html`<ol class="rows">${m.up.map(r)}</ol>` : html`<p class="note">Inget område har gått upp.</p>`}
     </section>
     <section class="group" aria-labelledby="g-down">
       <h3 class="group-title" id="g-down">Minskat mest</h3>
-      ${m.down.length ? html`<ol class="rows">${m.down.map(changeRow)}</ol>` : html`<p class="note">Inget område har gått ner.</p>`}
+      ${m.down.length ? html`<ol class="rows">${m.down.map(r)}</ol>` : html`<p class="note">Inget område har gått ner.</p>`}
     </section>
     <details class="group group-more">
       <summary class="group-title">Alla områden <span class="count">${m.all.length}</span><span class="summary-hint">Visa</span></summary>
-      <ol class="rows">${m.all.map(changeRow)}</ol>
+      <ol class="rows">${m.all.map(r)}</ol>
     </details>
     ${m.missing.length
       ? html`<p class="note">Förändring saknas för ${m.missing.map((e) => e.name).join(", ")}, för få affärer.</p>`

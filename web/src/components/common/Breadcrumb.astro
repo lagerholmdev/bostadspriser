@@ -42,15 +42,21 @@ const { items } = Astro.props;
     color: var(--c-ink-3);
   }
   .crumbs a {
-    display: inline-block;
-    padding-block: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
     color: var(--c-ink-2);
   }
   .crumbs a:hover {
     color: var(--c-accent);
   }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+  }
   .crumbs span {
-    display: inline-block;
-    padding-block: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
   }
 </style>

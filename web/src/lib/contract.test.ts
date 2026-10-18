@@ -33,7 +33,13 @@ class Problems {
   }
 }
 
-function checkKeys(p: Problems, where: string, obj: Json, required: string[], optional: string[] = []): void {
+function checkKeys(
+  p: Problems,
+  where: string,
+  obj: Json,
+  required: string[],
+  optional: string[] = [],
+): void {
   for (const k of required) p.check(k in obj, `${where}: saknar nyckeln "${k}"`);
   const allowed = new Set([...required, ...optional]);
   for (const k of Object.keys(obj)) p.check(allowed.has(k), `${where}: okänd nyckel "${k}"`);
@@ -44,8 +50,12 @@ function checkStat(p: Problems, where: string, s: unknown): void {
   checkKeys(p, where, s, [...STAT_FIELDS], ["missing"]);
   for (const f of STAT_FIELDS) {
     const v = s[f];
-    p.check(v === null || isNum(v), `${where}.${f}: ska vara tal eller null, är ${JSON.stringify(v)}`);
-    if (isNum(v) && INTEGER_FIELDS.has(f)) p.check(Number.isInteger(v), `${where}.${f}: ska vara heltal`);
+    p.check(
+      v === null || isNum(v),
+      `${where}.${f}: ska vara tal eller null, är ${JSON.stringify(v)}`,
+    );
+    if (isNum(v) && INTEGER_FIELDS.has(f))
+      p.check(Number.isInteger(v), `${where}.${f}: ska vara heltal`);
     if (isNum(v) && f === "change") {
       p.check(Math.round(v * 10) / 10 === v, `${where}.change: högst en decimal, är ${v}`);
     }
@@ -54,8 +64,14 @@ function checkStat(p: Problems, where: string, s: unknown): void {
     const m = s.missing;
     if (!isObj(m)) return p.check(false, `${where}.missing: ska vara ett objekt`);
     for (const [k, code] of Object.entries(m)) {
-      p.check((STAT_FIELDS as readonly string[]).includes(k), `${where}.missing: okänt fält "${k}"`);
-      p.check(MISSING_CODES.has(code as string), `${where}.missing.${k}: kod ${JSON.stringify(code)} ∉ {F,N,0}`);
+      p.check(
+        (STAT_FIELDS as readonly string[]).includes(k),
+        `${where}.missing: okänt fält "${k}"`,
+      );
+      p.check(
+        MISSING_CODES.has(code as string),
+        `${where}.missing.${k}: kod ${JSON.stringify(code)} ∉ {F,N,0}`,
+      );
       p.check(s[k] === null, `${where}.missing.${k}: fältet ska vara null när det saknas`);
     }
   }
@@ -82,7 +98,10 @@ function validateDataset(data: unknown): string[] {
   );
   const source = data.source;
   p.check(
-    isObj(source) && typeof source.name === "string" && typeof source.url === "string" && source.url.startsWith("https://"),
+    isObj(source) &&
+      typeof source.name === "string" &&
+      typeof source.url === "string" &&
+      source.url.startsWith("https://"),
     "Dataset.source: ska ha name och en https-url",
   );
   const county = data.county;
@@ -104,10 +123,26 @@ function validateDataset(data: unknown): string[] {
       continue;
     }
     const w = `areas[${typeof a.slug === "string" ? a.slug : i}]`;
-    checkKeys(p, w, a, ["slug", "name", "kind", "label", "neighbours", "bbox", "apartment", "house", "houseScope"]);
-    p.check(typeof a.slug === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(a.slug), `${w}.slug: ogiltig`);
+    checkKeys(p, w, a, [
+      "slug",
+      "name",
+      "kind",
+      "label",
+      "neighbours",
+      "bbox",
+      "apartment",
+      "house",
+      "houseScope",
+    ]);
+    p.check(
+      typeof a.slug === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(a.slug),
+      `${w}.slug: ogiltig`,
+    );
     p.check(typeof a.name === "string" && a.name !== "", `${w}.name: ska vara text`);
-    p.check(a.kind === "district" || a.kind === "municipality", `${w}.kind: ${JSON.stringify(a.kind)}`);
+    p.check(
+      a.kind === "district" || a.kind === "municipality",
+      `${w}.kind: ${JSON.stringify(a.kind)}`,
+    );
     p.check(isNumTuple(a.label, 2), `${w}.label: ska vara [lon, lat]`);
     p.check(isNumTuple(a.bbox, 4), `${w}.bbox: ska vara [väst, syd, öst, nord]`);
     if (isNumTuple(a.label, 2) && isNumTuple(a.bbox, 4)) {
@@ -118,20 +153,37 @@ function validateDataset(data: unknown): string[] {
     }
     if (Array.isArray(a.neighbours)) {
       for (const n of a.neighbours) {
-        p.check(typeof n === "string" && slugs.has(n), `${w}.neighbours: okänd slug ${JSON.stringify(n)}`);
+        p.check(
+          typeof n === "string" && slugs.has(n),
+          `${w}.neighbours: okänd slug ${JSON.stringify(n)}`,
+        );
         p.check(n !== a.slug, `${w}.neighbours: innehåller sig själv`);
       }
     } else p.check(false, `${w}.neighbours: ska vara en lista`);
     if (a.apartment !== null) checkStatsByPeriod(p, `${w}.apartment`, a.apartment);
     if (a.house !== null) checkStatsByPeriod(p, `${w}.house`, a.house);
-    p.check([null, "area", "city"].includes(a.houseScope as string | null), `${w}.houseScope: ${JSON.stringify(a.houseScope)}`);
-    p.check((a.house === null) === (a.houseScope === null), `${w}: houseScope ska vara null om och endast om house är null`);
-    if (a.kind === "district" && a.house !== null) p.check(a.houseScope === "city", `${w}: stadsdelsområden har houseScope "city"`);
-    if (a.kind === "municipality" && a.house !== null) p.check(a.houseScope === "area", `${w}: kommuner har houseScope "area"`);
+    p.check(
+      [null, "area", "city"].includes(a.houseScope as string | null),
+      `${w}.houseScope: ${JSON.stringify(a.houseScope)}`,
+    );
+    p.check(
+      (a.house === null) === (a.houseScope === null),
+      `${w}: houseScope ska vara null om och endast om house är null`,
+    );
+    if (a.kind === "district" && a.house !== null)
+      p.check(a.houseScope === "city", `${w}: stadsdelsområden har houseScope "city"`);
+    if (a.kind === "municipality" && a.house !== null)
+      p.check(a.houseScope === "area", `${w}: kommuner har houseScope "area"`);
   }
   const count = (kind: string) => areas.filter((a) => isObj(a) && a.kind === kind).length;
-  p.check(count("district") === 12, `Dataset.areas: ${count("district")} stadsdelsområden, väntade 12`);
-  p.check(count("municipality") === 25, `Dataset.areas: ${count("municipality")} kommuner, väntade 25`);
+  p.check(
+    count("district") === 12,
+    `Dataset.areas: ${count("district")} stadsdelsområden, väntade 12`,
+  );
+  p.check(
+    count("municipality") === 25,
+    `Dataset.areas: ${count("municipality")} kommuner, väntade 25`,
+  );
   return p.list;
 }
 
@@ -153,7 +205,9 @@ if (!exists) {
     });
 
     it.skipIf(!existsSync(GEO_FILE))("har samma ytor som areas.geojson", () => {
-      const geo = JSON.parse(readFileSync(GEO_FILE, "utf8")) as { features: { properties: { slug: string } }[] };
+      const geo = JSON.parse(readFileSync(GEO_FILE, "utf8")) as {
+        features: { properties: { slug: string } }[];
+      };
       const geoSlugs = geo.features.map((f) => f.properties.slug).sort();
       const slugs = (data as { areas: { slug: string }[] }).areas.map((a) => a.slug).sort();
       expect(geoSlugs).toEqual(slugs);
@@ -176,14 +230,35 @@ describe("kontraktsvalideringen själv", () => {
           label: [20, 60],
           neighbours: ["b"],
           bbox: [18, 59, 19, 59.5],
-          apartment: { m3: { sales: 1.5, pricePerSqm: null, meanPrice: 1, change: 1, missing: { pricePerSqm: "X" } }, m12: {} },
+          apartment: {
+            m3: {
+              sales: 1.5,
+              pricePerSqm: null,
+              meanPrice: 1,
+              change: 1,
+              missing: { pricePerSqm: "X" },
+            },
+            m12: {},
+          },
           house: null,
           houseScope: "city",
         },
       ],
     };
     const problems = validateDataset(broken).join("\n");
-    for (const needle of ["updated", "periods", "https", "kind", "utanför bbox", "okänd slug", "heltal", "∉ {F,N,0}", "houseScope ska vara null", "väntade 12", "väntade 25"]) {
+    for (const needle of [
+      "updated",
+      "periods",
+      "https",
+      "kind",
+      "utanför bbox",
+      "okänd slug",
+      "heltal",
+      "∉ {F,N,0}",
+      "houseScope ska vara null",
+      "väntade 12",
+      "väntade 25",
+    ]) {
       expect(problems).toContain(needle);
     }
   });

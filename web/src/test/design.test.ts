@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import scales from "../../../design/scales.json";
+import * as scalesModule from "../lib/scales";
 import {
   BUDGET_COLORS,
   CHANGE_COLORS,
@@ -33,11 +34,27 @@ describe("design/scales.json", () => {
   it("är det scales.ts exporterar", () => {
     expect(PRICE_COLORS).toEqual(scales.price.colors);
     expect(PRICE_BREAKS).toEqual(scales.price.breaks);
-    expect(CHANGE_COLORS).toEqual({ down: scales.change.down, flat: scales.change.flat, up: scales.change.up });
+    expect(CHANGE_COLORS).toEqual({
+      down: scales.change.down,
+      flat: scales.change.flat,
+      up: scales.change.up,
+    });
     expect(CHANGE_MAX).toBe(scales.change.max);
-    expect(BUDGET_COLORS).toEqual({ ok: scales.budget.ok, near: scales.budget.near, no: scales.budget.no });
+    expect(BUDGET_COLORS).toEqual({
+      ok: scales.budget.ok,
+      near: scales.budget.near,
+      no: scales.budget.no,
+    });
     expect(NEAR_MARGIN).toBe(scales.budget.nearMargin);
     expect(NODATA_COLOR).toBe(scales.nodata);
+  });
+
+  // Förändring i fem steg: scales.ts har ännu egna konstanter. Tills de läses från filen
+  // ser testet till att de är lika (delningsbilderna läser filen).
+  const mod = scalesModule as Record<string, unknown>;
+  it.skipIf(!("CHANGE_STEPS" in mod))("har samma fem förändringssteg som scales.ts", () => {
+    expect(mod.CHANGE_STEPS).toEqual(scales.change.steps);
+    expect(mod.CHANGE_FULL).toEqual(scales.change.full);
   });
 });
 

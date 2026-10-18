@@ -27,6 +27,8 @@ const map = buildMinimap({
   neighbours: [...area.neighbours].sort((a, b) => (bySlug.get(a)?.kind === area.kind ? -1 : 0) - (bySlug.get(b)?.kind === area.kind ? -1 : 0)),
   width: 520,
   height: 400,
+  // På smala skärmar förstoras fokusetiketten till 20 enheter (se CSS nedan).
+  focusReserveFont: 20,
 });
 
 const shown = map.labels.filter((l) => !l.focus).map((l) => l.text);
@@ -41,7 +43,7 @@ const svg = minimapSvg(map, { label });
 <figure class="minimap">
   <div class="mm" set:html={svg} />
   <figcaption>
-    <PriceLegend title="Pris per kvm för bostadsrätter, kr" />
+    <PriceLegend title="Pris per kvm, tusen kr" />
     {shown.length > 0 && <p class="mm-note">{area.name} har grön kant. Grannområdena visas blekare.</p>}
   </figcaption>
 </figure>
@@ -53,6 +55,7 @@ const svg = minimapSvg(map, { label });
     gap: var(--sp-3);
   }
   .mm {
+    container-type: inline-size;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--c-line);
@@ -94,9 +97,26 @@ const svg = minimapSvg(map, { label });
     font-weight: 700;
     fill: var(--c-ink);
   }
+  /*
+   * Bilden är 520 enheter bred. Under 477 px skulle grannetiketterna (12 enheter) bli
+   * mindre än 11 px, så de döljs, och områdets egen etikett förstoras så att den
+   * håller minst 11 px ner till 288 px bredd (320 px skärm).
+   */
+  @container (max-width: 476px) {
+    .mm :global(.mm-label:not(.mm-label-focus)) {
+      display: none;
+    }
+    .mm :global(.mm-label-focus) {
+      font-size: 20px;
+      stroke-width: 4px;
+    }
+  }
+  figcaption {
+    display: grid;
+    gap: var(--sp-2);
+  }
   .mm-note {
     font-size: var(--fs-xs);
     color: var(--c-ink-3);
-    margin-top: var(--sp-2);
   }
 </style>

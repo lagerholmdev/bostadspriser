@@ -1,10 +1,10 @@
 /**
  * Sidans läge. En enda källa (AppState) som speglas i adressen:
- * - val av område läggs till i historiken (pushState), så att Bakåt stänger detaljen,
- * - reglage, flikar och filter skriver över nuvarande adress (replaceState, lite fördröjt),
+ * - val av område och byte av vy läggs till i historiken (pushState), så att Bakåt går tillbaka,
+ * - reglage och filter skriver över nuvarande adress (replaceState, lite fördröjt),
  * - Bakåt/Framåt (popstate) läser in adressen igen.
  */
-import { parseState, sameState, stateHref, type AppState } from "../../lib/url";
+import { appStateHref, parseAppState, sameState, type AppState } from "../../lib/url";
 
 export type HistoryMode = "push" | "replace" | "none";
 export type Listener = (state: AppState, prev: AppState, mode: HistoryMode) => void;
@@ -22,7 +22,7 @@ export class Store {
   ) {
     this.current = initial;
     window.addEventListener("popstate", () => {
-      const next = parseState(location.search, this.isKnown).state;
+      const next = parseAppState(location.search, this.isKnown).state;
       this.commit(next, "none");
     });
   }
@@ -39,6 +39,11 @@ export class Store {
     this.commit({ ...this.current, ...patch }, mode);
   }
 
+  /** Ersätt hela läget (t.ex. efter withView/withHousing i lib/url). */
+  replace(next: AppState, mode: HistoryMode = "replace"): void {
+    this.commit(next, mode);
+  }
+
   private commit(next: AppState, mode: HistoryMode): void {
     const prev = this.current;
     if (sameState(prev, next)) return;
@@ -49,7 +54,7 @@ export class Store {
 
   private writeUrl(mode: HistoryMode): void {
     if (mode === "none") return;
-    const href = () => stateHref(this.current, location.pathname) + location.hash;
+    const href = () => appStateHref(this.current, location.pathname) + location.hash;
     window.clearTimeout(this.pending);
     this.pending = undefined;
     try {
@@ -73,7 +78,7 @@ export class Store {
     window.clearTimeout(this.pending);
     this.pending = undefined;
     try {
-      history.replaceState(history.state, "", stateHref(this.current, location.pathname) + location.hash);
+      history.replaceState(history.state, "", appStateHref(this.current, location.pathname) + location.hash);
     } catch {
       /* se ovan */
     }

@@ -47,5 +47,40 @@ export function salesText(sales: number | null, thin: boolean): string {
 }
 
 export function thinExplainer(period: Period): string {
-  return `Blekta rader bygger på färre än ${THIN_SALES[period]} affärer och är osäkrare.`;
+  return `Rader märkta ”få affärer” bygger på färre än ${THIN_SALES[period]} affärer och är osäkrare. På kartan är de randiga.`;
+}
+
+/** "6,6 %" utan tecken. */
+function pctAbs(v: number): string {
+  return `${Math.abs(v).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+}
+
+/**
+ * En mening som knyter ihop förändringen på ett år och de senaste tre månaderna:
+ * "Priserna har gått upp 6,6 % på ett år, men ner 1,1 % de senaste tre månaderna."
+ * Tom sträng när båda saknas.
+ */
+export function changeSentence(year: number | null | undefined, quarter: number | null | undefined): string {
+  const dir = (v: number) => {
+    const r = Math.round(v * 10) / 10;
+    return r > 0 ? "upp" : r < 0 ? "ner" : "flat";
+  };
+  const Y = "på ett år";
+  const Q = "de senaste tre månaderna";
+  if (year == null && quarter == null) return "";
+  if (year == null || quarter == null) {
+    const v = (year ?? quarter) as number;
+    const when = year != null ? Y : Q;
+    const d = dir(v);
+    return d === "flat"
+      ? `Priserna är i stort sett oförändrade ${when}.`
+      : `Priserna har gått ${d} ${pctAbs(v)} ${when}.`;
+  }
+  const dy = dir(year);
+  const dq = dir(quarter);
+  if (dy === "flat" && dq === "flat") return `Priserna är i stort sett oförändrade både ${Y} och ${Q}.`;
+  if (dy === "flat") return `Priserna är i stort sett oförändrade ${Y}, men har gått ${dq} ${pctAbs(quarter)} ${Q}.`;
+  if (dq === "flat") return `Priserna har gått ${dy} ${pctAbs(year)} ${Y}, men är i stort sett oförändrade ${Q}.`;
+  if (dy === dq) return `Priserna har gått ${dy} ${pctAbs(year)} ${Y} och ${pctAbs(quarter)} ${Q}.`;
+  return `Priserna har gått ${dy} ${pctAbs(year)} ${Y}, men ${dq} ${pctAbs(quarter)} ${Q}.`;
 }

@@ -26,7 +26,6 @@ const toc = [
 >
   <div class="wrap about">
     <header class="intro">
-      <p class="eyebrow">Senaste siffrorna publicerades {date(dataset.updated)}</p>
       <h1>Om datan och metoden</h1>
       <p class="lead">
         Stockholms prislandskap visar vad bostäder har sålts för i {areas.length} delar av Stockholms län. Här står
@@ -109,7 +108,8 @@ const toc = [
           <dd>Inga bostäder av det slaget såldes alls under perioden.</dd>
         </dl>
         <p>
-          Värden som finns men bygger på få affärer visas blekare och märks med <span class="thin-tag">få affärer</span>.
+          Värden som finns men bygger på få affärer märks med <span class="thin-tag">få affärer</span>, och
+          staplar och färger för dem visas blekare.
           Gränsen är {THIN_SALES.m3} sålda bostäder på 3 månader och {THIN_SALES.m12} på 12 månader. Det är vår egen
           gräns, satt för att visa när ett snitt kan svänga mycket mellan månaderna.
         </p>
@@ -205,7 +205,6 @@ const toc = [
     font-size: var(--fs-lg);
     color: var(--c-ink-2);
     line-height: 1.45;
-    margin-top: var(--sp-2);
   }
   .toc {
     grid-column: 2;
@@ -312,7 +311,10 @@ const toc = [
       border-radius: var(--radius);
     }
     .toc a {
-      padding-block: 8px;
+      display: flex;
+      align-items: center;
+      min-height: var(--tap);
+      padding-block: 2px;
     }
     .lead {
       font-size: var(--fs-md);
@@ -324,9 +326,6 @@ const toc = [
     .prose li,
     .prose dd {
       font-size: var(--fs-md);
-    }
-    .next .btn {
-      min-height: 44px;
     }
   }
 </style>

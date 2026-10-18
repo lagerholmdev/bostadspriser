@@ -42,8 +42,12 @@ skuggor på allt, kräm med terrakotta, Inter.
 
 ### Färger
 
-Alla färger finns som tokens i `web/src/styles/tokens.css` och som hex i `web/src/lib/scales.ts`
-(för kartan och SVG).
+Alla färger finns som tokens i `web/src/styles/tokens.css`. Skalorna (pris, förändring, budget och
+saknad data) och budgetens marginal har en enda källa, `design/scales.json`, som både
+`web/src/lib/scales.ts` (kartan och SVG) och pipelinens `palette.py` (delningsbilderna) läser. CSS
+kan inte importera JSON, så tokens.css har samma värden för hand och testet
+`web/src/test/design.test.ts` fallerar om de skiljer sig. Ändra en skalfärg i `design/scales.json`
+och i `tokens.css`, och kör `python -m prislandskap og`.
 
 | Roll | Token | Värde |
 | --- | --- | --- |
@@ -51,9 +55,9 @@ Alla färger finns som tokens i `web/src/styles/tokens.css` och som hex i `web/s
 | Yta | `--c-surface` | `#ffffff` |
 | Text | `--c-ink` | `#1a1f1c` |
 | Sekundär text | `--c-ink-2` | `#4d5650` |
-| Hjälptext | `--c-ink-3` | `#737c76` |
+| Hjälptext | `--c-ink-3` | `#5f6762` |
 | Accent | `--c-accent` | `#1f6f5c` |
-| Pris, 6 steg | `--c-price-1` … `-6` | `#f3e7c4` → `#652a21` |
+| Pris, 6 steg | `--c-price-1` … `-6` | `#efdba6` → `#652a21` |
 | Förändring | `--c-down`, `--c-flat`, `--c-up` | blå, grå, rost |
 | Budget | `--c-ok`, `--c-near`, `--c-no` | grön, ockra, grå |
 

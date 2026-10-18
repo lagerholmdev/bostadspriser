@@ -18,7 +18,7 @@ export const CHANGE_COLORS = { down: scales.change.down, flat: scales.change.fla
 export const CHANGE_MAX: number = scales.change.max;
 
 export const BUDGET_COLORS = { ok: scales.budget.ok, near: scales.budget.near, no: scales.budget.no } as const;
-/** Inom så här mycket över budget räknas området som "nästan" (samma som NEAR_MARGIN i budget.ts). */
+/** Inom så här mycket över budget räknas området som "nästan". */
 export const NEAR_MARGIN: number = scales.budget.nearMargin;
 export const NODATA_COLOR: string = scales.nodata;
 

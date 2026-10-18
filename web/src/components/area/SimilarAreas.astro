@@ -1,6 +1,6 @@
 ---
 /** "Liknande grannområden": tre närliggande områden med pris nära det här. */
-import { stat } from "../../lib/data";
+import { KIND_SHORT, stat } from "../../lib/data";
 import { pricier, sqm } from "../../lib/format";
 import { priceColor } from "../../lib/scales";
 import type { Area } from "../../lib/types";
@@ -12,7 +12,6 @@ interface Props {
 }
 const { area, similar } = Astro.props;
 const me = stat(area, "apartment", "m3")?.pricePerSqm ?? null;
-const kindShort = (a: Area) => (a.kind === "district" ? "Stadsdelsområde" : "Kommun");
 ---
 
 <ul class="similar">
@@ -23,7 +22,7 @@ const kindShort = (a: Area) => (a.kind === "district" ? "Stadsdelsområde" : "Ko
       return (
         <li>
           <a href={areaUrl(a.slug)}>
-            <span class="sim-kind">{kindShort(a)}</span>
+            <span class="sim-kind">{KIND_SHORT[a.kind]}</span>
             <span class="sim-name">{a.name}</span>
           </a>
           <span class="sim-price">

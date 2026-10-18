@@ -1,7 +1,7 @@
 ---
 /** Reglagen i "Var har jag råd?": skjutreglage med synligt värde och plus/minus-knappar. */
 import { BUDGET_RANGE, SIZE_RANGE, typicalRooms } from "../../lib/budget";
-import { mkr } from "../../lib/format";
+import { mkr, mkrSpoken } from "../../lib/format";
 
 const b = BUDGET_RANGE;
 const z = SIZE_RANGE;
@@ -10,6 +10,7 @@ const controls = [
     id: "budget",
     label: "Budget",
     out: mkr(b.default),
+    spoken: mkrSpoken(b.default),
     hint: "Vad du kan lägga på bostaden",
     min: b.min / 1e6,
     max: b.max / 1e6,
@@ -23,6 +24,7 @@ const controls = [
     id: "size",
     label: "Boarea",
     out: `${z.default} kvm`,
+    spoken: `${z.default} kvadratmeter`,
     hint: `ungefär ${typicalRooms(z.default)}`,
     min: z.min,
     max: z.max,
@@ -59,7 +61,7 @@ const controls = [
             step={c.step}
             value={c.value}
             aria-describedby={`${c.id}-hint`}
-            aria-valuetext={c.out}
+            aria-valuetext={c.spoken}
             style={`--p:${((c.value - c.min) / (c.max - c.min)) * 100}%`}
           />
           <button type="button" class="step" data-action="step" data-control={c.id} data-dir="1" aria-label={c.more}>

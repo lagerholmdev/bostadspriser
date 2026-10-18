@@ -5,10 +5,11 @@
  * Adress: ?omraden=a,b,c. Äldre ?a=&b=&c= och ?jamfor=a,b fungerar också.
  */
 import Base from "../../layouts/Base.astro";
+import CopyLink from "../../components/common/CopyLink.astro";
 import { areasUrl, compareUrl } from "../../lib/links";
 import "../../components/common/common.css";
-import { areas, bySlug, dataset } from "../../lib/data";
-import { date } from "../../lib/format";
+import { areas, areasFor, bySlug, dataset } from "../../lib/data";
+import { joinNames } from "../../lib/text";
 
 const collator = new Intl.Collator("sv");
 const sorted = [...areas].sort((a, b) => collator.compare(a.name, b.name));
@@ -22,10 +23,7 @@ const SUGGESTIONS: string[][] = [
   ["hagersten-liljeholmen", "enskede-skarpnack", "bromma-vasterled"],
 ];
 const suggestions = SUGGESTIONS.map((s) => s.filter((x) => bySlug.has(x))).filter((s) => s.length >= 2);
-const names = (s: string[]) => {
-  const n = s.map((x) => bySlug.get(x)!.name);
-  return n.length > 1 ? `${n.slice(0, -1).join(", ")} och ${n.at(-1)}` : n[0];
-};
+const names = (s: string[]) => joinNames(areasFor(s).map((a) => a.name));
 const slots = [1, 2, 3];
 ---
 
@@ -36,7 +34,6 @@ const slots = [1, 2, 3];
 >
   <div class="wrap compare-page">
     <header class="intro">
-      <p class="eyebrow">Uppdaterad {date(dataset.updated)}</p>
       <h1>Jämför områden</h1>
       <p class="lead">Välj upp till tre områden och se priserna sida vid sida. Länken går att dela.</p>
     </header>
@@ -57,8 +54,8 @@ const slots = [1, 2, 3];
                   </optgroup>
                 ))}
               </select>
-              <button type="button" class="remove" data-remove={n - 1} hidden>
-                Ta bort<span class="visually-hidden" data-remove-name />
+              <button type="button" class="remove" data-remove={n - 1} aria-label="Ta bort" hidden>
+                <span aria-hidden="true">×</span>
               </button>
             </div>
           </div>
@@ -69,13 +66,11 @@ const slots = [1, 2, 3];
       </noscript>
     </form>
 
-    <div class="share" data-share hidden>
-      <button type="button" class="btn" id="copy-link">Kopiera länk</button>
-      <span class="share-status" id="copy-status" aria-live="polite"></span>
-    </div>
-
     <section class="result" id="compare-result" aria-labelledby="result-title" hidden>
-      <h2 id="result-title" class="visually-hidden">Jämförelse</h2>
+      <div class="result-head">
+        <h2 id="result-title">Jämförelse</h2>
+        <CopyLink class="result-copy" />
+      </div>
       <div id="compare-table"></div>
       <p class="fineprint" id="compare-notes"></p>
     </section>
@@ -133,7 +128,6 @@ const slots = [1, 2, 3];
   .lead {
     font-size: var(--fs-lg);
     color: var(--c-ink-2);
-    margin-top: var(--sp-2);
   }
   .picker {
     display: grid;
@@ -155,11 +149,14 @@ const slots = [1, 2, 3];
     display: flex;
     gap: var(--sp-2);
   }
+  .slot-row {
+    position: relative;
+  }
   select {
     flex: 1;
     min-width: 0;
     font: inherit;
-    min-height: 44px;
+    min-height: max(44px, var(--tap));
     padding: 0 2.25rem 0 var(--sp-3);
     border: 1px solid var(--c-line-strong);
     border-radius: var(--radius);
@@ -184,40 +181,50 @@ const slots = [1, 2, 3];
   select.empty-select {
     color: var(--c-ink-3);
   }
+  /* × för att ta bort ett val, inne i väljarens rad. */
   .remove {
-    font: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 600;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
     min-height: 44px;
-    padding: 0 var(--sp-3);
-    border: 1px solid transparent;
+    padding: 0;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    border: 1px solid var(--c-line-strong);
     border-radius: var(--radius);
-    background: none;
+    background: var(--c-surface);
     color: var(--c-ink-2);
     cursor: pointer;
   }
   .remove:hover {
     color: var(--c-ink);
-    background: var(--c-sunken);
-  }
-  .share {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-    margin-top: var(--sp-4);
-  }
-  .share[hidden] {
-    display: none;
-  }
-  .share-status {
-    font-size: var(--fs-sm);
-    color: var(--c-ink-2);
+    border-color: var(--c-ink-3);
+    background: var(--c-page);
   }
   .result {
     margin-top: var(--sp-6);
     display: grid;
-    gap: var(--sp-4);
+    gap: var(--sp-3);
+  }
+  .result-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2) var(--sp-4);
+  }
+  .result-head h2 {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    min-width: 0;
+    hyphens: auto;
+  }
+  .result-head :global(.result-copy) {
+    flex: none;
+    margin-left: auto;
+    justify-content: flex-end;
+    max-width: 60%;
   }
   .empty {
     margin-top: var(--sp-6);
@@ -249,7 +256,7 @@ const slots = [1, 2, 3];
     gap: var(--sp-3);
   }
   .suggest .btn {
-    min-height: 44px;
+    min-height: max(44px, var(--tap));
     text-align: left;
     padding-block: var(--sp-2);
     line-height: 1.35;
@@ -303,7 +310,10 @@ const slots = [1, 2, 3];
   }
   #compare-table :global(.ref) {
     color: var(--c-ink-3);
-    font-size: var(--fs-sm);
+  }
+  #compare-table :global(.col-head a) {
+    hyphens: auto;
+    overflow-wrap: normal;
   }
   #compare-table :global(.thin-tag) {
     margin-left: var(--sp-2);
@@ -359,6 +369,10 @@ const slots = [1, 2, 3];
       hyphens: auto;
       min-width: 0;
     }
+    #compare-table :global(td:nth-child(n + 2)),
+    #compare-table :global(th:nth-child(n + 2)) {
+      padding-right: var(--sp-1);
+    }
     #compare-table :global(tr > :first-child) {
       padding-left: var(--sp-3);
     }
@@ -384,6 +398,7 @@ const slots = [1, 2, 3];
     }
     #compare-table :global(.col-head a) {
       font-size: var(--fs-sm);
+      overflow-wrap: break-word;
     }
     #compare-table :global(tbody th) {
       grid-column: 1 / -1;
@@ -405,6 +420,19 @@ const slots = [1, 2, 3];
     #compare-table :global(.chg-word) {
       display: block;
       margin-left: 0;
+    }
+  }
+  @media (max-width: 360px) {
+    #compare-table :global(.col-head a) {
+      font-size: 13px;
+      letter-spacing: -0.01em;
+    }
+    #compare-table :global(th),
+    #compare-table :global(td) {
+      padding-left: var(--sp-1);
+    }
+    #compare-table :global(tr > :first-child) {
+      padding-left: var(--sp-2);
     }
   }
 </style>

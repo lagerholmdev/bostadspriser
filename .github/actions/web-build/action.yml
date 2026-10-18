@@ -1,0 +1,38 @@
+name: Kontrollera och bygg webben
+description: >-
+  npm ci, formatkontroll, astro check, vitest och astro build i web/. Samma steg i ci.yml och
+  deploy.yml. Förutsätter att pipelinen redan har skrivit web/src/generated/ (kontraktstestet läser den).
+inputs:
+  goatcounter:
+    description: Kodnamn för GoatCounter (PUBLIC_GOATCOUNTER), tomt för ingen besöksstatistik
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+        cache-dependency-path: web/package-lock.json
+    - name: Installera beroenden
+      shell: bash
+      working-directory: web
+      run: npm ci
+    - name: Formatering (prettier)
+      shell: bash
+      working-directory: web
+      run: npm run format:check
+    - name: Typkontroll (astro check)
+      shell: bash
+      working-directory: web
+      run: npm run check
+    - name: Tester (vitest)
+      shell: bash
+      working-directory: web
+      run: npm test
+    - name: Bygg webbplatsen
+      shell: bash
+      working-directory: web
+      env:
+        PUBLIC_GOATCOUNTER: ${{ inputs.goatcounter }}
+      run: npm run build

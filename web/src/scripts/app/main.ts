@@ -3,7 +3,7 @@
  * och ansluts när den är klar. Går kartan inte att visa fungerar listan ändå.
  */
 import { bySlug } from "../../lib/data";
-import { parseState, stateHref, type AppState } from "../../lib/url";
+import { appStateHref, parseAppState, type AppState } from "../../lib/url";
 import { trackViewOnce } from "./analytics";
 import { compareHref } from "./compare";
 import { fetchBaseStyle } from "./mapstyle";
@@ -23,7 +23,7 @@ function start(): void {
   if (!app || !panelEl) return;
   const base = app.dataset.base ?? "/";
 
-  const parsed = parseState(location.search, isKnown);
+  const parsed = parseAppState(location.search, isKnown);
 
   // Äldre länk till en jämförelse (?jamfor=a,b): jämförelsen har nu en egen sida.
   if (parsed.compare.length) {
@@ -34,7 +34,7 @@ function start(): void {
   const store = new Store(parsed.state, isKnown);
   if (parsed.legacy) {
     try {
-      history.replaceState(history.state, "", stateHref(parsed.state, location.pathname) + location.hash);
+      history.replaceState(history.state, "", appStateHref(parsed.state, location.pathname) + location.hash);
     } catch {
       /* ok */
     }
@@ -55,7 +55,11 @@ function start(): void {
   const shareFallback = $("share-fallback");
   const shareInput = $<HTMLInputElement>("share-url");
   if (shareBtn && shareStatus && shareFallback && shareInput) {
-    initShare({ button: shareBtn, status: shareStatus, fallback: shareFallback, fallbackInput: shareInput }, () => store.flush());
+    const sharer = initShare(
+      { button: shareBtn, status: shareStatus, fallback: shareFallback, fallbackInput: shareInput },
+      () => store.flush(),
+    );
+    panel.copyLink = (status) => void sharer.copyLink(status);
   }
 
   trackViewOnce(store.state.view);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { areas, getArea } from "../../lib/data";
-import { BUDGET_COLORS, NODATA_COLOR, priceColor } from "../../lib/scales";
+import { areas, getArea, placeInCounty } from "../../lib/data";
+import { BUDGET_COLORS, NODATA_COLOR, changeStepColor, priceColor } from "../../lib/scales";
 import { DEFAULT_STATE } from "../../lib/url";
 import {
   CITY_NAME,
@@ -9,9 +9,7 @@ import {
   entries,
   mapPaint,
   priceModel,
-  rankOf,
   sortEntries,
-  THIN_OPACITY,
   unionBbox,
 } from "./model";
 
@@ -70,13 +68,19 @@ describe("budgetModel", () => {
     expect(m.maxPerSqm).toBeCloseTo(83333.33, 1);
     expect(m.ok.every((e) => e.stat.pricePerSqm! <= m.maxPerSqm)).toBe(true);
     expect(m.near.every((e) => e.stat.pricePerSqm! <= m.maxPerSqm * 1.1)).toBe(true);
-    // Störst bostad för pengarna först.
-    expect(m.ok[0].size).toBeGreaterThanOrEqual(m.ok[m.ok.length - 1].size);
+    // Dyrast du har råd med först, närmast budgeten.
+    expect(m.ok[0].slug).toBe("hagersten-liljeholmen");
+    expect(Math.floor(m.ok[0].size)).toBe(62);
+    expect(m.ok[0].stat.pricePerSqm).toBeGreaterThanOrEqual(m.ok[m.ok.length - 1].stat.pricePerSqm!);
+    // Över budget: billigast (närmast budgeten) först.
+    expect(m.near.every((e, i, a) => i === 0 || e.stat.pricePerSqm! >= a[i - 1].stat.pricePerSqm!)).toBe(true);
     expect(m.cheapest?.slug).toBe("sigtuna");
   });
   it("räknar Stockholms stad som ett område för villor", () => {
     const m = budgetModel("house", "m3", 5_000_000, 60);
-    expect(m.total).toBe(entries("house", "m3").length);
+    // Alla rader utom Solna (4 villor sålda, visas utan pris).
+    expect(m.total).toBe(entries("house", "m3").length - 1);
+    expect(m.missing.map((e) => e.slug)).toEqual(["solna"]);
   });
   it("räcker ingenstans med liten budget och stor bostad", () => {
     const m = budgetModel("apartment", "m3", 1_000_000, 150);
@@ -106,22 +110,47 @@ describe("changeModel", () => {
   });
 });
 
-describe("rankOf", () => {
+describe("placeInCounty", () => {
   it("ger plats 1 till dyraste och delar stadens plats för villor", () => {
-    expect(rankOf(getArea("vasastan-norrmalm")!, "apartment", "m3")).toEqual({ rank: 1, total: areas.length });
-    const a = rankOf(getArea("sodermalm")!, "house", "m3");
-    const b = rankOf(getArea("spanga-kista")!, "house", "m3");
+    expect(placeInCounty(getArea("vasastan-norrmalm")!, "apartment", "m3")).toEqual({ rank: 1, total: areas.length });
+    const a = placeInCounty(getArea("sodermalm")!, "house", "m3");
+    const b = placeInCounty(getArea("spanga-kista")!, "house", "m3");
     expect(a).toEqual(b);
     expect(a).not.toBeNull();
+  });
+  it("räknar inte villor med för få affärer (Solna, 4 sålda)", () => {
+    expect(placeInCounty(getArea("solna")!, "house", "m3")).toBeNull();
+    const total = entries("house", "m3").filter((e) => e.stat.pricePerSqm != null).length;
+    expect(placeInCounty(getArea("danderyd")!, "house", "m3")?.total).toBe(total);
+  });
+});
+
+describe("villor med få affärer", () => {
+  it("visas utan pris och med orsak", () => {
+    const solna = entries("house", "m3").find((e) => e.slug === "solna")!;
+    expect(solna.stat.pricePerSqm).toBeNull();
+    expect(solna.stat.missing?.pricePerSqm).toBe("F");
+    // Med tolv månader finns 37 affärer, så priset visas.
+    expect(entries("house", "m12").find((e) => e.slug === "solna")!.stat.pricePerSqm).toBe(76476);
   });
 });
 
 describe("mapPaint", () => {
-  it("färgar efter pris i prisvyn och bleker osäkra områden", () => {
+  it("färgar efter pris i prisvyn och gör osäkra områden randiga", () => {
     const p = mapPaint(DEFAULT_STATE);
     expect(p.color.sodermalm).toBe(priceColor(116680));
-    expect(p.opacity.ekero).toBe(THIN_OPACITY); // 38 affärer
+    expect(p.color.ekero).toBe(priceColor(47297)); // full färg trots få affärer
+    expect(p.thin).toContain("ekero"); // 38 affärer
+    expect(p.thin).not.toContain("sodermalm");
+    expect(p.nodata).toEqual([]);
     expect(p.price.sodermalm).toBe(116680);
+  });
+  it("ritar stadsdelarna randiga med stadens färg för villor", () => {
+    const p = mapPaint({ ...DEFAULT_STATE, housing: "house" });
+    expect(p.color.sodermalm).toBe(priceColor(75494));
+    expect(p.color.kungsholmen).toBe(p.color.sodermalm);
+    expect(p.thin).toContain("sodermalm");
+    expect(p.nodata).toContain("solna"); // 4 villor sålda
   });
   it("färgar efter budgetstatus", () => {
     const p = mapPaint({ ...DEFAULT_STATE, view: "budget" });
@@ -131,6 +160,15 @@ describe("mapPaint", () => {
   it("visar saknad förändring som saknad data", () => {
     const p = mapPaint({ ...DEFAULT_STATE, view: "forandring", period: "m12" });
     expect(p.color.nykvarn).toBe(NODATA_COLOR);
+    expect(p.nodata).toContain("nykvarn");
+  });
+  it("färgar förändringen i steg som beror på perioden", () => {
+    const year = mapPaint({ ...DEFAULT_STATE, view: "forandring", period: "m12" });
+    expect(year.color.sodermalm).toBe(changeStepColor(10.5, "m12"));
+    // +2,0 % är ett tydligt steg på tre månader men bara ett svagt på ett år.
+    const q = mapPaint({ ...DEFAULT_STATE, view: "forandring", period: "m3" });
+    expect(q.color.sodermalm).toBe(changeStepColor(5, "m3"));
+    expect(changeStepColor(2, "m12")).not.toBe(changeStepColor(2, "m3"));
   });
 });
 

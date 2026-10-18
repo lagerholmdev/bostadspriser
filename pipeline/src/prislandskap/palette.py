@@ -72,3 +72,34 @@ def change_color(value: float | None) -> Color:
         return NODATA
     t = min(1.0, abs(value) / CHANGE_MAX)
     return mix(CHANGE_FLAT, CHANGE_UP if value >= 0 else CHANGE_DOWN, t)
+
+
+# ---------- förändring i fem steg, som changeStepColor() i scales.ts ----------
+
+CHANGE_STEPS: dict[str, tuple[float, float]] = {
+    period: (float(flat), float(strong)) for period, (flat, strong) in _SCALES["change"]["steps"].items()
+}
+CHANGE_FULL: dict[str, float] = {period: float(v) for period, v in _SCALES["change"]["full"].items()}
+
+
+def change_class(value: float | None, period: str) -> int | None:
+    """−2 tydligt ner … 0 i stort sett oförändrat … 2 tydligt upp, räknat på värdet med en decimal."""
+    if value is None:
+        return None
+    r = math.floor(value * 10 + 0.5) / 10
+    flat, strong = CHANGE_STEPS[period]
+    mag = 0 if abs(r) < flat else 1 if abs(r) < strong else 2
+    return 0 if mag == 0 else -mag if r < 0 else mag
+
+
+def change_class_color(c: int, period: str) -> Color:
+    """Det svaga steget färgas som förändringen vid sin övre gräns, det tydliga med full färg."""
+    if c == 0:
+        return CHANGE_FLAT
+    t = 1.0 if abs(c) == 2 else CHANGE_STEPS[period][1] / CHANGE_FULL[period]
+    return mix(CHANGE_FLAT, CHANGE_UP if c > 0 else CHANGE_DOWN, t)
+
+
+def change_step_color(value: float | None, period: str) -> Color:
+    c = change_class(value, period)
+    return NODATA if c is None else change_class_color(c, period)

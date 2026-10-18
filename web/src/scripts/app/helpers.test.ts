@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { LayerSpecification, StyleSpecification } from "@maplibre/maplibre-gl-style-spec";
+import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
 import { DEFAULT_STATE } from "../../lib/url";
 import { addTo, compareHref, removeFrom } from "./compare";
 import { attr, html, raw } from "../../lib/html";
-import { composeStyle, firstSymbolIndex, LAYER, matchBySlug, PLACE_LABEL_MINZOOM, waterIndex } from "./mapstyle";
-import { mapPaint } from "./model";
+import { composeStyle, firstSymbolIndex, hatchImage, LAYER, matchBySlug, PLACE_LABEL_MINZOOM, waterIndex } from "./mapstyle";
+import { FILL_OPACITY, mapPaint } from "./model";
 import { search } from "./search-index";
 
 describe("html", () => {
@@ -109,5 +109,47 @@ describe("mapstyle", () => {
 
   it("bygger match-uttryck per område", () => {
     expect(matchBySlug({ a: "#fff", b: "#000" }, "#ccc")).toEqual(["match", ["get", "slug"], "a", "#fff", "b", "#000", "#ccc"]);
+  });
+});
+
+describe("search, rangordning", () => {
+  it("går inte efter stadsdelar när områdets eget namn matchar", () => {
+    const hits = search("sö");
+    expect(hits[0].area.slug).toBe("sodermalm");
+    expect(hits[1].area.slug).toBe("sodertalje");
+  });
+  it("väljer exakta å/ä/ö och sedan flest affärer vid lika träff", () => {
+    expect(search("söd").map((h) => h.area.slug).slice(0, 2)).toEqual(["sodermalm", "sodertalje"]);
+    expect(search("sod").map((h) => h.area.slug).slice(0, 2)).toEqual(["sodermalm", "sodertalje"]);
+    // "so" utan prickar: Solna (641 sålda) före Sollentuna (277) och Södermalm före Södertälje.
+    const so = search("so").map((h) => h.area.slug);
+    expect(so.indexOf("sodermalm")).toBeLessThan(so.indexOf("sodertalje"));
+    expect(so.indexOf("solna")).toBeLessThan(so.indexOf("sollentuna"));
+  });
+  it("lägger områdesnamn före stadsdelar även när stadsdelen matchar bättre", () => {
+    const hits = search("kista");
+    expect(hits[0].area.slug).toBe("spanga-kista");
+    expect(hits[0].via).toBeNull();
+  });
+});
+
+describe("hatchImage", () => {
+  it("ritar 1 px diagonala linjer på 8 × 8 px, skalade efter pixeltäthet", () => {
+    const img = hatchImage("thin");
+    expect(img.width).toBe(8);
+    expect(img.data.length).toBe(8 * 8 * 4);
+    const alpha = (x: number, y: number) => img.data[(y * 8 + x) * 4 + 3];
+    expect(alpha(0, 0)).toBe(Math.round(0.25 * 255));
+    expect(alpha(1, 0)).toBe(0);
+    const hi = hatchImage("nodata", 2);
+    expect(hi.width).toBe(16);
+  });
+  it("lägger ränderna direkt efter ytorna, under vattnet", () => {
+    const paint = mapPaint(DEFAULT_STATE);
+    const { style } = composeStyle(null, "areas.geojson", paint);
+    const ids = style.layers.map((l) => l.id);
+    expect(ids.indexOf(LAYER.hatchThin)).toBe(ids.indexOf(LAYER.fill) + 1);
+    const fill = style.layers.find((l) => l.id === LAYER.fill) as { paint: Record<string, unknown> };
+    expect(fill.paint["fill-opacity"]).toBe(FILL_OPACITY);
   });
 });

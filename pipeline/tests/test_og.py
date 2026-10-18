@@ -2,8 +2,7 @@ import json
 
 from PIL import Image
 
-from prislandskap import og
-from prislandskap import palette
+from prislandskap import og, palette
 from prislandskap.config import SCALES_FILE
 from prislandskap.palette import change_color, hex_rgb, price_color
 
@@ -14,10 +13,10 @@ SCALES = json.loads(SCALES_FILE.read_text(encoding="utf-8"))
 def test_palette_is_read_from_design_scales_json():
     assert [hex_rgb(c) for c in SCALES["price"]["colors"]] == list(palette.PRICE_COLORS)
     assert list(palette.PRICE_BREAKS) == SCALES["price"]["breaks"]
-    assert palette.NODATA == hex_rgb(SCALES["nodata"])
-    assert palette.BUDGET_COLORS == {k: hex_rgb(SCALES["budget"][k]) for k in ("ok", "near", "no")}
-    assert og.BUDGET_NEAR == SCALES["budget"]["nearMargin"]
-    assert palette.CHANGE_MAX == SCALES["change"]["max"]
+    assert hex_rgb(SCALES["nodata"]) == palette.NODATA
+    assert {k: hex_rgb(SCALES["budget"][k]) for k in ("ok", "near", "no")} == palette.BUDGET_COLORS
+    assert SCALES["budget"]["nearMargin"] == og.BUDGET_NEAR
+    assert SCALES["change"]["max"] == palette.CHANGE_MAX
 
 
 def test_price_color_matches_scales_ts():
@@ -69,3 +68,46 @@ def test_run_writes_all_images(tmp_path, monkeypatch, snapshot):
     with Image.open(tmp_path / "start.png") as img:
         assert img.size == (1200, 630)
     assert all(p.stat().st_size < 120_000 for p in paths)
+
+
+def _feature(features, slug):
+    return next(f for f in features if f["properties"]["slug"] == slug)
+
+
+def test_thin_areas_get_a_note(snapshot, features):
+    nykvarn = og.area_card(snapshot, _feature(features, "nykvarn"), features)
+    assert nykvarn.note == "Få affärer, osäkert värde"  # 26 sålda bostadsrätter
+    assert og.area_card(snapshot, _feature(features, "sodermalm"), features).note is None
+
+
+def test_remote_areas_get_a_wider_map_with_context(snapshot, features):
+    feature = _feature(features, "nykvarn")
+    card = og.area_card(snapshot, feature, features)
+    narrow = og.area_box(feature)
+    assert card.box[3] - card.box[1] >= og.REMOTE_SPAN_DEG
+    assert card.box[3] - card.box[1] > narrow[3] - narrow[1]
+    assert len(card.labels) >= og.CONTEXT_AREAS
+    for slug in card.labels:
+        lon, lat = _feature(features, slug)["properties"]["label"]
+        assert card.box[0] <= lon <= card.box[2] and card.box[1] <= lat <= card.box[3]
+    # Områden med många grannar behåller det vanliga utsnittet
+    vaxholm = _feature(features, "vaxholm")
+    assert og.area_card(snapshot, vaxholm, features).box == og.area_box(vaxholm)
+
+
+def test_logo_uses_price_colours_and_accent():
+    assert [color for _, color in og.LOGO_GABLES] == [palette.PRICE_COLORS[i] for i in (2, 4, 5)]
+    assert hex_rgb("#1f6f5c") == palette.ACCENT
+
+
+def test_all_text_uses_bundled_familjen_grotesk():
+    for weight in (400, 600, 700):
+        f = og.font(weight, 14)
+        assert f.getname()[0] == "Familjen Grotesk"
+        assert str(og.FONT_DIR) in f.path
+
+
+def test_forandring_uses_five_steps_like_the_map(snapshot, features):
+    card = og.overview_cards(snapshot, features)["forandring"]
+    assert [label for _, label in card.legend.swatches] == ["−4", "−1", "+1", "+4", ""]
+    assert len(set(card.fills.values()) - {palette.NODATA}) <= 5

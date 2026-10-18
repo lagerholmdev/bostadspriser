@@ -3,22 +3,20 @@
  * eller en enkel reservstil om baskartan inte går att nå. Rena funktioner, så de går att testa.
  *
  * Lagerordning med baskarta:
- *   … mark/parker  →  [ytor, gränser]  →  vatten …  vägar  →  [3D, hovring, valt]  →  etiketter
+ *   … mark/parker  →  [ytor, ränder, gränser]  →  vatten …  vägar  →  [3D, hovring, valt]  →  etiketter
  * Ytorna ligger under vattnet så att hav och sjöar målas över dem: kommungränser som går ut i
  * havet syns då inte som färgade block. Markering och 3D ligger över vägarna men under texten.
  */
-import type {
-  ExpressionSpecification,
-  LayerSpecification,
-  StyleSpecification,
-} from "@maplibre/maplibre-gl-style-spec";
+import type { ExpressionSpecification, FilterSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 import { NODATA_COLOR } from "../../lib/scales";
-import type { Paint } from "./model";
+import { FILL_OPACITY, type Paint } from "./model";
 
 export const POSITRON_URL = "https://tiles.openfreemap.org/styles/positron";
 export const SOURCE = "areas";
 export const LAYER = {
   fill: "pl-fill",
+  hatchThin: "pl-hatch-thin",
+  hatchNodata: "pl-hatch-nodata",
   outline: "pl-outline",
   extrude: "pl-extrude",
   hover: "pl-hover",
@@ -32,6 +30,40 @@ export const FALLBACK_BACKGROUND = "#eef0ec";
 export const HEIGHT_PER_SQM_PRICE = 0.015;
 /** Under den här zoomnivån döljs baskartans ortnamn, så att våra områdesnamn inte krockar med dem. */
 export const PLACE_LABEL_MINZOOM = 10.5;
+
+/** Rändermönster (bilder som kartan lägger till själv, se hatchImage). */
+export const HATCH = {
+  thin: { id: "pl-hatch-dark", color: [26, 31, 28], alpha: 0.25 },
+  nodata: { id: "pl-hatch-light", color: [95, 103, 98], alpha: 0.4 },
+} as const;
+export type HatchKind = keyof typeof HATCH;
+
+/**
+ * Diagonala ränder (/) i en ruta på 8 × 8 px, 1 px linjer, som RGBA-pixlar.
+ * `ratio` är skärmens pixeltäthet, så att linjerna blir skarpa på högupplösta skärmar.
+ */
+export function hatchImage(kind: HatchKind, ratio = 1): { width: number; height: number; data: Uint8Array } {
+  const r = Math.max(1, Math.round(ratio));
+  const size = 8 * r;
+  const { color, alpha } = HATCH[kind];
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if ((x + y) % size >= r) continue;
+      const i = (y * size + x) * 4;
+      data[i] = color[0];
+      data[i + 1] = color[1];
+      data[i + 2] = color[2];
+      data[i + 3] = Math.round(alpha * 255);
+    }
+  }
+  return { width: size, height: size, data };
+}
+
+/** Filter för en lista med områden. */
+export function slugsFilter(slugs: readonly string[]): FilterSpecification {
+  return ["in", ["get", "slug"], ["literal", [...slugs]]] as unknown as FilterSpecification;
+}
 
 type Matchable = Record<string, string | number>;
 
@@ -48,8 +80,8 @@ export function heightExpression(paint: Paint): ExpressionSpecification {
   return matchBySlug(h, 0);
 }
 
-export function slugFilter(slug: string | null): ExpressionSpecification {
-  return ["==", ["get", "slug"], slug ?? "__ingen__"] as unknown as ExpressionSpecification;
+export function slugFilter(slug: string | null): FilterSpecification {
+  return ["==", ["get", "slug"], slug ?? "__ingen__"] as unknown as FilterSpecification;
 }
 
 /** Våra lager. `below` ska under vattnet, `above` över vägarna men under etiketterna. */
@@ -61,9 +93,24 @@ export function areaLayers(paint: Paint): { below: LayerSpecification[]; above: 
       source: SOURCE,
       paint: {
         "fill-color": matchBySlug(paint.color, NODATA_COLOR),
-        "fill-opacity": matchBySlug(paint.opacity, 0.5),
+        "fill-opacity": FILL_OPACITY,
         "fill-antialias": true,
       },
+    },
+    // Ränder ovanpå färgen: få affärer (mörka) och saknat värde (ljusgrå).
+    {
+      id: LAYER.hatchThin,
+      type: "fill",
+      source: SOURCE,
+      filter: slugsFilter(paint.thin),
+      paint: { "fill-pattern": HATCH.thin.id },
+    },
+    {
+      id: LAYER.hatchNodata,
+      type: "fill",
+      source: SOURCE,
+      filter: slugsFilter(paint.nodata),
+      paint: { "fill-pattern": HATCH.nodata.id },
     },
     {
       id: LAYER.outline,
@@ -97,7 +144,7 @@ export function areaLayers(paint: Paint): { below: LayerSpecification[]; above: 
       source: SOURCE,
       filter: slugFilter(null),
       layout: { "line-join": "round" },
-      paint: { "line-color": "#1a1f1c", "line-width": 1.5, "line-opacity": 0.55 },
+      paint: { "line-color": "#1a1f1c", "line-width": 2, "line-opacity": 0.9 },
     },
     {
       id: LAYER.selectedCasing,

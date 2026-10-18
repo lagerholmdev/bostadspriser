@@ -1,13 +1,14 @@
 ---
 /**
- * "Plats i länet": alla områden som tunna liggande staplar, dyrast överst.
- * Området självt är markerat i accentfärg och namngivet; länets snitt är en lodrät linje.
- * Skärmläsare får en vanlig numrerad lista i stället för bilden.
+ * "Plats i länet": ett utsnitt av prislistan med namn på varje rad. Dyraste och
+ * billigaste området, området självt och tre grannar i listan åt varje håll; "…"
+ * markerar hoppen. Området är markerat i accentfärg. Länets snitt är en streckad linje.
+ * Skärmläsare och den som vill se allt får hela listan i <details> under.
  */
-import { countyStat, rankByPrice, stat } from "../../lib/data";
-import { sqm } from "../../lib/format";
-import type { Area } from "../../lib/types";
+import { countyStat, rankByPrice, rankWindow, stat } from "../../lib/data";
+import { number, sqm } from "../../lib/format";
 import { areaUrl } from "../../lib/links";
+import type { Area } from "../../lib/types";
 
 interface Props {
   area: Area;
@@ -19,33 +20,55 @@ const max = Math.max(...list.map(price));
 const county = countyStat("apartment", "m3").pricePerSqm ?? 0;
 const pct = (v: number) => `${((v / max) * 100).toFixed(2)}%`;
 const myIndex = list.findIndex((a) => a.slug === area.slug);
-// Namnge första, sista och området självt, så att skalan går att läsa.
-const named = new Set([0, list.length - 1, myIndex]);
+const shown = rankWindow(list.length, myIndex, 3);
+const skipped = (k: number) => {
+  // Antal rader som hoppas över vid ett "…".
+  const before = shown[k - 1];
+  const after = shown[k + 1];
+  return before != null && after != null ? after - before - 1 : 0;
+};
 ---
 
 <div class="rank">
   <div class="rank-plot" aria-hidden="true">
     <div class="rank-axis">
-      <span />
+      <span></span>
       <div class="rank-track">
-        <span class="rank-county-label" style={`left:${pct(county)}`}>Länets snitt {sqm(county)}</span>
+        <span class="rank-county-label" style={`left:${pct(county)}`}>Länets snitt {number(county)}</span>
       </div>
     </div>
     {
-      list.map((a, i) => (
-        <div class:list={["rank-row", { me: a.slug === area.slug, named: named.has(i) }]}>
-          <span class="rank-name">{named.has(i) ? a.name : ""}</span>
-          <div class="rank-track">
-            <div class="rank-bar" style={`width:${pct(price(a))}`} />
-            {named.has(i) && (
+      shown.map((i, k) => {
+        if (i == null) {
+          return (
+            <div class="rank-row gap">
+              <span class="rank-name">… {skipped(k)} områden</span>
+              <div class="rank-track">
+                <span class="rank-county" style={`left:${pct(county)}`} />
+              </div>
+            </div>
+          );
+        }
+        const a = list[i];
+        if (!a) return null;
+        const me = a.slug === area.slug;
+        return (
+          <div class:list={["rank-row", { me }]}>
+            <span class="rank-name">
+              <span class="rank-no">{i + 1}</span>
+              <span class="rank-label">{a.name}</span>
+            </span>
+            <div class="rank-track">
+              <div class="rank-bar" style={`width:${pct(price(a))}`} />
+              <span class="rank-county" style={`left:${pct(county)}`} />
               <span class="rank-val" style={`left:calc(${pct(price(a))} + 6px)`}>
-                {sqm(price(a))}
+                {number(price(a))}
+                {me && <span class="rank-unit">&nbsp;kr/kvm</span>}
               </span>
-            )}
-            <span class="rank-county" style={`left:${pct(county)}`} />
+            </div>
           </div>
-        </div>
-      ))
+        );
+      })
     }
   </div>
   <details class="rank-list">
@@ -54,11 +77,7 @@ const named = new Set([0, list.length - 1, myIndex]);
       {
         list.map((a) => (
           <li class:list={{ me: a.slug === area.slug }}>
-            {a.slug === area.slug ? (
-              <strong>{a.name}</strong>
-            ) : (
-              <a href={areaUrl(a.slug)}>{a.name}</a>
-            )}
+            {a.slug === area.slug ? <strong>{a.name}</strong> : <a href={areaUrl(a.slug)}>{a.name}</a>}
             <span>{sqm(price(a))}</span>
           </li>
         ))
@@ -74,8 +93,12 @@ const named = new Set([0, list.length - 1, myIndex]);
     max-width: 760px;
   }
   .rank-plot {
-    --name-w: 11rem;
+    --name-w: 13rem;
     display: grid;
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
   }
   .rank-row,
   .rank-axis {
@@ -85,7 +108,7 @@ const named = new Set([0, list.length - 1, myIndex]);
     column-gap: var(--sp-3);
   }
   .rank-axis {
-    height: 22px;
+    height: 24px;
   }
   .rank-track {
     position: relative;
@@ -93,38 +116,54 @@ const named = new Set([0, list.length - 1, myIndex]);
     margin-right: 7.5rem;
   }
   .rank-row {
-    height: 9px;
+    height: 28px;
   }
-  .rank-row.named {
-    height: 26px;
+  .rank-row.gap {
+    height: 24px;
   }
   .rank-bar {
     position: absolute;
     left: 0;
-    top: 1px;
-    bottom: 1px;
+    top: 9px;
+    bottom: 9px;
     background: var(--c-line-strong);
     border-radius: 0 2px 2px 0;
   }
-  .rank-row.named .rank-bar {
+  .rank-row.me .rank-bar {
     top: 7px;
     bottom: 7px;
-  }
-  .rank-row.me .rank-bar {
-    top: 5px;
-    bottom: 5px;
     background: var(--c-accent);
   }
   .rank-name {
-    font-size: var(--fs-sm);
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    min-width: 0;
+    font-size: 13px;
     color: var(--c-ink-2);
+  }
+  .rank-no {
+    flex: none;
+    width: 1.6em;
     text-align: right;
+    color: var(--c-ink-3);
+    font-size: var(--fs-xs);
+  }
+  .rank-label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .rank-row.gap .rank-name {
+    padding-left: calc(1.6em + var(--sp-2));
+    color: var(--c-ink-3);
+    font-size: var(--fs-xs);
+  }
   .rank-row.me .rank-name {
     font-weight: 700;
+    color: var(--c-accent);
+  }
+  .rank-row.me .rank-no {
     color: var(--c-accent);
   }
   .rank-val {
@@ -136,8 +175,8 @@ const named = new Set([0, list.length - 1, myIndex]);
     white-space: nowrap;
   }
   .rank-row.me .rank-val {
-    font-size: var(--fs-sm);
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     color: var(--c-ink);
   }
   .rank-county {
@@ -159,7 +198,7 @@ const named = new Set([0, list.length - 1, myIndex]);
     color: var(--c-accent);
     font-size: var(--fs-sm);
     font-weight: 600;
-    min-height: 44px;
+    min-height: var(--tap);
     display: inline-flex;
     align-items: center;
   }
@@ -180,16 +219,22 @@ const named = new Set([0, list.length - 1, myIndex]);
   }
   @media (max-width: 560px) {
     .rank-plot {
-      --name-w: 7.5rem;
-    }
-    .rank-name {
-      font-size: var(--fs-xs);
+      --name-w: 9.5rem;
+      padding: var(--sp-2) var(--sp-3) var(--sp-3);
     }
     .rank-track {
-      margin-right: 6rem;
+      margin-right: 3.25rem;
     }
     .rank-row.me .rank-val {
       font-size: var(--fs-xs);
+    }
+    .rank-unit {
+      display: none;
+    }
+  }
+  @media (max-width: 360px) {
+    .rank-plot {
+      --name-w: 8.25rem;
     }
   }
 </style>

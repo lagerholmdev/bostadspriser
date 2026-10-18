@@ -1,57 +1,57 @@
 name: CI
 
+# Körs på pull requests och pushar till andra grenar än main. deploy.yml anropar samma arbetsflöde
+# (workflow_call) innan den bygger och publicerar, så kontrollerna är desamma i båda.
 on:
   pull_request:
   push:
-    branches-ignore: [main] # main testas och byggs av deploy.yml
+    branches-ignore: [main]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Vid workflow_call är github.workflow anroparens namn, så den gruppen krockar inte med CI:s egen.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.workflow == 'CI' }}
 
 jobs:
   pipeline:
-    name: Pipeline (ruff, pytest)
+    name: Pipeline (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/pipeline-setup
         with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: pipeline/pyproject.toml
-      - run: pip install -e "pipeline[dev]"
-      - run: ruff check pipeline
-      - run: ruff format --check pipeline
-      - run: pytest pipeline
+          python-version: ${{ matrix.python }}
+      - name: ruff check
+        working-directory: pipeline
+        run: ruff check .
+      - name: ruff format --check
+        working-directory: pipeline
+        run: ruff format --check .
+      - name: pytest
+        working-directory: pipeline
+        run: pytest
 
   web:
-    name: Webb (check, test, build)
+    name: Webb (format, check, test, build)
     needs: pipeline
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: pipeline/pyproject.toml
-      - run: pip install -e pipeline
+      - uses: ./.github/actions/pipeline-setup
       - name: Exportera data och delningsbilder
         run: python -m prislandskap all
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/web-build
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - working-directory: web
-        run: npm ci
-      - working-directory: web
-        run: npm run check
-      - working-directory: web
-        run: npm test -- --passWithNoTests
-      - working-directory: web
-        run: npm run build
+          goatcounter: ${{ vars.PUBLIC_GOATCOUNTER }}

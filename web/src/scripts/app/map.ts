@@ -12,12 +12,22 @@ import {
   type MapMouseEvent,
 } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+import type { StyleSpecification } from "maplibre-gl";
 import geojsonUrl from "../../generated/areas.geojson?url";
-import type { StyleSpecification } from "@maplibre/maplibre-gl-style-spec";
 import { areas as ALL_AREAS } from "../../lib/data";
 import type { Html } from "../../lib/html";
 import { AreaLabels } from "./labels";
-import { composeStyle, heightExpression, LAYER, matchBySlug, slugFilter } from "./mapstyle";
+import {
+  composeStyle,
+  HATCH,
+  hatchImage,
+  heightExpression,
+  LAYER,
+  matchBySlug,
+  slugFilter,
+  slugsFilter,
+  type HatchKind,
+} from "./mapstyle";
 import { unionBbox, type Paint } from "./model";
 import { NODATA_COLOR } from "../../lib/scales";
 import { Tooltip } from "./tooltip";
@@ -47,7 +57,13 @@ const LOCALE = {
   "NavigationControl.ZoomIn": "Zooma in",
   "NavigationControl.ZoomOut": "Zooma ut",
   "NavigationControl.ResetBearing": "Återställ riktning",
+  "CooperativeGesturesHandler.WindowsHelpText": "Håll ned Ctrl och scrolla för att zooma",
+  "CooperativeGesturesHandler.MacHelpText": "Håll ned ⌘ och scrolla för att zooma",
+  "CooperativeGesturesHandler.MobileHelpText": "Använd två fingrar för att flytta kartan",
 };
+
+/** Lager som ritar ytorna platt; döljs i 3D. */
+const FLAT_LAYERS = [LAYER.fill, LAYER.hatchThin, LAYER.hatchNodata, LAYER.outline, LAYER.hover] as const;
 
 export interface AreaMapOptions {
   wrap: HTMLElement;
@@ -64,6 +80,8 @@ export interface AreaMapOptions {
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isWide = () => window.matchMedia("(min-width: 960px)").matches;
 const canHover = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+/** På pekskärm drar ett finger sidan och två fingrar kartan, så att man kan scrolla förbi kartan. */
+const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 
 export class AreaMap {
   private is3d = false;
@@ -71,7 +89,7 @@ export class AreaMap {
   private selected: string | null;
   private labels: AreaLabels;
   private tooltip: Tooltip;
-  private toggle3d!: HTMLButtonElement;
+  private toggle3d: HTMLButtonElement | null = null;
 
   private constructor(
     private readonly map: MlMap,
@@ -93,7 +111,7 @@ export class AreaMap {
     const selectedArea = opts.selected ? ALL_AREAS.find((a) => a.slug === opts.selected) : undefined;
     const map = new MlMap({
       container: opts.canvas,
-      style: style as never,
+      style,
       bounds: selectedArea ? selectedArea.bbox : isWide() ? INNER_BBOX : CITY_BBOX,
       fitBoundsOptions: { padding: isWide() ? 48 : 16, maxZoom: isWide() ? AREA_MAX_ZOOM : AREA_MAX_ZOOM - 0.75 },
       maxBounds: MAX_BOUNDS,
@@ -106,7 +124,13 @@ export class AreaMap {
       attributionControl: false,
       locale: LOCALE,
       fadeDuration: 0,
-      cooperativeGestures: false,
+      cooperativeGestures: isTouch(),
+    });
+    // Rändermönstren ritas här i stället för att laddas som bilder.
+    const ratio = window.devicePixelRatio || 1;
+    map.setMissingStyleImageResolver((id) => {
+      const kind = (Object.keys(HATCH) as HatchKind[]).find((k) => HATCH[k].id === id);
+      if (kind && !map.hasImage(id)) map.addImage(id, hatchImage(kind, ratio), { pixelRatio: Math.max(1, Math.round(ratio)) });
     });
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
@@ -129,7 +153,8 @@ export class AreaMap {
   setPaint(paint: Paint): void {
     const color = matchBySlug(paint.color, NODATA_COLOR);
     this.map.setPaintProperty(LAYER.fill, "fill-color", color);
-    this.map.setPaintProperty(LAYER.fill, "fill-opacity", matchBySlug(paint.opacity, 0.5));
+    this.map.setFilter(LAYER.hatchThin, slugsFilter(paint.thin));
+    this.map.setFilter(LAYER.hatchNodata, slugsFilter(paint.nodata));
     this.map.setPaintProperty(LAYER.extrude, "fill-extrusion-color", color);
     this.map.setPaintProperty(LAYER.extrude, "fill-extrusion-height", heightExpression(paint));
     this.tooltip.invalidate();
@@ -177,9 +202,9 @@ export class AreaMap {
         county.addEventListener("click", () => self.showCounty());
         const t3 = document.createElement("button");
         t3.type = "button";
-        t3.textContent = "3D";
+        t3.textContent = "Visa i 3D";
         t3.setAttribute("aria-pressed", "false");
-        t3.title = "Visa priset som höjd";
+        t3.title = "Visa priset per kvm som höjd";
         t3.addEventListener("click", () => self.set3d(!self.is3d));
         self.toggle3d = t3;
         box.append(county, t3);
@@ -194,10 +219,8 @@ export class AreaMap {
     this.is3d = on;
     const m = this.map;
     m.setLayoutProperty(LAYER.extrude, "visibility", on ? "visible" : "none");
-    m.setLayoutProperty(LAYER.fill, "visibility", on ? "none" : "visible");
-    m.setLayoutProperty(LAYER.outline, "visibility", on ? "none" : "visible");
-    m.setLayoutProperty(LAYER.hover, "visibility", on ? "none" : "visible");
-    this.toggle3d.setAttribute("aria-pressed", String(on));
+    for (const id of FLAT_LAYERS) m.setLayoutProperty(id, "visibility", on ? "none" : "visible");
+    this.toggle3d?.setAttribute("aria-pressed", String(on));
     this.labels.setVisible(!on);
     this.opts.wrap.classList.toggle("is-3d", on);
     if (on) {

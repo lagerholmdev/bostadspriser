@@ -3,7 +3,7 @@
  * pil upp/ner flyttar, Enter väljer, Escape stänger (och tömmer vid andra tryck).
  */
 import { html } from "../../lib/html";
-import { KIND_LABEL } from "./panel/detail";
+import { KIND_LABEL } from "../../lib/data";
 import { search, type SearchHit } from "./search-index";
 
 export interface SearchElements {
@@ -58,7 +58,8 @@ export function initSearch(el: SearchElements, onPick: (slug: string) => void): 
       : html`<li class="opt-empty" role="presentation">Inget område matchar ”${q}”. Prova en kommun eller stadsdel, till exempel Solna eller Aspudden.</li>`.value;
     status.textContent = hits.length ? `${hits.length} ${hits.length === 1 ? "träff" : "träffar"}` : "Inga träffar";
     open(true);
-    setActive(hits.length ? 0 : -1);
+    // Ingen träff markeras i förväg: Enter väljer ändå den första, och skärmläsaren läser inte upp ett val som inte gjorts.
+    setActive(-1);
   }
 
   function pick(i: number) {
@@ -88,9 +89,9 @@ export function initSearch(el: SearchElements, onPick: (slug: string) => void): 
         if (isOpen && hits.length) setActive(active <= 0 ? hits.length - 1 : active - 1);
         break;
       case "Enter":
-        if (isOpen && active >= 0) {
+        if (isOpen && hits.length) {
           e.preventDefault();
-          pick(active);
+          pick(active >= 0 ? active : 0);
         }
         break;
       case "Escape":

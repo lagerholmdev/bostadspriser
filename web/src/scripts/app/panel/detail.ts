@@ -1,17 +1,11 @@
 /** Områdesdetaljen i panelen: nyckeltal, fakta och vägar vidare. */
 import { budgetStatus, estimatedCost, affordableSize } from "../../../lib/budget";
-import { countyStat, isThin, similarNeighbours, stat } from "../../../lib/data";
-import { MISSING_TEXT, change, mkr, money, number, ordinal, relative } from "../../../lib/format";
+import { KIND_LABEL, countyStat, isThin, placeInCounty, shownStat, similarNeighbours } from "../../../lib/data";
+import { MISSING_TEXT, change, mkr, money, number, rankText, relative } from "../../../lib/format";
 import type { Area, MissingReason, Period, Stat } from "../../../lib/types";
 import type { AppState } from "../../../lib/url";
-import { html, attr, type Html } from "../../../lib/html";
-import { rankOf } from "../model";
-import { CHANGE_LABEL, CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, months, PERIOD_SHORT } from "./text";
-
-export const KIND_LABEL = {
-  district: "Stadsdelsområde i Stockholms stad",
-  municipality: "Kommun i Stockholms län",
-} as const;
+import { html, type Html } from "../../../lib/html";
+import { CHANGE_LABEL, CITY_HOUSE_NOTE, COMPARED_TO, HOUSING_MANY, changeSentence, months, PERIOD_SHORT } from "./text";
 
 type Field = "sales" | "pricePerSqm" | "meanPrice" | "change";
 
@@ -32,24 +26,24 @@ export interface DetailOptions {
 
 export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
   const { housing, period } = s;
-  const st = stat(area, housing, period);
+  const st = shownStat(area, housing, period);
   const value = st?.pricePerSqm ?? null;
   const thin = isThin(st, period);
   const county = countyStat(housing, period).pricePerSqm;
   const cityHouse = housing === "house" && area.houseScope === "city";
   const ratio = value != null && county ? value / county - 1 : null;
-  const rank = rankOf(area, housing, period);
-  const other: Period = period === "m3" ? "m12" : "m3";
-  const changeNow = st?.change ?? null;
-  const changeOther = stat(area, housing, other)?.change ?? null;
-  const changeFact = (p: Period, v: number | null) =>
-    fact(
-      CHANGE_LABEL[p],
-      v == null ? missingText(stat(area, housing, p), "change") : change(v),
-      COMPARED_TO[p],
-    );
+  const rank = placeInCounty(area, housing, period);
+  const stOf = (p: Period) => (p === period ? st : shownStat(area, housing, p));
+  const changeOf = (p: Period) => stOf(p)?.change ?? null;
+  const changeFact = (p: Period) => {
+    const v = changeOf(p);
+    return fact(CHANGE_LABEL[p], v == null ? missingText(stOf(p), "change") : change(v), COMPARED_TO[p]);
+  };
+  const sentence = changeSentence(changeOf("m12"), changeOf("m3"));
 
-  const neighbours = similarNeighbours(area, 3, housing, period);
+  const neighbours = similarNeighbours(area, 4, housing, period)
+    .filter((n) => shownStat(n, housing, period)?.pricePerSqm != null)
+    .slice(0, 3);
   const href = `${opts.base}omrade/${area.slug}/`;
 
   return html`
@@ -62,9 +56,10 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
         ? html`<p class="kpi kpi-missing">Pris saknas</p><p class="kpi-sentence">${missingText(st, "pricePerSqm")}.</p>`
         : html`<p class="kpi${thin ? " is-thin" : ""}"><span class="kpi-num">${number(value)}</span> <span class="kpi-unit">kr/kvm</span></p>
             <p class="kpi-sentence">${capitalize(relative(ratio))} länets snitt på ${number(county)} kr/kvm.</p>`}
-      ${thin && st?.sales != null
+      ${thin && st?.sales != null && value != null
         ? html`<p class="thin-note">Bygger på bara ${number(st.sales)} affärer, så värdet är osäkert.</p>`
         : ""}
+      ${sentence ? html`<p class="change-sentence">${sentence}</p>` : ""}
       ${cityHouse ? html`<p class="thin-note">${CITY_HOUSE_NOTE} Siffrorna gäller staden, inte ${area.name}.</p>` : ""}
       ${s.view === "budget" && value != null ? budgetBox(value, s) : ""}
       <dl class="facts">
@@ -74,26 +69,28 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
           st?.sales == null ? missingText(st, "sales") : number(st.sales),
           thin && st?.sales != null ? "få affärer" : undefined,
         )}
-        ${changeFact("m3", period === "m3" ? changeNow : changeOther)}
-        ${changeFact("m12", period === "m12" ? changeNow : changeOther)}
+        ${changeFact("m12")}
+        ${changeFact("m3")}
         ${fact(
           "Plats i länet",
-          rank ? `${rank.rank === 1 ? "Dyrast" : `${ordinal(rank.rank)} dyrast`} av ${rank.total}` : "Saknas",
+          rank ? rankText(rank.rank, rank.total) : "Saknas",
           cityHouse ? "för hela Stockholms stad" : undefined,
         )}
       </dl>
       <div class="actions">
         <a class="btn btn-primary" href="${href}">Läs mer om ${area.name}</a>
-        <button type="button" class="btn" data-action="compare" data-slug="${area.slug}"${attr("aria-pressed", opts.inCompare ? "true" : "false")}>
+        <button type="button" class="${`btn${opts.inCompare ? " is-on" : ""}`}" data-action="compare" data-slug="${area.slug}">
           ${opts.inCompare ? "Ta bort ur jämförelsen" : "Lägg till i jämförelsen"}
         </button>
+        <button type="button" class="btn btn-quiet-plain" data-action="copy-link">Kopiera länk</button>
       </div>
+      <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
       ${neighbours.length
         ? html`<div class="neighbours">
             <h3 class="group-title">Grannar med liknande pris</h3>
             <ul class="chips-plain">
               ${neighbours.map((n) => {
-                const v = stat(n, housing, period)?.pricePerSqm;
+                const v = shownStat(n, housing, period)?.pricePerSqm;
                 return html`<li><button type="button" class="link-btn" data-slug="${n.slug}">${n.name}</button> <span class="muted">${number(v)} kr/kvm</span></li>`;
               })}
             </ul>
@@ -103,7 +100,7 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
 }
 
 function budgetBox(value: number, s: AppState): Html {
-  const status = budgetStatus(s.budget, s.sqm, value)!;
+  const status = budgetStatus(s.budget, s.sqm, value) ?? "no";
   const size = Math.floor(affordableSize(s.budget, value));
   const label = status === "ok" ? "Budgeten räcker" : status === "near" ? "Budgeten räcker nästan" : "Budgeten räcker inte";
   return html`<div class="${`budget-box is-${status}`}">

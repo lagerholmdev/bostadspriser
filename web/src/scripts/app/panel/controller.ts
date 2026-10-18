@@ -4,21 +4,38 @@
  */
 import { BUDGET_RANGE, SIZE_RANGE, typicalRooms } from "../../../lib/budget";
 import { getArea } from "../../../lib/data";
-import { mkr } from "../../../lib/format";
-import { VIEWS, type AppState, type View } from "../../../lib/url";
-import { addTo, loadCompare, MAX_COMPARE, removeFrom, saveCompare } from "../compare";
+import { mkr, mkrSpoken } from "../../../lib/format";
 import type { Html } from "../../../lib/html";
-import { budgetModel, changeModel, priceModel, type SortOrder } from "../model";
-import type { Store } from "../state";
+import { VIEWS, withHousing, withView, type AppState, type View } from "../../../lib/url";
+import { addTo, loadCompare, MAX_COMPARE, removeFrom, saveCompare } from "../compare";
+import { budgetModel, changeModel, mapPaint, priceModel, type SortOrder } from "../model";
+import type { HistoryMode, Store } from "../state";
 import { detail } from "./detail";
-import { mapLegend } from "./legend";
+import { legend, mapLegend } from "./legend";
 import { peekHtml } from "./quick";
 import { tray } from "./tray";
-import { budgetHeadline, budgetMax, budgetResults, changeLists, changeSummary, priceList, priceSummary } from "./views";
+import {
+  budgetBest,
+  budgetHeadline,
+  budgetMax,
+  budgetResults,
+  changeLists,
+  changeSummary,
+  priceList,
+  priceSummary,
+} from "./views";
 
 const SORT_KEY = "prislandskap:sortering";
-const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const SITE_TITLE = "Stockholms prislandskap";
+const VIEW_TITLE: Partial<Record<View, string>> = {
+  budget: `Var har jag råd? | ${SITE_TITLE}`,
+  forandring: `Förändring i bostadspriser | ${SITE_TITLE}`,
+};
+/** Så länge efter sista ändringen av ett reglage läses resultatet upp. */
+const ANNOUNCE_DELAY = 600;
+
+const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isWide = () => window.matchMedia("(min-width: 960px)").matches;
 
 export interface PanelOptions {
   base: string;
@@ -28,8 +45,13 @@ export class PanelController {
   private sort: SortOrder = "desc";
   private compare: string[];
   private trayTimer: number | undefined;
+  private announceTimer: number | undefined;
+  /** Senast ritade HTML per yta, så att oförändrade delar inte ritas om (och fokus inte tappas). */
+  private rendered = new Map<string, string>();
   private readonly baseTitle = document.title;
   private q = <T extends Element = HTMLElement>(sel: string) => this.root.querySelector<T>(sel);
+  /** Kopierar sidans adress; sätts av main.ts när delningen kopplats in. */
+  copyLink: ((status: HTMLElement | null) => void) | null = null;
 
   constructor(
     private readonly root: HTMLElement,
@@ -44,12 +66,12 @@ export class PanelController {
     }
     this.compare = loadCompare((s) => !!getArea(s));
     this.bind();
-    store.subscribe((s, prev) => this.render(s, prev));
+    store.subscribe((s, prev, mode) => this.render(s, prev, mode));
   }
 
   /** Första ritningen efter att sidan laddats (adressen kan skilja sig från byggets standardläge). */
   start(): void {
-    this.render(this.store.state, null);
+    this.render(this.store.state, null, "none");
     this.renderTray();
     this.root.closest(".app")?.removeAttribute("data-pending");
   }
@@ -57,11 +79,11 @@ export class PanelController {
   selectArea(slug: string | null, opts: { focus?: boolean } = {}): void {
     const prev = this.store.state.area;
     if (slug === prev) {
-      if (slug && opts.focus) this.focusDetail(true);
+      if (slug && opts.focus) this.revealDetail({ focus: true });
       return;
     }
     this.store.set({ area: slug }, "push");
-    if (slug && opts.focus) this.focusDetail(true);
+    if (slug && opts.focus) this.revealDetail({ focus: true });
     if (!slug && prev && opts.focus) this.focusRow(prev);
   }
 
@@ -71,7 +93,7 @@ export class PanelController {
     // Flikar: klick och piltangenter (automatisk aktivering).
     const tabs = [...this.root.querySelectorAll<HTMLButtonElement>("[role=tab]")];
     for (const tab of tabs) {
-      tab.addEventListener("click", () => this.setView(tab.dataset.view as View));
+      tab.addEventListener("click", () => this.setView(tab.dataset.view));
       tab.addEventListener("keydown", (e) => {
         const i = tabs.indexOf(tab);
         let j = -1;
@@ -79,17 +101,19 @@ export class PanelController {
         else if (e.key === "ArrowLeft") j = (i - 1 + tabs.length) % tabs.length;
         else if (e.key === "Home") j = 0;
         else if (e.key === "End") j = tabs.length - 1;
-        if (j < 0) return;
+        const next = tabs[j];
+        if (!next) return;
         e.preventDefault();
-        tabs[j].focus();
-        this.setView(tabs[j].dataset.view as View);
+        next.focus();
+        this.setView(next.dataset.view);
       });
     }
 
     this.root.addEventListener("change", (e) => {
       const t = e.target as HTMLInputElement;
-      if (t.name === "bostad") this.store.set({ housing: t.value === "house" ? "house" : "apartment" });
-      else if (t.name === "period") this.store.set({ period: t.value === "m12" ? "m12" : "m3" });
+      if (t.name === "bostad") {
+        this.store.replace(withHousing(this.store.state, t.value === "house" ? "house" : "apartment"));
+      } else if (t.name === "period") this.store.set({ period: t.value === "m12" ? "m12" : "m3" });
       else if (t.name === "sortering") {
         this.sort = t.value as SortOrder;
         try {
@@ -109,36 +133,58 @@ export class PanelController {
     this.root.addEventListener("click", (e) => {
       const t = (e.target as HTMLElement).closest<HTMLElement>("button, a");
       if (!t || !this.root.contains(t)) return;
-      const action = t.dataset.action;
+      const { action, slug } = t.dataset;
       if (action === "step") {
-        this.step(t.dataset.control!, Number(t.dataset.dir));
+        this.step(t.dataset.control, Number(t.dataset.dir), t);
       } else if (action === "peek-go") {
-        this.focusDetail(true, true);
+        this.revealDetail({ focus: true, force: true });
       } else if (action === "back") {
         this.selectArea(null, { focus: true });
-      } else if (action === "compare") {
-        this.toggleCompare(t.dataset.slug!);
-      } else if (action === "remove-compare") {
-        this.removeCompare(t.dataset.slug!);
-      } else if (!action && t.dataset.slug && t.tagName === "BUTTON") {
-        this.selectArea(t.dataset.slug, { focus: true });
+      } else if (action === "compare" && slug) {
+        this.toggleCompare(slug);
+      } else if (action === "remove-compare" && slug) {
+        this.removeCompare(slug);
+      } else if (action === "copy-link") {
+        this.copyLink?.(this.q("#copy-status"));
+      } else if (action === "to-filters") {
+        e.preventDefault();
+        const radio = this.q<HTMLInputElement>("#filters input:checked");
+        radio?.focus();
+        radio?.scrollIntoView({ block: "center", behavior: reduced() ? "auto" : "smooth" });
+      } else if (!action && slug && t.tagName === "BUTTON") {
+        this.selectArea(slug, { focus: true });
       }
     });
   }
 
-  private setView(view: View): void {
-    if (!VIEWS.includes(view)) return;
-    this.store.set({ view });
+  private setView(view: string | undefined): void {
+    const v = VIEWS.find((x) => x === view);
+    if (!v || v === this.store.state.view) return;
+    this.store.replace(withView(this.store.state, v), "push");
+    this.scrollTabsIntoView();
   }
 
-  private step(control: string, dir: number): void {
+  /** På mobilen: lägg flikraden precis under sidhuvudet, så att den nya vyns innehåll syns. */
+  private scrollTabsIntoView(): void {
+    if (isWide()) return;
+    const tabs = this.q<HTMLElement>(".tabs");
+    if (!tabs) return;
+    requestAnimationFrame(() => {
+      const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
+      const delta = tabs.getBoundingClientRect().top - headerBottom - 4;
+      if (Math.abs(delta) > 2) window.scrollBy({ top: delta, behavior: reduced() ? "auto" : "smooth" });
+    });
+  }
+
+  private step(control: string | undefined, dir: number, btn: HTMLElement): void {
+    if (btn.getAttribute("aria-disabled") === "true") return;
     const s = this.store.state;
     if (control === "budget") {
       const v = Math.min(BUDGET_RANGE.max, Math.max(BUDGET_RANGE.min, s.budget + dir * BUDGET_RANGE.step));
-      this.store.set({ budget: v });
-    } else {
+      if (v !== s.budget) this.store.set({ budget: v });
+    } else if (control === "size") {
       const v = Math.min(SIZE_RANGE.max, Math.max(SIZE_RANGE.min, s.sqm + dir * SIZE_RANGE.step));
-      this.store.set({ sqm: v });
+      if (v !== s.sqm) this.store.set({ sqm: v });
     }
   }
 
@@ -194,7 +240,7 @@ export class PanelController {
 
   /* ---------- Ritning ---------- */
 
-  private render(s: AppState, prev: AppState | null): void {
+  private render(s: AppState, prev: AppState | null, mode: HistoryMode): void {
     const app = this.root.closest<HTMLElement>(".app");
     if (app) app.dataset.view = s.view;
 
@@ -212,8 +258,8 @@ export class PanelController {
     this.check("sortering", this.sort);
     // I Förändring betyder perioden "på tre månader" eller "på ett år" (se panel/text.ts).
     for (const span of this.root.querySelectorAll<HTMLElement>("[data-change-label]")) {
-      const t = s.view === "forandring" ? span.dataset.changeLabel! : span.dataset.label!;
-      if (span.textContent !== t) span.textContent = t;
+      const t = (s.view === "forandring" ? span.dataset.changeLabel : span.dataset.label) ?? "";
+      if (t && span.textContent !== t) span.textContent = t;
     }
     const houseNote = this.q("#house-note");
     if (houseNote) houseNote.hidden = s.housing !== "house";
@@ -228,16 +274,6 @@ export class PanelController {
     if (s.area) this.renderDetail(s);
     else this.renderActiveView(s);
 
-    // På datorn scrollar panelen för sig: visa detaljens början när ett nytt område öppnas
-    // (t.ex. via Bakåt eller kartan). På mobilen lämnas sidans scroll i fred.
-    if (s.area && prev && prev.area !== s.area && window.matchMedia("(min-width: 960px)").matches) {
-      const wrap = this.q<HTMLElement>("#detail");
-      const sc = this.q<HTMLElement>("#panel-scroll");
-      if (wrap && sc && wrap.getBoundingClientRect().top < sc.getBoundingClientRect().top) {
-        sc.scrollTop += wrap.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16;
-      }
-    }
-
     // Remsan under kartan (bara på mobilen) visar vad som valts på kartan.
     const peek = this.q("#peek");
     if (peek) {
@@ -245,15 +281,44 @@ export class PanelController {
       if (s.area) this.slot("peek", peekHtml(s.area, s));
     }
 
-    // Kartans förklaring följer vyn.
-    if (!prev || prev.view !== s.view) {
-      const ml = document.querySelector<HTMLElement>("[data-slot=map-legend]");
-      if (ml) ml.innerHTML = mapLegend(s.view).value;
-    }
+    // Kartans förklaring följer vyn, bostadstypen och perioden.
+    const ml = document.querySelector<HTMLElement>("[data-slot=map-legend]");
+    if (ml) this.paintInto("map-legend", ml, mapLegend(s, mapPaint(s).nodata.length > 0));
 
     const area = s.area ? getArea(s.area) : null;
-    document.title = area ? `${area.name}: bostadspriser | ${SITE_TITLE}` : this.baseTitle;
+    document.title = area ? `${area.name}: bostadspriser | ${SITE_TITLE}` : (VIEW_TITLE[s.view] ?? this.baseTitle);
 
+    if (!prev) return;
+    const opened = !!s.area && prev.area !== s.area;
+    if (mode === "none") {
+      // Bakåt/Framåt: lägg fokus där innehållet ändrades.
+      if (opened) this.revealDetail({ focus: true });
+      else if (!s.area && prev.area) this.focusRow(prev.area);
+    } else if (opened) {
+      // Nytt område (t.ex. från kartan): visa detaljens början, med "Tillbaka till listan".
+      this.revealDetail({ focus: false });
+    }
+
+    // Läs upp resultatet i "Var har jag råd?" en stund efter sista ändringen.
+    if (
+      s.view === "budget" &&
+      !s.area &&
+      prev.view === "budget" &&
+      (s.budget !== prev.budget || s.sqm !== prev.sqm || s.housing !== prev.housing || s.period !== prev.period)
+    ) {
+      this.scheduleAnnounce();
+    }
+  }
+
+  private scheduleAnnounce(): void {
+    window.clearTimeout(this.announceTimer);
+    this.announceTimer = window.setTimeout(() => {
+      const status = this.q("#budget-status");
+      if (!status) return;
+      const head = this.q("[data-slot=budget-headline]")?.textContent?.trim() ?? "";
+      const best = this.q("[data-slot=budget-best]")?.textContent?.trim() ?? "";
+      status.textContent = [head ? `${head}.` : "", best].filter(Boolean).join(" ");
+    }, ANNOUNCE_DELAY);
   }
 
   private check(name: string, value: string): void {
@@ -271,16 +336,20 @@ export class PanelController {
     const pct = (v: number, r: { min: number; max: number }) => `${((v - r.min) / (r.max - r.min)) * 100}%`;
     b?.style.setProperty("--p", pct(s.budget, BUDGET_RANGE));
     z?.style.setProperty("--p", pct(s.sqm, SIZE_RANGE));
-    b?.setAttribute("aria-valuetext", mkr(s.budget));
-    z?.setAttribute("aria-valuetext", `${s.sqm} kvm`);
+    b?.setAttribute("aria-valuetext", mkrSpoken(s.budget));
+    z?.setAttribute("aria-valuetext", `${s.sqm} kvadratmeter`);
     this.text("#budget-out", mkr(s.budget));
     this.text("#size-out", `${s.sqm} kvm`);
-    this.text("#size-hint", `ungefär ${typicalRooms(s.sqm)}`);
+    // Rumsantalet säger något om lägenheter, men inte om villor.
+    this.text("#size-hint", s.housing === "house" ? "Villans boarea" : `ungefär ${typicalRooms(s.sqm)}`);
     for (const btn of this.root.querySelectorAll<HTMLButtonElement>("[data-action=step]")) {
       const isBudget = btn.dataset.control === "budget";
       const v = isBudget ? s.budget : s.sqm;
       const r = isBudget ? BUDGET_RANGE : SIZE_RANGE;
-      btn.disabled = Number(btn.dataset.dir) < 0 ? v <= r.min : v >= r.max;
+      const atEnd = Number(btn.dataset.dir) < 0 ? v <= r.min : v >= r.max;
+      // aria-disabled i stället för disabled: knappen behåller fokus när gränsen nås.
+      if (atEnd) btn.setAttribute("aria-disabled", "true");
+      else btn.removeAttribute("aria-disabled");
     }
   }
 
@@ -289,9 +358,24 @@ export class PanelController {
     if (el && el.textContent !== t) el.textContent = t;
   }
 
+  private paintInto(key: string, el: HTMLElement, h: Html): void {
+    if (this.rendered.get(key) === h.value) return;
+    this.rendered.set(key, h.value);
+    el.innerHTML = h.value;
+  }
+
   private slot(name: string, h: Html): void {
     const el = this.root.querySelector<HTMLElement>(`[data-slot="${name}"]`);
-    if (el && el.innerHTML !== h.value) el.innerHTML = h.value;
+    if (el) this.paintInto(name, el, h);
+  }
+
+  /** Rita om och behåll en öppnad <details> öppen. */
+  private slotKeepOpen(name: string, h: Html): void {
+    const sel = `[data-slot="${name}"] details`;
+    const wasOpen = this.root.querySelector<HTMLDetailsElement>(sel)?.open;
+    this.slot(name, h);
+    const d = this.root.querySelector<HTMLDetailsElement>(sel);
+    if (d && wasOpen) d.open = true;
   }
 
   private renderActiveView(s: AppState): void {
@@ -303,18 +387,13 @@ export class PanelController {
       const m = budgetModel(s.housing, s.period, s.budget, s.sqm);
       this.slot("budget-max", budgetMax(m));
       this.text("[data-slot=budget-headline]", budgetHeadline(m, s.budget, s.sqm));
-      // Behåll "Räcker inte" öppen om användaren har öppnat den.
-      const wasOpen = this.root.querySelector<HTMLDetailsElement>("[data-slot=budget-results] details")?.open;
-      this.slot("budget-results", budgetResults(m, s.budget, s.sqm, s.housing));
-      const d = this.root.querySelector<HTMLDetailsElement>("[data-slot=budget-results] details");
-      if (d && wasOpen) d.open = true;
+      this.slot("budget-best", budgetBest(m));
+      this.slotKeepOpen("budget-results", budgetResults(m, s.budget, s.sqm, s.housing));
     } else {
       const m = changeModel(s.housing, s.period);
       this.slot("change-summary", changeSummary(m, s.housing, s.period));
-      const wasOpen = this.root.querySelector<HTMLDetailsElement>("[data-slot=change-lists] details")?.open;
-      this.slot("change-lists", changeLists(m, s.housing));
-      const d = this.root.querySelector<HTMLDetailsElement>("[data-slot=change-lists] details");
-      if (d && wasOpen) d.open = true;
+      this.slot("change-legend", legend(s));
+      this.slotKeepOpen("change-lists", changeLists(m, s.housing, s.period));
     }
   }
 
@@ -331,20 +410,33 @@ export class PanelController {
     );
   }
 
-  /* ---------- Fokus ---------- */
+  /* ---------- Fokus och scroll ---------- */
 
-  private focusDetail(scroll: boolean, force = false): void {
+  /**
+   * Visa områdesdetaljen med "Tillbaka till listan" synlig. På datorn scrollar panelen för sig;
+   * på mobilen scrollar sidan och bara om detaljen inte redan syns (eller om `force`).
+   */
+  private revealDetail(o: { focus: boolean; force?: boolean }): void {
     requestAnimationFrame(() => {
       const wrap = this.q<HTMLElement>("#detail");
-      if (scroll && wrap) {
-        // Panelen scrollar på datorn, sidan på mobilen; scrollIntoView tar hänsyn till scroll-margin.
-        const panelTop = this.q<HTMLElement>("#panel-scroll")?.getBoundingClientRect().top ?? 0;
+      if (!wrap) return;
+      const smooth = !!o.force && !reduced();
+      if (isWide()) {
+        const sc = this.q<HTMLElement>("#panel-scroll");
+        if (sc) {
+          const box = sc.getBoundingClientRect();
+          const top = wrap.getBoundingClientRect().top;
+          if (top < box.top + 4 || top > box.top + box.height * 0.4) {
+            sc.scrollTo({ top: sc.scrollTop + top - box.top - 12, behavior: smooth ? "smooth" : "auto" });
+          }
+        }
+      } else {
         const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
         const top = wrap.getBoundingClientRect().top;
-        const visible = top >= Math.max(panelTop, headerBottom) && top < window.innerHeight * 0.6;
-        if (!visible || force) wrap.scrollIntoView({ block: "start", behavior: force && !reduced() ? "smooth" : "auto" });
+        const visible = top >= headerBottom && top < window.innerHeight * 0.6;
+        if (!visible || o.force) wrap.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
       }
-      this.q<HTMLElement>("#detail-title")?.focus({ preventScroll: true });
+      if (o.focus) this.q<HTMLElement>("#detail-title")?.focus({ preventScroll: true });
     });
   }
 
@@ -363,6 +455,6 @@ export class PanelController {
 
   /** Visa områdets detalj utan att flytta fokus (t.ex. efter klick på kartan). */
   revealDetailQuietly(): void {
-    this.focusDetail(false);
+    this.revealDetail({ focus: false });
   }
 }

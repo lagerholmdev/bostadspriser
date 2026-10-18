@@ -32,7 +32,7 @@ def test_env_wins(tmp_path: Path):
 
 
 def test_clear_error_in_swedish(tmp_path: Path):
-    with pytest.raises(PipelineError, match="Hittar inte repots rot.*PRISLANDSKAP_ROOT"):
+    with pytest.raises(PipelineError, match=r"Hittar inte repots rot.*PRISLANDSKAP_ROOT"):
         find_repo_root([tmp_path])
     with pytest.raises(PipelineError, match="ingen katalog"):
         find_repo_root([tmp_path], env=str(tmp_path / "saknas"))

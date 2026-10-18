@@ -1,6 +1,7 @@
 /**
  * "Dela": systemets delningsmeny på mobilen, annars kopiera länken. Går ingetdera visas
- * länken i ett markerat textfält som man kan kopiera själv.
+ * länken i ett markerat textfält som man kan kopiera själv. "Kopiera länk" i områdesdetaljen
+ * använder samma kopiering (copyLink), utan delningsmenyn.
  */
 import { track } from "./analytics";
 
@@ -11,14 +12,36 @@ export interface ShareElements {
   fallbackInput: HTMLInputElement;
 }
 
-export function initShare(el: ShareElements, beforeShare: () => void): void {
-  let timer: number | undefined;
-  const say = (msg: string) => {
-    window.clearTimeout(timer);
-    el.status.textContent = msg;
-    timer = window.setTimeout(() => (el.status.textContent = ""), 4000);
+export interface Sharer {
+  /** Kopiera adressen och skriv resultatet i `status` (eller i delningsknappens statusrad). */
+  copyLink(status?: HTMLElement | null): Promise<void>;
+}
+
+export function initShare(el: ShareElements, beforeShare: () => void): Sharer {
+  const timers = new WeakMap<HTMLElement, number>();
+  const say = (target: HTMLElement, msg: string) => {
+    window.clearTimeout(timers.get(target));
+    target.textContent = msg;
+    timers.set(
+      target,
+      window.setTimeout(() => (target.textContent = ""), 4000),
+    );
   };
   const coarse = window.matchMedia("(pointer: coarse)").matches;
+
+  async function copy(url: string, status: HTMLElement): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(url);
+      say(status, "Länken är kopierad");
+    } catch {
+      el.fallbackInput.value = url;
+      el.fallback.hidden = false;
+      el.fallbackInput.focus();
+      el.fallbackInput.select();
+      say(status, "Kopiera länken i fältet");
+    }
+    track("delning");
+  }
 
   el.button.addEventListener("click", async () => {
     beforeShare();
@@ -33,22 +56,19 @@ export function initShare(el: ShareElements, beforeShare: () => void): void {
         if ((err as DOMException)?.name === "AbortError") return; // användaren ångrade sig
       }
     }
-    try {
-      await navigator.clipboard.writeText(url);
-      say("Länken är kopierad");
-      track("delning");
-    } catch {
-      el.fallbackInput.value = url;
-      el.fallback.hidden = false;
-      el.fallbackInput.focus();
-      el.fallbackInput.select();
-      say("Kopiera länken i fältet");
-      track("delning");
-    }
+    await copy(url, el.status);
   });
 
   el.fallback.querySelector<HTMLButtonElement>("[data-action=close-share]")?.addEventListener("click", () => {
     el.fallback.hidden = true;
     el.button.focus();
   });
+
+  return {
+    async copyLink(status) {
+      beforeShare();
+      el.fallback.hidden = true;
+      await copy(location.href, status ?? el.status);
+    },
+  };
 }

@@ -1,7 +1,21 @@
+# Node och Astro
+node_modules/
+web/dist/
+web/.astro/
+
+# Skrivs av pipelinen (python -m prislandskap export/og), checkas inte in
+web/src/generated/
+web/public/og/
+
 # Python
 __pycache__/
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
 .venv/
+build/
+
+# Skrapans cache
 .cache/
 
 # Editor/OS

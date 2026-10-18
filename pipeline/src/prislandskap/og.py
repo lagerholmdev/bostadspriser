@@ -21,6 +21,8 @@ from prislandskap.models import MissingReason, Period, Snapshot, Stat
 from prislandskap.palette import (
     ACCENT,
     BUDGET_COLORS,
+    BUDGET_NEAR_MARGIN,
+    CHANGE_STEPS,
     INK,
     INK_2,
     INK_3,
@@ -31,7 +33,8 @@ from prislandskap.palette import (
     PRICE_COLORS,
     SURFACE,
     Color,
-    change_color,
+    change_class_color,
+    change_step_color,
     price_color,
 )
 from prislandskap.text import period_labels
@@ -45,10 +48,23 @@ MAP_X = 620  # kartpanelens vänsterkant
 BORDER_PX = 1.5
 OUTLINE_PX = 4
 MIN_SPAN_DEG = 0.07  # ungefär 8 km: små områden som Essingen visas med sina grannar
+REMOTE_SPAN_DEG = 0.42  # ungefär 47 km: avlägsna områden visas med mer omgivning
+REMOTE_NEIGHBOURS = 2  # högst så här många grannar räknas som avlägset (t.ex. Nykvarn)
+CONTEXT_AREAS = 4  # så många områden runt ett avlägset område får etikett
+THIN_SALES = 60  # färre sålda bostadsrätter på tre månader ger "osäkert värde", som THIN_SALES.m3 i data.ts
 
 BUDGET = 5_000_000  # samma standardvärden som web/src/lib/budget.ts
 BUDGET_SQM = 60
-BUDGET_NEAR = 0.1
+BUDGET_NEAR = BUDGET_NEAR_MARGIN  # design/scales.json
+
+# Märket från web/src/components/common/Logo.astro (viewBox 28×28): tre gavlar i prisskalans färger
+# och en kaj i accentfärgen.
+LOGO_GABLES: tuple[tuple[tuple[tuple[float, float], ...], Color], ...] = (
+    (((2, 26), (2, 13), (6, 9), (10, 13), (10, 26)), PRICE_COLORS[2]),
+    (((10, 26), (10, 8), (14, 3.5), (18, 8), (18, 26)), PRICE_COLORS[4]),
+    (((18, 26), (18, 11), (22, 7), (26, 11), (26, 26)), PRICE_COLORS[5]),
+)
+LOGO_BASE = (1, 25.5, 27, 27)  # x0, y0, x1, y1, rundad
 
 MISSING_TEXT: dict[MissingReason, str] = {
     "F": "För få affärer för ett snittpris",
@@ -93,6 +109,7 @@ class Legend:
     swatches: list[tuple[Color, str]]
     caption: str
     centered: bool = False
+    min_swatch: float = 34
 
 
 @dataclass
@@ -109,6 +126,7 @@ class Card:
     legend: Legend
     highlight: str | None = None
     labels: list[str] = field(default_factory=list)
+    note: str | None = None  # liten varningsrad under nyckeltalen, t.ex. vid få affärer
 
 
 # ---------- ritning ----------
@@ -243,11 +261,14 @@ def _overlaps(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
 
 def draw_legend(c: Canvas, legend: Legend) -> None:
     """Färgrutor med text längst ner i kartpanelen, på vit platta."""
-    sw, gap, pad = 34, 2, 14
+    gap, pad, tick = 2, 14, 14
+    labels = [label for _, label in legend.swatches if label]
+    widest = max((c.width(label, 400, tick) for label in labels), default=0)
+    sw = max(legend.min_swatch, widest + 12) if legend.centered else legend.min_swatch
     n = len(legend.swatches)
     inner = max(n * sw + (n - 1) * gap, c.width(legend.caption, 400, 14))
     x0, y1 = W - 24 - inner - 2 * pad, H - 24
-    y0 = y1 - 66
+    y0 = y1 - 68
     c.draw.rounded_rectangle(
         [x0 * S, y0 * S, (W - 24) * S, y1 * S], radius=8 * S, fill=SURFACE, outline=LINE, width=S
     )
@@ -256,7 +277,7 @@ def draw_legend(c: Canvas, legend: Legend) -> None:
     for color, label in legend.swatches:
         c.draw.rectangle([x * S, (y + 22) * S, (x + sw) * S, (y + 32) * S], fill=color)
         if label:
-            c.text((x + (sw / 2 if legend.centered else sw), y + 48), label, 400, 13, INK_2, anchor="ms")
+            c.text((x + (sw / 2 if legend.centered else sw), y + 50), label, 400, tick, INK_2, anchor="ms")
         x += sw + gap
 
 
@@ -292,8 +313,9 @@ def fit_title(c: Canvas, title: str) -> tuple[list[str], int]:
 def draw_text(c: Canvas, card: Card) -> None:
     """Sajtnamn överst, källa nederst och huvudblocket centrerat däremellan."""
     x = TEXT_X
-    c.draw.rounded_rectangle([x * S, 47 * S, (x + 12) * S, 59 * S], radius=3 * S, fill=ACCENT)
-    c.text((x + 22, 60), SITE_NAME, 600, 20, INK_2)
+    logo = 32
+    draw_logo(c, x - logo / 28, 61 - 27 * logo / 28, logo)  # kajen i linje med textens baslinje
+    c.text((x + logo + 10, 60), SITE_NAME, 600, 20, INK_2)
     c.text((x, H - 48), f"Källa: {SOURCE_NAME}", 400, 17, INK_3)
 
     lines, size = fit_title(c, card.title)
@@ -303,7 +325,8 @@ def draw_text(c: Canvas, card: Card) -> None:
     title_ys = [eyebrow_y + 22 + round(size * 0.74) + i * leading for i in range(len(lines))]
     big_y = title_ys[-1] + 40 + 70
     line_ys = [big_y + 58, big_y + 96][: len(card.lines)]
-    top = 96 + (H - 96 - 84 - line_ys[-1]) / 2
+    note_y = line_ys[-1] + 40 if card.note else None
+    top = 96 + (H - 96 - 84 - (note_y or line_ys[-1])) / 2
 
     c.text((x, top + eyebrow_y), card.eyebrow, 400, 20, INK_3)
     for line, y in zip(lines, title_ys, strict=True):
@@ -312,6 +335,30 @@ def draw_text(c: Canvas, card: Card) -> None:
     c.text((x + big_w + 12, top + big_y), card.unit, 400, 28, INK_2)
     for i, (parts, y) in enumerate(zip(card.lines, line_ys, strict=False)):
         c.segments((x, top + y), parts, 24 if i == 0 else 21, INK if i == 0 else INK_2)
+    if card.note and note_y is not None:
+        draw_note(c, x, top + note_y, card.note)
+
+
+def draw_logo(c: Canvas, x: float, y: float, size: float = 28) -> None:
+    """Märket med övre vänstra hörnet i (x, y) och sidan size, i 1x-pixlar."""
+    k = size / 28
+    for points, color in LOGO_GABLES:
+        c.draw.polygon([((x + px * k) * S, (y + py * k) * S) for px, py in points], fill=color)
+    bx0, by0, bx1, by1 = LOGO_BASE
+    c.draw.rounded_rectangle(
+        [(x + bx0 * k) * S, (y + by0 * k) * S, (x + bx1 * k) * S, (y + by1 * k) * S],
+        radius=0.75 * k * S,
+        fill=ACCENT,
+    )
+
+
+def draw_note(c: Canvas, x: float, y: float, text: str) -> None:
+    """Varningsrad: en ring med utropstecken och texten, i hjälptextens färg."""
+    r = 9
+    cx, cy = x + r, y - 7
+    c.draw.ellipse([(cx - r) * S, (cy - r) * S, (cx + r) * S, (cy + r) * S], outline=INK_3, width=2 * S)
+    c.text((cx, cy + 0.5), "!", 700, 14, INK_3, anchor="mm")
+    c.text((x + 2 * r + 10, y), text, 400, 21, INK_2)
 
 
 def render(card: Card, features: list[Feature]) -> Image.Image:
@@ -319,7 +366,8 @@ def render(card: Card, features: list[Feature]) -> Image.Image:
     draw_map(c, card, features)
     draw_legend(c, card.legend)
     draw_text(c, card)
-    keys = [PAGE, SURFACE, INK, INK_2, INK_3, ACCENT, LINE, NODATA, *card.fills.values()]
+    keys = [PAGE, SURFACE, INK, INK_2, INK_3, ACCENT, LINE, NODATA, *(color for _, color in LOGO_GABLES)]
+    keys += list(card.fills.values())
     keys += [color for color, _ in card.legend.swatches]
     return c.result(keys)
 
@@ -333,12 +381,61 @@ def price_legend() -> Legend:
     return Legend(list(zip(PRICE_COLORS, labels, strict=True)), "Pris per kvm, tusen kr")
 
 
-def area_box(feature: Feature) -> BBox:
-    """Kartutsnitt: området i mitten med gott om omgivning, minst MIN_SPAN_DEG högt."""
+def change_legend(period: Period) -> Legend:
+    """Fem steg som på kartsidan. Gränserna står vid rutornas kanter: −4, −1, +1, +4 (på ett år)."""
+    flat, strong = CHANGE_STEPS[period]
+    ticks = [-strong, -flat, flat, strong]
+    labels = [f"{'+' if t > 0 else '−'}{fmt_num(abs(t))}" for t in ticks] + [""]
+    colors = [change_class_color(c, period) for c in (-2, -1, 0, 1, 2)]
+    return Legend(list(zip(colors, labels, strict=True)), "Förändring på ett år, procent", min_swatch=40)
+
+
+def fmt_num(v: float) -> str:
+    """4.0 -> '4', 0.5 -> '0,5'."""
+    return f"{v:g}".replace(".", ",")
+
+
+def area_box(feature: Feature, context: Sequence[Feature] = ()) -> BBox:
+    """Kartutsnitt: området i mitten med gott om omgivning, minst MIN_SPAN_DEG högt.
+
+    Med context (kommuner i länets utkant med högst REMOTE_NEIGHBOURS grannar) vidgas utsnittet till minst
+    REMOTE_SPAN_DEG och så att de närmaste områdenas etikettpunkter syns, så att man ser var området
+    ligger.
+    """
     factor = 2.6 if feature["properties"]["kind"] == "district" else 2.0
     x0, y0, x1, y1 = expand(bbox([feature["geometry"]]), factor)
-    grow = max(1.0, MIN_SPAN_DEG / (y1 - y0))
+    min_span = MIN_SPAN_DEG
+    if context:
+        lons = [f["properties"]["label"][0] for f in context]
+        lats = [f["properties"]["label"][1] for f in context]
+        # Etiketterna behöver luft: halva etikettbredden i sidled och en rad i höjdled
+        pad_x, pad_y = 0.09, 0.03
+        x0, y0 = min(x0, min(lons) - pad_x), min(y0, min(lats) - pad_y)
+        x1, y1 = max(x1, max(lons) + pad_x), max(y1, max(lats) + pad_y)
+        min_span = REMOTE_SPAN_DEG
+    grow = max(1.0, min_span / (y1 - y0))
     return expand((x0, y0, x1, y1), grow)
+
+
+def nearby(feature: Feature, features: Sequence[Feature], n: int = CONTEXT_AREAS) -> list[Feature]:
+    """Grannarna, kompletterade med de närmaste områdena (räknat på etikettpunkt) upp till n stycken."""
+    props = feature["properties"]
+    by_slug = {f["properties"]["slug"]: f for f in features}
+    out = [by_slug[s] for s in props["neighbours"] if s in by_slug]
+    lon0, lat0 = props["label"]
+    k = math.cos(math.radians(lat0))
+
+    def dist(f: Feature) -> float:
+        lon, lat = f["properties"]["label"]
+        return math.hypot((lon - lon0) * k, lat - lat0)
+
+    taken = {props["slug"], *(f["properties"]["slug"] for f in out)}
+    rest = sorted((f for f in features if f["properties"]["slug"] not in taken), key=dist)
+    return out + rest[: max(0, n - len(out))]
+
+
+def is_thin(stat: Stat | None) -> bool:
+    return not stat or stat["sales"] is None or stat["sales"] < THIN_SALES
 
 
 def city_box(features: list[Feature]) -> BBox:
@@ -355,7 +452,7 @@ def price_fills(snap: Snapshot) -> dict[str, Color]:
     return {a["slug"]: price_color(a["apartment"]["m3"]["pricePerSqm"]) for a in snap["areas"]}
 
 
-def area_card(snap: Snapshot, feature: Feature) -> Card:
+def area_card(snap: Snapshot, feature: Feature, features: Sequence[Feature] = ()) -> Card:
     props = feature["properties"]
     stat = apartment(snap, props["slug"])
     county = snap["county"]["apartment"]["m3"]["pricePerSqm"]
@@ -372,6 +469,9 @@ def area_card(snap: Snapshot, feature: Feature) -> Card:
     eyebrow = (
         "Stadsdelsområde i Stockholms stad" if props["kind"] == "district" else "Kommun i Stockholms län"
     )
+    thin = is_thin(stat) and price is not None
+    remote = len(props["neighbours"]) <= REMOTE_NEIGHBOURS
+    context = nearby(feature, features) if remote and features else []
     return Card(
         eyebrow=eyebrow,
         title=props["name"],
@@ -379,10 +479,11 @@ def area_card(snap: Snapshot, feature: Feature) -> Card:
         unit="kr/kvm",
         lines=[first, second],
         fills=price_fills(snap),
-        box=area_box(feature),
+        box=area_box(feature, context),
         legend=price_legend(),
         highlight=props["slug"],
-        labels=list(props["neighbours"]),
+        labels=list(dict.fromkeys([*props["neighbours"], *(f["properties"]["slug"] for f in context)])),
+        note="Få affärer, osäkert värde" if thin else None,
     )
 
 
@@ -408,6 +509,9 @@ def overview_cards(snap: Snapshot, features: list[Feature]) -> dict[str, Card]:
         1 for a in snap["areas"] if a["slug"] != CITY_SLUG and budget_fills[a["slug"]] == BUDGET_COLORS["ok"]
     )
     total = sum(1 for a in snap["areas"] if a["slug"] != CITY_SLUG)
+    change_fills = {
+        a["slug"]: change_step_color(a["apartment"]["m12"]["change"], "m12") for a in snap["areas"]
+    }
     top_name, top_price = by_price[0]
     rise_name, rise = by_change[0]
     return {
@@ -448,8 +552,13 @@ def overview_cards(snap: Snapshot, features: list[Feature]) -> dict[str, Card]:
             ],
             fills=budget_fills,
             legend=Legend(
-                [(BUDGET_COLORS["ok"], ""), (BUDGET_COLORS["near"], ""), (BUDGET_COLORS["no"], "")],
-                "Räcker · nästan · räcker inte",
+                [
+                    (BUDGET_COLORS["ok"], "Räcker"),
+                    (BUDGET_COLORS["near"], "Nästan"),
+                    (BUDGET_COLORS["no"], "Räcker inte"),
+                ],
+                f"5 mkr för {BUDGET_SQM} kvm",
+                centered=True,
             ),
             **common,
         ),
@@ -462,15 +571,8 @@ def overview_cards(snap: Snapshot, features: list[Feature]) -> dict[str, Card]:
                 [("Mest: ", 400), (f"{rise_name}, {fmt_change(rise)}", 600)],
                 [("Länets snitt jämfört med året innan", 400)],
             ],
-            fills={a["slug"]: change_color(a["apartment"]["m12"]["change"]) for a in snap["areas"]},
-            legend=Legend(
-                [
-                    (change_color(v), lbl)
-                    for v, lbl in ((-10, "−10"), (-5, ""), (0, "0"), (5, ""), (10, "+10"))
-                ],
-                "Förändring, procent",
-                centered=True,
-            ),
+            fills=change_fills,
+            legend=change_legend("m12"),
             **common,
         ),
     }
@@ -500,7 +602,7 @@ def run(out_dir: Path = OG_DIR, geo_file: Path = GEO_FILE) -> list[Path]:
     snap = snapshots.load_latest()
     features = load_features(geo_file)
     cards = overview_cards(snap, features)
-    cards |= {f["properties"]["slug"]: area_card(snap, f) for f in features}
+    cards |= {f["properties"]["slug"]: area_card(snap, f, features) for f in features}
     paths = [out_dir / f"{name}.png" for name in cards]
     written = sum(
         _save(render(card, features), path) for card, path in zip(cards.values(), paths, strict=True)

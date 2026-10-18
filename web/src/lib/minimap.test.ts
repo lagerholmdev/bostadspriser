@@ -100,3 +100,20 @@ describe("minimapSvg", () => {
     expect(svg.match(/<path/g)!.length).toBe(3);
   });
 });
+
+describe("buildMinimap focusReserveFont", () => {
+  it("håller en förstorad fokusetikett inom bilden", () => {
+    const m = buildMinimap({
+      ...toyInput,
+      name: (s: string) => (s === "a" ? "Ett mycket långt områdesnamn" : undefined),
+      labelPoint: (s: string): [number, number] | undefined => (s === "a" ? [18.0, 59.305] : undefined),
+      focusReserveFont: 20,
+      minSpan: 0.2,
+    });
+    const l = m.labels[0];
+    expect(l?.focus).toBe(true);
+    const half = (28 * 20 * 0.56) / 2;
+    expect((l?.x ?? 0) - half).toBeGreaterThanOrEqual(5.9);
+    expect((l?.x ?? 0) + half).toBeLessThanOrEqual(m.width - 5.9);
+  });
+});

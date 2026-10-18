@@ -3,10 +3,12 @@
  * Rent och utan DOM, så det går att testa.
  */
 
+import { NEAR_MARGIN } from "./scales";
+
 export type BudgetStatus = "ok" | "near" | "no";
 
-/** Inom så här mycket över budget räknas området som "nästan". */
-export const NEAR_MARGIN = 0.1;
+/** Inom så här mycket över budget räknas området som "nästan" (design/scales.json). */
+export { NEAR_MARGIN };
 
 export const BUDGET_RANGE = { min: 1_000_000, max: 15_000_000, step: 250_000, default: 5_000_000 };
 export const SIZE_RANGE = { min: 20, max: 150, step: 5, default: 60 };

@@ -33,10 +33,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const imageUrl = new URL(`${base}${image}`, Astro.site).href;
 const path = Astro.url.pathname;
 const nav = [
-  { href: base, label: "Karta", current: path === base },
-  { href: areasUrl(), label: "Områden", current: path.startsWith(areasUrl()) },
-  { href: compareUrl(), label: "Jämför", current: path.startsWith(compareUrl()) },
-  { href: aboutUrl(), label: "Om datan", current: path.startsWith(aboutUrl()) },
+  { href: base, label: "Karta", current: path === base, home: true },
+  { href: areasUrl(), label: "Områden", current: path.startsWith(areasUrl()), home: false },
+  { href: compareUrl(), label: "Jämför", current: path.startsWith(compareUrl()), home: false },
+  { href: aboutUrl(), label: "Om datan", current: path.startsWith(aboutUrl()), home: false },
 ];
 const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
 ---
@@ -88,7 +88,7 @@ const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
           <ul>
             {
               nav.map((n) => (
-                <li>
+                <li class:list={{ "nav-home": n.home }}>
                   <a href={n.href} aria-current={n.current ? "page" : undefined}>
                     {n.label}
                   </a>
@@ -188,6 +188,7 @@ const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
     text-decoration: none;
     font-size: var(--fs-sm);
     font-weight: 600;
+    white-space: nowrap;
   }
   nav a:hover {
     color: var(--c-ink);
@@ -227,6 +228,12 @@ const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
     nav a {
       padding: 0 var(--sp-2);
       font-size: 13px;
+    }
+  }
+  /* På smala skärmar leder märket till kartan, så "Karta" behövs inte i menyn. */
+  @media (max-width: 480px) {
+    .nav-home {
+      display: none;
     }
   }
   @media (max-width: 359px) {

@@ -1,12 +1,17 @@
 ---
 /**
  * Segmenterat val byggt på vanliga radioknappar: piltangenter och skärmläsare fungerar utan extra kod.
+ * Varje val har en lång text och en kort (`short`) som visas på smala skärmar.
  */
 interface Option {
   value: string;
   label: string;
-  /** Kortare text som visas i Förändring-vyn (t.ex. "På ett år"). */
+  /** Kortare text för smala skärmar (t.ex. "3 mån"). */
+  short?: string;
+  /** Text som visas i Förändring-vyn (t.ex. "På ett år"). */
   changeLabel?: string;
+  /** Kort text i Förändring-vyn. */
+  changeShort?: string;
 }
 interface Props {
   name: string;
@@ -27,8 +32,15 @@ const { name, legend, options, value, hideLegend = false, class: cls } = Astro.p
       options.map((o) => (
         <label class="seg-option">
           <input type="radio" name={name} value={o.value} checked={o.value === value} />
-          <span data-label={o.label} data-change-label={o.changeLabel}>
-            {o.label}
+          <span class="seg-face">
+            <span class:list={{ "seg-full": !!o.short }} data-label={o.label} data-change-label={o.changeLabel}>
+              {o.label}
+            </span>
+            {o.short && (
+              <span class="seg-short" data-label={o.short} data-change-label={o.changeShort ?? o.changeLabel}>
+                {o.short}
+              </span>
+            )}
           </span>
         </label>
       ))

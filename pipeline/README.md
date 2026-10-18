@@ -3,9 +3,11 @@
 Datapipelinen för Stockholms prislandskap. Den hämtar statistik från Svensk Mäklarstatistik och
 skriver de filer som webben läser. Formatet beskrivs i [docs/data.md](../docs/data.md).
 
+Kör från `pipeline/`:
+
 ```sh
-python -m venv .venv && . .venv/bin/activate
-pip install -e "pipeline[dev]"      # lägg till ,geo för att bygga om geometrin
+python -m venv .venv && source .venv/bin/activate
+pip install -c requirements.lock -e ".[dev]"   # ".[dev,geo]" för att bygga om geometrin
 
 python -m prislandskap scrape       # hämta senaste månaden till data/snapshots/ (nätverk)
 python -m prislandskap export       # skriv web/src/generated/areas.json och areas.geojson
@@ -13,13 +15,27 @@ python -m prislandskap og           # skriv delningsbilder till web/public/og/
 python -m prislandskap all          # export + og
 python -m prislandskap geometry     # bygg om data/geo/areas.geojson (kräver [geo], sällan)
 
-ruff check pipeline && ruff format --check pipeline
-pytest pipeline
+ruff check . && ruff format --check .
+pytest
 ```
 
 Alla kommandon går att köra om. Filer som inte ändrats skrivs inte om. Ett fel ger ett meddelande
-på svenska och slutkoden 1. Sökvägarna utgår från repots rot. Sätt `PRISLANDSKAP_ROOT` för att köra
-mot en annan katalog.
+på svenska och slutkoden 1. Sökvägarna utgår från repots rot, som hittas genom att gå uppåt från
+paketet och sedan från arbetskatalogen tills en katalog innehåller både `data/` och `web/`. Det
+fungerar alltså även utan redigerbar installation, så länge kommandot körs inifrån repot. Sätt
+`PRISLANDSKAP_ROOT` för att peka ut roten uttryckligen.
+
+### Låsta versioner
+
+`pyproject.toml` anger tillåtna intervall. `requirements.lock` låser exakta versioner (även
+transitiva och dev-verktygen) så att månadskörningen i Actions blir reproducerbar; den används som
+constraints-fil (`-c`), så paketet självt installeras fortfarande från `pyproject.toml`. Uppdatera
+låsningen med [pip-tools](https://pip-tools.readthedocs.io) och kör testerna på 3.11 och 3.12:
+
+```sh
+pip install pip-tools
+pip-compile --extra dev --strip-extras --output-file requirements.lock pyproject.toml
+```
 
 | Modul | Ansvar |
 | --- | --- |
@@ -28,7 +44,7 @@ mot en annan katalog.
 | `scrape.py` | Hämtar två sidor och bygger en validerad ögonblicksbild |
 | `snapshot.py` | Läser, validerar och skriver `data/snapshots/` |
 | `export.py` | Gör om ögonblicksbild och geometri till webbens kontrakt |
-| `og.py`, `palette.py` | Delningsbilder och färgerna från `web/src/lib/scales.ts` |
+| `og.py`, `palette.py` | Delningsbilder. Färgskalorna läses från `design/scales.json`, samma fil som webben använder |
 | `geometry.py`, `mapping.py` | Bygger områdesgeometrin, med stadsdel → stadsdelsområde |
 | `models.py`, `text.py`, `geojson.py` | Typer, svensk text och GeoJSON utan geobibliotek |
 

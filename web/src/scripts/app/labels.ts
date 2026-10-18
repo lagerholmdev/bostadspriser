@@ -2,6 +2,7 @@
  * Områdesnamn på kartan som HTML ovanpå kartbilden. Det fungerar utan kartans typsnittsfiler
  * (även i reservstilen) och använder sajtens eget typsnitt. Ett namn visas bara när området är
  * stort nog på skärmen och inte krockar med ett viktigare namn; det valda området går först.
+ * Namn som skulle hamna under kartans knappar eller förklaring visas inte.
  */
 import type { Map as MlMap } from "maplibre-gl";
 import type { Area } from "../../lib/types";
@@ -14,6 +15,10 @@ interface Label {
 }
 
 const PAD = 4;
+type Box = [number, number, number, number];
+
+/** Kartans flytande element som namnen inte ska ligga under. */
+const OBSTACLES = [".maplibregl-ctrl-top-right", ".maplibregl-ctrl-bottom-right", ".map-legend"];
 
 export class AreaLabels {
   private labels: Label[];
@@ -42,6 +47,9 @@ export class AreaLabels {
     });
     map.on("move", () => this.schedule());
     map.on("resize", () => this.schedule());
+    // Förklaringen byter storlek med vyn.
+    const legend = layer.parentElement?.querySelector(".map-legend");
+    if (legend && typeof ResizeObserver === "function") new ResizeObserver(() => this.schedule()).observe(legend);
     this.schedule();
   }
 
@@ -63,6 +71,22 @@ export class AreaLabels {
       l.w = l.el.offsetWidth;
       l.h = l.el.offsetHeight;
     }
+  }
+
+  /** Knapparnas och förklaringens rutor i lagrets koordinater, med lite marginal. */
+  private obstacles(): Box[] {
+    const root = this.layer.parentElement;
+    if (!root) return [];
+    const o = this.layer.getBoundingClientRect();
+    const out: Box[] = [];
+    for (const sel of OBSTACLES) {
+      const el = root.querySelector<HTMLElement>(sel);
+      if (!el || el.offsetParent === null) continue;
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      out.push([r.left - o.left - PAD, r.top - o.top - PAD, r.right - o.left + PAD, r.bottom - o.top + PAD]);
+    }
+    return out;
   }
 
   private schedule(): void {
@@ -91,7 +115,7 @@ export class AreaLabels {
       if (b.l.area.slug === this.selected) return 1;
       return b.size - a.size;
     });
-    const placed: [number, number, number, number][] = [];
+    const placed: Box[] = this.obstacles();
     for (const { l, p, width } of items) {
       const isSel = l.area.slug === this.selected;
       const x0 = p.x - l.w / 2 - PAD;

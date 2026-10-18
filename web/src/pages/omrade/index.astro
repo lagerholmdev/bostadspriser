@@ -3,10 +3,10 @@
 import Base from "../../layouts/Base.astro";
 import AreaRow from "../../components/common/AreaRow.astro";
 import PriceLegend from "../../components/common/PriceLegend.astro";
-import { mapUrl } from "../../lib/links";
+import { compareUrl, mapUrl } from "../../lib/links";
 import "../../components/common/common.css";
 import { areas, countyStat, dataset, stat } from "../../lib/data";
-import { date, sqm } from "../../lib/format";
+import { sqm } from "../../lib/format";
 import type { Area } from "../../lib/types";
 
 const price = (a: Area) => stat(a, "apartment", "m3")?.pricePerSqm ?? -1;
@@ -27,34 +27,40 @@ const groups = [
   },
 ];
 const county = countyStat("apartment", "m3");
-const cheapest = byPrice(areas).filter((a) => price(a) > 0).at(-1)!;
-const dearest = byPrice(areas)[0]!;
+const ranked = byPrice(areas).filter((a) => price(a) > 0);
+const cheapest = ranked[ranked.length - 1];
+const dearest = ranked[0];
 
 const title = "Bostadspriser i Stockholms län, område för område | Stockholms prislandskap";
-const description = `Pris per kvm för bostadsrätter i alla ${areas.length} områden i Stockholms län, ${dataset.periods.m3}. Från ${sqm(price(cheapest))} i ${cheapest.name} till ${sqm(price(dearest))} i ${dearest.name}.`;
+const description =
+  `Pris per kvm för bostadsrätter i alla ${areas.length} områden i Stockholms län, ${dataset.periods.m3}.` +
+  (cheapest && dearest ? ` Från ${sqm(price(cheapest))} i ${cheapest.name} till ${sqm(price(dearest))} i ${dearest.name}.` : "");
 ---
 
 <Base title={title} description={description} image="og/start.png">
   <div class="wrap list-page">
     <header class="intro">
-      <p class="eyebrow">Uppdaterad {date(dataset.updated)}</p>
       <h1>Bostadspriser i Stockholms län, område för område</h1>
       <p class="lead">
         Snittpris per kvm för bostadsrätter i {areas.length} områden, sålda {dataset.periods.m3}. Länets snitt är {
           sqm(county.pricePerSqm)
         }. Välj ett område för att se fler siffror, grannområden och vad din budget räcker till.
       </p>
+      <p class="intro-links">
+        <a class="btn" href={compareUrl()}>Jämför områden</a>
+        <a class="btn" href={mapUrl()}>Visa på kartan</a>
+      </p>
     </header>
 
     <div class="toolbar" data-list-tools hidden>
       <div class="search">
-        <label for="area-search">Sök område</label>
+        <label for="area-search">Sök område, stadsdel eller ort</label>
         <input
           id="area-search"
           type="search"
           autocomplete="off"
           spellcheck="false"
-          placeholder="Till exempel Hägersten eller Nacka"
+          placeholder="Till exempel Aspudden eller Nacka"
           aria-describedby="search-status"
         />
       </div>
@@ -100,14 +106,13 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     }
 
     <div class="after">
-      <PriceLegend title="Färgerna i staplarna, pris per kvm i kr" />
+      <PriceLegend title="Färgerna i staplarna: pris per kvm, tusen kr" />
       <p class="fineprint">
-        Förändring är prisutvecklingen på ett år: de senaste tre månaderna jämfört med samma månader året innan. Områden med få
-        affärer visas blekare, eftersom snittet där kan svänga mycket. Källa: <a href={dataset.source.url} rel="noopener"
+        Förändring är prisutvecklingen på ett år: de senaste tre månaderna jämfört med samma månader året innan. Områden med
+        få affärer är märkta, eftersom snittet där kan svänga mycket. Källa: <a href={dataset.source.url} rel="noopener"
           >{dataset.source.name}</a
         >.
       </p>
-      <p><a class="btn" href={mapUrl()}>Visa alla områden på kartan</a></p>
     </div>
   </div>
 </Base>
@@ -133,6 +138,11 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     font-size: var(--fs-lg);
     color: var(--c-ink-2);
     line-height: 1.45;
+  }
+  .intro-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-3);
     margin-top: var(--sp-2);
   }
   .toolbar {
@@ -141,6 +151,7 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     align-items: end;
     gap: var(--sp-4) var(--sp-6);
     margin-top: var(--sp-6);
+    max-width: 880px;
   }
   .toolbar[hidden] {
     display: none;
@@ -148,7 +159,7 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
   .search {
     display: grid;
     gap: var(--sp-1);
-    flex: 1 1 280px;
+    flex: 1 1 260px;
     max-width: 420px;
   }
   .search label,
@@ -186,16 +197,17 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     padding: 0;
     margin-bottom: var(--sp-1);
   }
+  /* Segmenterat val, samma som på kartsidan: vit tumme på nedsänkt spår. */
   .seg {
     display: inline-flex;
-    border: 1px solid var(--c-line-strong);
+    background: var(--c-sunken);
     border-radius: var(--radius);
-    background: var(--c-surface);
     padding: 3px;
-    gap: 2px;
+    gap: 3px;
   }
   .seg label {
     position: relative;
+    display: inline-flex;
     cursor: pointer;
   }
   .seg input {
@@ -208,26 +220,32 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
   .seg span {
     display: inline-flex;
     align-items: center;
-    min-height: 36px;
+    min-height: calc(var(--tap) - 6px);
     padding: 0 var(--sp-4);
-    border-radius: var(--radius-sm);
+    border-radius: 7px;
     font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--c-ink-2);
+    pointer-events: none;
+  }
+  .seg label:hover span {
+    color: var(--c-ink);
   }
   .seg input:checked + span {
-    background: var(--c-accent-soft);
+    background: var(--c-surface);
     color: var(--c-accent);
+    box-shadow: 0 0 0 2px var(--c-accent);
   }
   .seg input:focus-visible + span {
     outline: 2px solid var(--c-accent);
-    outline-offset: 1px;
+    outline-offset: 3px;
   }
   .status {
     min-height: 1.5em;
     margin-top: var(--sp-3);
     font-size: var(--fs-sm);
     color: var(--c-ink-2);
+    max-width: 68ch;
   }
   .group {
     margin-top: var(--sp-6);
@@ -251,33 +269,44 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     color: var(--c-ink-3);
     font-size: var(--fs-sm);
   }
+
+  /* Rader: hela raden är klickbar via länkens ::after. */
   .area-table :global(.area-row) {
     position: relative;
   }
   .area-table :global(.area-row:hover) {
     background: var(--c-page);
   }
-  .area-table :global(.area-row th a) {
+  .area-table :global(.row-name) {
     font-weight: 600;
     text-decoration: none;
     color: var(--c-ink);
+    hyphens: auto;
   }
-  .area-table :global(.area-row:hover th a) {
+  .area-table :global(.area-row:hover .row-name) {
     color: var(--c-accent);
     text-decoration: underline;
   }
-  /* Hela raden klickbar */
-  .area-table :global(.area-row th a::after) {
+  .area-table :global(.row-name::after) {
     content: "";
     position: absolute;
     inset: 0;
   }
-  .area-table :global(.area-row th a:focus-visible) {
+  .area-table :global(.row-name:focus-visible) {
     outline: none;
   }
-  .area-table :global(.area-row:has(a:focus-visible)) {
+  .area-table :global(.area-row:has(.row-name:focus-visible)) {
     outline: 2px solid var(--c-accent);
     outline-offset: -2px;
+  }
+  .area-table :global(.row-via) {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    color: var(--c-ink-2);
+  }
+  .area-table :global(.row-via[hidden]) {
+    display: none;
   }
   .area-table :global(.row-sub) {
     display: none;
@@ -285,39 +314,43 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     color: var(--c-ink-3);
     font-weight: 400;
   }
+  .area-table :global(.row-sub .thin-tag) {
+    margin-left: var(--sp-2);
+  }
+  /* Fasta kolumner, så att de två tabellerna linjerar. */
+  .area-table {
+    table-layout: fixed;
+  }
+  .area-table :global(thead th:first-child) {
+    width: 31%;
+  }
   .area-table :global(.col-price) {
-    width: 38%;
-  }
-  .area-table :global(td.col-price) {
-    text-align: left;
-  }
-  .area-table :global(th.col-price) {
+    width: 37%;
     text-align: left;
   }
   .area-table :global(.price) {
     display: block;
     font-weight: 600;
   }
-  .area-table :global(.bar) {
-    display: block;
-    height: 6px;
+  .area-table :global(td .price-bar) {
     margin-top: 6px;
-    background: var(--c-sunken);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .area-table :global(.bar > span) {
-    display: block;
-    height: 100%;
-    border-radius: 3px;
   }
   .area-table :global(.col-sales .thin-tag) {
     margin-left: var(--sp-2);
+  }
+  /* Få affärer: texten behåller full kontrast, bara stapeln bleknar. */
+  .area-table :global(.is-thin .row-name),
+  .area-table :global(.is-thin .price) {
+    color: var(--c-ink-2);
+  }
+  .area-table :global(.is-thin .price-bar > span) {
+    opacity: 0.5;
   }
   .after {
     display: grid;
     gap: var(--sp-4);
     margin-top: var(--sp-6);
+    max-width: 880px;
   }
   @media (max-width: 640px) {
     .list-page {
@@ -326,22 +359,79 @@ const description = `Pris per kvm för bostadsrätter i alla ${areas.length} omr
     .lead {
       font-size: var(--fs-md);
     }
-    .area-table :global(.col-sales) {
-      display: none;
-    }
-    .area-table :global(.row-sub) {
-      display: block;
-    }
-    .area-table :global(th),
-    .area-table :global(td) {
-      padding: var(--sp-3);
-      font-size: var(--fs-sm);
-    }
-    .area-table :global(.col-price) {
-      width: 44%;
-    }
     .group-head h2 {
       font-size: var(--fs-lg);
+    }
+  }
+  @media (max-width: 559px) {
+    /*
+     * Mobil: raden staplas. Namn och pris på första raden, stapel och förändring
+     * under, antal sålda minst. Ingen tabell som bryter namnen.
+     */
+    .area-table :global(thead) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .area-table,
+    .area-table :global(tbody) {
+      display: block;
+    }
+    .area-table :global(.area-row) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "name value"
+        "via via"
+        "bar chg"
+        "sub sub";
+      align-items: center;
+      column-gap: var(--sp-4);
+      min-height: 48px;
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--c-line);
+    }
+    .area-table :global(tbody .area-row:last-child) {
+      border-bottom: 0;
+    }
+    .area-table :global(.area-row > th),
+    .area-table :global(.area-row > td.col-price) {
+      display: contents;
+    }
+    .area-table :global(.area-row > td.col-chg) {
+      grid-area: chg;
+      padding: 0;
+      border: 0;
+      font-size: var(--fs-sm);
+      margin-top: 4px;
+    }
+    .area-table :global(.area-row > td.col-sales) {
+      display: none;
+    }
+    .area-table :global(.row-name) {
+      grid-area: name;
+      line-height: 1.3;
+      overflow-wrap: break-word;
+      min-width: 0;
+    }
+    .area-table :global(.price) {
+      grid-area: value;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .area-table :global(.row-via) {
+      grid-area: via;
+    }
+    .area-table :global(td .price-bar) {
+      grid-area: bar;
+      margin-top: 4px;
+    }
+    .area-table :global(.row-sub) {
+      grid-area: sub;
+      display: block;
+      margin-top: 2px;
     }
   }
 </style>

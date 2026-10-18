@@ -1,7 +1,7 @@
 ---
 /** Senaste 3 och 12 månaderna sida vid sida. Mätvärden som rader, så att tabellen får plats på mobil. */
 import { dataset, isThin } from "../../lib/data";
-import { money, number, sqm, MISSING_TEXT } from "../../lib/format";
+import { money, number, MISSING_TEXT } from "../../lib/format";
 import type { MissingReason, Period, StatsByPeriod } from "../../lib/types";
 import ChangeValue from "../common/ChangeValue.astro";
 
@@ -41,7 +41,13 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
         {
           periods.map((p) => (
             <td class:list={{ "thin-value": isThin(stats[p], p) }}>
-              {stats[p].pricePerSqm == null ? <span class="chg-none">{missText(miss(p, "pricePerSqm"))}</span> : sqm(stats[p].pricePerSqm)}
+              {stats[p].pricePerSqm == null ? (
+                <span class="chg-none">{missText(miss(p, "pricePerSqm"))}</span>
+              ) : (
+                <>
+                  {number(stats[p].pricePerSqm)} <span class="unit">kr/kvm</span>
+                </>
+              )}
             </td>
           ))
         }
@@ -100,11 +106,26 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
     }
     .stats-table th,
     .stats-table td {
-      padding: var(--sp-3) var(--sp-3);
+      padding: var(--sp-3) var(--sp-2);
       font-size: var(--fs-sm);
+    }
+    .stats-table tr > :first-child {
+      padding-left: var(--sp-3);
+    }
+    .stats-table tr > :last-child {
+      padding-right: var(--sp-3);
     }
     .stats-table td {
       white-space: normal;
+    }
+    .stats-table tbody th {
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+    .unit {
+      display: block;
+      font-size: var(--fs-xs);
+      color: var(--c-ink-3);
     }
     .stats-table .thin-tag {
       margin-left: 0;

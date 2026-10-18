@@ -4,6 +4,7 @@ import Base from "../layouts/Base.astro";
 import { areasUrl, areaUrl, mapUrl } from "../lib/links";
 import { areas, rankByPrice } from "../lib/data";
 import { inArea } from "../lib/format";
+import "../components/common/common.css";
 
 const popular = ["sodermalm", "kungsholmen", "hagersten-liljeholmen", "nacka", "solna"];
 const known = new Set(rankByPrice("apartment", "m3").map((a) => a.slug));
@@ -12,16 +13,19 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
 
 <Base title="Sidan finns inte | Stockholms prislandskap" description="Sidan du letade efter finns inte." noindex>
   <div class="wrap nf">
-    <p class="eyebrow">Fel 404</p>
+    <p class="kicker">Fel 404</p>
     <h1>Sidan finns inte</h1>
+    <p class="nf-suggest" data-suggest hidden>
+      <a class="btn btn-primary" href={areasUrl()} data-suggest-link><span>Menade du <span data-suggest-name></span>?</span> <span aria-hidden="true">→</span></a>
+    </p>
     <p class="lead">
       Adressen kan vara felstavad, eller så har sidan flyttat. Områdessidorna ligger under{" "}
       <code>/omrade/</code> och har namnet utan å, ä och ö, till exempel <a href={areaUrl("sodermalm")}>/omrade/sodermalm/</a>.
     </p>
-    <form class="nf-search" action={areasUrl()} method="get" role="search">
+    <form class="nf-search" action={areasUrl()} method="get" role="search" data-nf-search>
       <label for="nf-q">Sök område</label>
       <div class="nf-row">
-        <input id="nf-q" name="q" type="search" placeholder="Till exempel Hägersten eller Nacka" autocomplete="off" />
+        <input id="nf-q" name="q" type="search" placeholder="Till exempel Aspudden eller Nacka" autocomplete="off" />
         <button class="btn btn-primary" type="submit">Sök</button>
       </div>
     </form>
@@ -45,6 +49,36 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
     }
   </div>
 </Base>
+
+<script>
+  import { suggestArea, findAreas } from "../lib/aliases";
+  import { areas } from "../lib/data";
+  import { areaUrl } from "../lib/links";
+
+  // "Menade du …?": sista delen av adressen, t.ex. /omrade/sodermalmm/ -> Södermalm.
+  const segment = location.pathname.split("/").filter(Boolean).pop() ?? "";
+  const hit = segment && segment !== "404" ? suggestArea(segment, areas) : null;
+  const box = document.querySelector<HTMLElement>("[data-suggest]");
+  const link = box?.querySelector<HTMLAnchorElement>("[data-suggest-link]");
+  const name = box?.querySelector<HTMLElement>("[data-suggest-name]");
+  if (hit && box && link && name) {
+    link.href = areaUrl(hit.area.slug);
+    name.textContent = hit.via ? `${hit.area.name} (där ${hit.via} ligger)` : hit.area.name;
+    box.hidden = false;
+  }
+
+  // Sökrutan: en enda träff går direkt till områdessidan, annars till listan med sökningen.
+  const form = document.querySelector<HTMLFormElement>("[data-nf-search]");
+  form?.addEventListener("submit", (e) => {
+    const q = new FormData(form).get("q");
+    const hits = typeof q === "string" ? findAreas(q, areas) : [];
+    const only = hits.length === 1 ? hits[0] : undefined;
+    if (only) {
+      e.preventDefault();
+      location.href = areaUrl(only.area.slug);
+    }
+  });
+</script>
 
 <style>
   .nf {
@@ -99,15 +133,16 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
     border-color: var(--c-accent);
   }
   .nf-row .btn {
-    min-height: 44px;
+    min-height: max(44px, var(--tap));
+  }
+  .nf-suggest .btn {
+    font-size: var(--fs-md);
+    min-height: max(44px, var(--tap));
   }
   .nf-links {
     display: flex;
     flex-wrap: wrap;
     gap: var(--sp-3);
-  }
-  .nf-links .btn {
-    min-height: 44px;
   }
   .nf-pop {
     margin-top: var(--sp-5);
@@ -123,8 +158,10 @@ const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slu
     margin: 0;
     padding-left: 1.2em;
   }
-  .nf-pop li {
-    padding-block: 4px;
+  .nf-pop a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
   }
   @media (max-width: 640px) {
     .nf {

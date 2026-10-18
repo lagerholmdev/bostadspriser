@@ -8,6 +8,7 @@ import Base from "../../../layouts/Base.astro";
 import Breadcrumb from "../../../components/common/Breadcrumb.astro";
 import ChangeValue from "../../../components/common/ChangeValue.astro";
 import StatCard from "../../../components/common/StatCard.astro";
+import CopyLink from "../../../components/common/CopyLink.astro";
 import Minimap from "../../../components/area/Minimap.astro";
 import StatsTable from "../../../components/area/StatsTable.astro";
 import RankChart from "../../../components/area/RankChart.astro";
@@ -25,7 +26,8 @@ import {
   priceRank,
   similarNeighbours,
 } from "../../../lib/data";
-import { change, date, inArea, money, number, ordinal, relative, sqm, MISSING_TEXT } from "../../../lib/format";
+import { change, date, inArea, money, number, relative, sqm, MISSING_TEXT } from "../../../lib/format";
+import { changeSentence, joinNames, rankPhrase } from "../../../lib/text";
 import type { Area, MissingReason, Stat } from "../../../lib/types";
 
 export const getStaticPaths = (() => areas.map((area) => ({ params: { slug: area.slug }, props: { area } }))) satisfies GetStaticPaths;
@@ -53,8 +55,12 @@ for (const s of [ap3, ap12, area.house?.m3, area.house?.m12]) {
 }
 const missingNote = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "saknas");
 
-const relSentence =
-  ratio == null ? null : relative(ratio) === "i nivå med" ? "i nivå med" : `${relative(ratio)}`;
+// "65 % över" eller "i nivå med", följt av "länets snitt".
+const relSentence = ratio == null ? null : relative(ratio);
+const trend = changeSentence(ap12?.change, ap3?.change);
+// Hårt mellanslag efter ordningstalet, så att "3:e dyrast" inte bryts isär.
+const rankText = rank ? rankPhrase(rank.rank, rank.total).replace(/^(\d+:[ae]) /, "$1\u00a0") : null;
+const imageAlt = `Karta över ${area.name} med pris per kvm i grannområdena`;
 
 // Titel och beskrivning med riktiga siffror, för sökresultatet.
 const title = `Bostadspriser ${where} – ${price != null ? sqm(price) : "pris per kvm"} | Stockholms prislandskap`;
@@ -102,7 +108,7 @@ const jsonLd = {
 const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 
-<Base title={title} description={description} image={`og/${area.slug}.png`}>
+<Base title={title} description={description} image={`og/${area.slug}.png`} imageAlt={imageAlt}>
   <script slot="head" is:inline type="application/ld+json" set:html={jsonLdText} />
 
   <div class="wrap area">
@@ -110,7 +116,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 
     <header class="hero">
       <div class="hero-text">
-        <p class="eyebrow">{KIND_LABEL[area.kind]} · Uppdaterad {updated}</p>
+        <p class="kicker">{KIND_LABEL[area.kind]} · uppdaterad {updated}</p>
         <h1>Bostadspriser {where}</h1>
 
         <div class="figure">
@@ -128,25 +134,20 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
             )
           }
           {
-            ratio != null && (
+            relSentence != null && (
               <p class="figure-context">
                 {relSentence} länets snitt på {sqm(county.pricePerSqm)}
-                {rank && (
-                  <>
-                    {" "}
-                    och det {ordinal(rank.rank)} dyraste av {rank.total} områden
-                  </>
-                )}
-                .
+                {rankText && `, ${rankText}`}.
               </p>
             )
           }
+          {trend && <p class="figure-trend">{trend}</p>}
         </div>
 
         {
           thin && ap3 && (
             <p class="thin-note" role="note">
-              <strong>Få affärer.</strong>{" "}
+              <strong>Få affärer:</strong>{" "}
               {ap3.sales != null
                 ? `Bara ${number(ap3.sales)} bostadsrätter såldes ${where} de senaste 3 månaderna.`
                 : "Antalet sålda bostadsrätter saknas."}{" "}
@@ -165,6 +166,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
               </a>
             )
           }
+          <CopyLink />
           <a class="tertiary" href={mapUrl({ vy: "budget", omrade: area.slug })}>Har jag råd här?</a>
         </div>
       </div>
@@ -180,7 +182,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
           <h2 id="nyckeltal" class="visually-hidden">
             Nyckeltal för bostadsrätter
           </h2>
-          <dl class="stats">
+          <dl class="stat-row">
             <StatCard label="Medelpris" note="per såld bostadsrätt, 3 mån" muted={thin}>
               {ap3.meanPrice != null ? money(ap3.meanPrice) : <span class="chg-none">{missingNote(ap3.missing?.meanPrice)}</span>}
             </StatCard>
@@ -265,8 +267,8 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
           <div class="section-head">
             <h2 id="plats">Plats i länet</h2>
             <p>
-              {area.name} är det {ordinal(rank.rank)} dyraste av de {rank.total} områdena i Stockholms län, räknat på pris
-              per kvm för bostadsrätter de senaste 3 månaderna.
+              {area.name} är {rankText} i Stockholms län, räknat på pris per kvm för bostadsrätter de senaste 3
+              månaderna.
             </p>
           </div>
           <RankChart area={area} />
@@ -283,10 +285,9 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
           </div>
           <SimilarAreas area={area} similar={similar} />
           <p class="more">
-            <a href={compareUrl([area.slug, ...neighboursForCompare])}>Jämför {area.name} med {similar
-                .slice(0, 2)
-                .map((a) => a.name)
-                .join(" och ")}</a>
+            <a href={compareUrl([area.slug, ...neighboursForCompare])}>
+              Jämför {area.name} med {joinNames(similar.slice(0, 2).map((a) => a.name))}
+            </a>
           </p>
         </section>
       )
@@ -344,6 +345,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     font-size: var(--fs-2xl);
     font-weight: 700;
     margin-top: calc(-1 * var(--sp-3));
+    hyphens: auto;
   }
   .figure {
     display: grid;
@@ -376,17 +378,22 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     font-size: var(--fs-lg);
     color: var(--c-ink-2);
     line-height: 1.4;
-    max-width: 34ch;
+    max-width: 36ch;
     margin-top: var(--sp-1);
   }
+  .figure-trend {
+    font-size: var(--fs-md);
+    color: var(--c-ink);
+    line-height: 1.45;
+    max-width: 44ch;
+    margin-top: var(--sp-2);
+  }
   .thin-note {
-    background: var(--c-surface);
-    border: 1px solid var(--c-line);
-    border-left: 4px solid var(--c-near);
+    background: var(--c-sunken);
     border-radius: var(--radius-sm);
     padding: var(--sp-3) var(--sp-4);
     font-size: var(--fs-sm);
-    color: var(--c-ink-2);
+    color: var(--c-ink);
     max-width: 52ch;
   }
   .thin-note strong {
@@ -400,14 +407,25 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
+    min-height: var(--tap);
     padding-inline: var(--sp-1);
   }
-  .stats {
+  /* Nyckeltalen: en platt rad med fyra tal och tunna avdelare, 2 × 2 på mobil. */
+  .stat-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--sp-4);
     margin: 0;
+    padding-block: var(--sp-5);
+    border-block: 1px solid var(--c-line);
+  }
+  .stat-row > :global(.stat) {
+    padding-inline: var(--sp-5);
+  }
+  .stat-row > :global(.stat:first-child) {
+    padding-left: 0;
+  }
+  .stat-row > :global(.stat + .stat) {
+    border-left: 1px solid var(--c-line);
   }
   .narrow {
     max-width: 760px;
@@ -445,8 +463,19 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     .hero-map {
       max-width: 560px;
     }
-    .stats {
+    .stat-row {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-block: 0;
+    }
+    .stat-row > :global(.stat) {
+      padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5);
+    }
+    .stat-row > :global(.stat:nth-child(odd)) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .stat-row > :global(.stat:nth-child(n + 3)) {
+      border-top: 1px solid var(--c-line);
     }
   }
   @media (max-width: 640px) {
@@ -465,15 +494,13 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     .figure-context {
       font-size: var(--fs-md);
     }
-    .stats {
-      gap: var(--sp-3);
+    .stat-row > :global(.stat) {
+      padding-right: var(--sp-3);
+      padding-left: var(--sp-4);
     }
     .hero-actions .btn {
       flex: 1 1 auto;
       justify-content: center;
-    }
-    .tertiary {
-      min-height: 44px;
     }
   }
 </style>
