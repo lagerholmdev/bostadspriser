@@ -4,7 +4,9 @@ Ljus layout enligt docs/design.md: textkolumn till vänster, platt karta till h�
 upplösning, skalas ner och kvantiseras till en liten palett så att filerna blir små.
 """
 
+import io
 import logging
+import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from functools import cache
@@ -53,7 +55,6 @@ MISSING_TEXT: dict[MissingReason, str] = {
     "N": "Snittpriset är inte representativt",
     "0": "Inga affärer under perioden",
 }
-ON_ISLANDS = {"sodermalm", "ostermalm", "kungsholmen", "essingen", "lidingo", "varmdo"}
 
 
 # ---------- formatering ----------
@@ -80,10 +81,6 @@ def fmt_relative(value: float, reference: float) -> tuple[str, str]:
     return f"{pct}{NBSP}% {'över' if value > reference else 'under'}", " länets snitt"
 
 
-def in_area(slug: str, name: str) -> str:
-    return f"{'på' if slug in ON_ISLANDS else 'i'} {name}"
-
-
 # ---------- kort ----------
 
 Segment = tuple[str, int]  # (text, vikt)
@@ -91,8 +88,11 @@ Segment = tuple[str, int]  # (text, vikt)
 
 @dataclass
 class Legend:
+    """Färgrutor med etiketter. Klassgränser står vid rutans högerkant, värden (centered) mitt under."""
+
     swatches: list[tuple[Color, str]]
     caption: str
+    centered: bool = False
 
 
 @dataclass
@@ -125,7 +125,7 @@ class Projection:
     def __init__(self, box: BBox, rect: tuple[float, float, float, float]) -> None:
         x0, y0, x1, y1 = box
         rx0, ry0, rx1, ry1 = rect
-        self.k = _cos_deg((y0 + y1) / 2)
+        self.k = math.cos(math.radians((y0 + y1) / 2))
         self.scale = min((rx1 - rx0) / ((x1 - x0) * self.k), (ry1 - ry0) / (y1 - y0))
         self.cx, self.cy = (x0 + x1) / 2, (y0 + y1) / 2
         self.px, self.py = (rx0 + rx1) / 2, (ry0 + ry1) / 2
@@ -134,12 +134,6 @@ class Projection:
         x = self.px + (lon - self.cx) * self.k * self.scale
         y = self.py - (lat - self.cy) * self.scale
         return x * S, y * S
-
-
-def _cos_deg(deg: float) -> float:
-    import math
-
-    return math.cos(math.radians(deg))
 
 
 class Canvas:
@@ -183,7 +177,7 @@ class Canvas:
         self.draw.line([*ring, ring[0]], fill=color, width=max(1, round(width_px * S)), joint="curve")
 
     def result(self, key_colors: Sequence[Color], colors: int = 96) -> Image.Image:
-        """Skala ner och kvantisera. Nyckelfärgerna läggs först i paletten så att ytor och rutor blir exakta."""
+        """Skala ner och kvantisera. Nyckelfärgerna läggs först i paletten så att ytorna blir exakta."""
         small = self.img.resize((W, H), Image.Resampling.LANCZOS)
         keys = list(dict.fromkeys(key_colors))
         adaptive = small.quantize(colors=colors - len(keys), method=Image.Quantize.MEDIANCUT)
@@ -262,7 +256,7 @@ def draw_legend(c: Canvas, legend: Legend) -> None:
     for color, label in legend.swatches:
         c.draw.rectangle([x * S, (y + 22) * S, (x + sw) * S, (y + 32) * S], fill=color)
         if label:
-            c.text((x + sw, y + 48), label, 400, 13, INK_2, anchor="ms")
+            c.text((x + (sw / 2 if legend.centered else sw), y + 48), label, 400, 13, INK_2, anchor="ms")
         x += sw + gap
 
 
@@ -334,11 +328,9 @@ def render(card: Card, features: list[Feature]) -> Image.Image:
 
 
 def price_legend() -> Legend:
-    labels = ["", *(f"{b // 1000}" for b in PRICE_BREAKS)]
-    swatches = [(color, "") for color in PRICE_COLORS]
-    # Gränserna står mellan rutorna: etiketten ritas vid rutans högra kant
-    shifted = [(color, labels[i + 1] if i + 1 < len(labels) else "") for i, (color, _) in enumerate(swatches)]
-    return Legend(shifted, "Pris per kvm, tusen kr")
+    """Sex rutor; varje klassgräns står vid högerkanten av rutan under den."""
+    labels = [f"{b // 1000}" for b in PRICE_BREAKS] + [""]
+    return Legend(list(zip(PRICE_COLORS, labels, strict=True)), "Pris per kvm, tusen kr")
 
 
 def area_box(feature: Feature) -> BBox:
@@ -354,16 +346,16 @@ def city_box(features: list[Feature]) -> BBox:
     return expand(bbox(districts), 1.15)
 
 
-def apartment(snap: Snapshot, slug: str, period: Period = "m3") -> Stat | None:
+def apartment(snap: Snapshot, slug: str) -> Stat | None:
     record = snapshots.area_by_slug(snap).get(slug)
-    return record["apartment"][period] if record else None
+    return record["apartment"]["m3"] if record else None
 
 
 def price_fills(snap: Snapshot) -> dict[str, Color]:
     return {a["slug"]: price_color(a["apartment"]["m3"]["pricePerSqm"]) for a in snap["areas"]}
 
 
-def area_card(snap: Snapshot, feature: Feature, features: list[Feature]) -> Card:
+def area_card(snap: Snapshot, feature: Feature) -> Card:
     props = feature["properties"]
     stat = apartment(snap, props["slug"])
     county = snap["county"]["apartment"]["m3"]["pricePerSqm"]
@@ -477,6 +469,7 @@ def overview_cards(snap: Snapshot, features: list[Feature]) -> dict[str, Card]:
                     for v, lbl in ((-10, "−10"), (-5, ""), (0, "0"), (5, ""), (10, "+10"))
                 ],
                 "Förändring, procent",
+                centered=True,
             ),
             **common,
         ),
@@ -491,21 +484,29 @@ def _budget_color(price: int | None, max_sqm: float) -> Color:
     return BUDGET_COLORS["near"] if price <= max_sqm * (1 + BUDGET_NEAR) else BUDGET_COLORS["no"]
 
 
-def _save(img: Image.Image, path: Path) -> None:
+def _save(img: Image.Image, path: Path) -> bool:
+    """Skriv bara om bilden ändrats. Returnerar om filen skrevs."""
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG", optimize=True)
+    data = buffer.getvalue()
+    if path.exists() and path.read_bytes() == data:
+        return False
     path.parent.mkdir(parents=True, exist_ok=True)
-    img.save(path, optimize=True)
+    path.write_bytes(data)
+    return True
 
 
 def run(out_dir: Path = OG_DIR, geo_file: Path = GEO_FILE) -> list[Path]:
     snap = snapshots.load_latest()
     features = load_features(geo_file)
     cards = overview_cards(snap, features)
-    cards |= {f["properties"]["slug"]: area_card(snap, f, features) for f in features}
-    paths = []
-    for name, card in cards.items():
-        path = out_dir / f"{name}.png"
-        _save(render(card, features), path)
-        paths.append(path)
+    cards |= {f["properties"]["slug"]: area_card(snap, f) for f in features}
+    paths = [out_dir / f"{name}.png" for name in cards]
+    written = sum(
+        _save(render(card, features), path) for card, path in zip(cards.values(), paths, strict=True)
+    )
     total_kb = sum(p.stat().st_size for p in paths) / 1024
-    log.info("Skrev %d delningsbilder till %s (%.0f kB totalt)", len(paths), display(out_dir), total_kb)
+    log.info(
+        "%d delningsbilder i %s (%d ändrade, %.0f kB totalt)", len(paths), display(out_dir), written, total_kb
+    )
     return paths

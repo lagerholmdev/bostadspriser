@@ -27,7 +27,7 @@ def test_formatting():
 
 def test_renders_area_card(snapshot, features):
     feature = next(f for f in features if f["properties"]["slug"] == "hagersten-liljeholmen")
-    card = og.area_card(snapshot, feature, features)
+    card = og.area_card(snapshot, feature)
     assert card.big == "80 252"
     assert card.highlight == "hagersten-liljeholmen"
     img = og.render(card, features)

@@ -21,8 +21,9 @@ def test_drop_small_holes_keeps_lakes():
 
 
 def test_label_point_lies_in_largest_part():
-    u_shape = Polygon([(0, 0), (3000, 0), (3000, 3000), (2000, 3000), (2000, 1000), (1000, 1000), (1000, 3000),
-                       (0, 3000)])  # fmt: skip
+    u_shape = Polygon(
+        [(0, 0), (3000, 0), (3000, 3000), (2000, 3000), (2000, 1000), (1000, 1000), (1000, 3000), (0, 3000)]
+    )
     geom = MultiPolygon([square(10_000, 0, 100), u_shape])
     point = label_point(geom)
     assert u_shape.contains(point)
@@ -32,10 +33,3 @@ def test_label_point_lies_in_largest_part():
 def test_neighbours_within_distance():
     geoms = [square(0, 0, 100), square(600, 0, 100), square(5000, 0, 100)]
     assert neighbours_within(geoms, ["a", "b", "c"], 1000) == [["b"], ["a"], []]
-
-
-def test_geometry_file_properties(features):
-    for feature in features:
-        props = feature["properties"]
-        assert set(props) == {"slug", "name", "kind", "label", "neighbours"}
-        assert props["kind"] in ("district", "municipality")

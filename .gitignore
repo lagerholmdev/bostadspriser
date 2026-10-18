@@ -1,11 +1,8 @@
-.cache/
+# Python
 __pycache__/
-dist/
-# Genereras av scripts/build_site.py i varje bygge
-site/index.html
-site/omrade/
-site/vy/
-site/jamfor/
-site/og/
-site/sitemap.xml
-site/robots.txt
+*.egg-info/
+.venv/
+.cache/
+
+# Editor/OS
+.DS_Store

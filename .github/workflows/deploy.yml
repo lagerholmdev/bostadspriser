@@ -1,0 +1,82 @@
+name: Uppdatera och publicera
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 10 * *" # den 10:e varje månad 06:17 UTC; Mäklarstatistik publicerar runt den 8:e
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pipeline/pyproject.toml
+      - run: pip install -e "pipeline[dev]"
+      - run: ruff check pipeline
+      - run: pytest pipeline
+
+      - name: Hämta ny statistik
+        if: github.event_name != 'push'
+        run: python -m prislandskap scrape
+      - name: Spara ny ögonblicksbild
+        if: github.event_name != 'push'
+        run: |
+          git add data/snapshots
+          if git diff --cached --quiet; then
+            echo "Ingen ny statistik."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Uppdatera data $(date -u +%Y-%m)"
+            git push
+          fi
+
+      - name: Exportera data och delningsbilder
+        run: python -m prislandskap all
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - working-directory: web
+        run: npm ci
+      - working-directory: web
+        run: npm run check
+      - working-directory: web
+        run: npm test -- --passWithNoTests
+      - name: Bygg webbplatsen
+        working-directory: web
+        env:
+          PUBLIC_GOATCOUNTER: ${{ vars.PUBLIC_GOATCOUNTER }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

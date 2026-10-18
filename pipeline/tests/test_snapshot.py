@@ -20,7 +20,7 @@ def test_rejects_missing_district(snapshot):
 
 def test_rejects_missing_city(snapshot):
     snapshot["areas"] = [a for a in snapshot["areas"] if a["slug"] != "stockholm"]
-    with pytest.raises(SnapshotError, match="25 kommuner.*Stockholms stad saknas"):
+    with pytest.raises(SnapshotError, match=r"25 kommuner.*Stockholms stad saknas"):
         snapshots.validate(snapshot)
 
 

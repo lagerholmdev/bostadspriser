@@ -1,4 +1,4 @@
-"""Små hjälpfunktioner för GeoJSON utan geobibliotek, så exporten och bilderna klarar sig med standardbiblioteket."""
+"""GeoJSON-hjälpare utan geobibliotek, så att export och delningsbilder klarar sig utan [geo]."""
 
 import json
 from collections.abc import Iterable, Iterator

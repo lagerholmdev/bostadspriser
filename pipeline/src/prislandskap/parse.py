@@ -89,7 +89,7 @@ def _is_area_row(cells: list[Tag]) -> bool:
 
 
 def parse_tables(html: str) -> list[dict[str, Row]]:
-    """Alla statistiktabeller på sidan, i sidordning, som {slug: Row}. Tabeller utan områdesrader hoppas över."""
+    """Alla statistiktabeller i sidordning, som {slug: Row}. Tabeller utan områdesrader hoppas över."""
     soup = BeautifulSoup(html, "html.parser")
     tables: list[dict[str, Row]] = []
     for table in soup.find_all("table"):

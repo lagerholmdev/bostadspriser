@@ -11,7 +11,6 @@ from prislandskap.text import swedish_sort_key
 
 AREA_KEYS = {"slug", "name", "kind", "label", "neighbours", "bbox", "apartment", "house", "houseScope"}
 STAT_KEYS = {"sales", "pricePerSqm", "meanPrice", "change"}
-STAT_FIELDS = (*STAT_KEYS,)
 
 
 def assert_stat(stat: dict) -> None:
@@ -22,7 +21,7 @@ def assert_stat(stat: dict) -> None:
     missing = stat.get("missing", {})
     assert set(missing) <= STAT_KEYS
     assert set(missing.values()) <= {"F", "N", "0"}
-    for key in STAT_FIELDS:
+    for key in STAT_KEYS:
         if key in missing:
             assert stat[key] is None, f"{key} saknas ({missing[key]}) men har ett värde"
 
@@ -100,6 +99,13 @@ def test_missing_flags_survive(dataset):
     solna = next(a for a in dataset["areas"] if a["slug"] == "solna")
     assert solna["house"]["m3"]["missing"] == {"change": "F"}
     assert solna["house"]["m3"]["pricePerSqm"] == 76057
+
+
+def test_geometry_file_properties(features):
+    for feature in features:
+        props = feature["properties"]
+        assert set(props) == {"slug", "name", "kind", "label", "neighbours"}
+        assert props["kind"] in ("district", "municipality")
 
 
 def test_geometry_carries_only_slug(features):
