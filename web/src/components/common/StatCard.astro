@@ -1,9 +1,12 @@
 ---
-/** Nyckeltal: etikett, stort värde (slot) och en rad som sätter det i sammanhang. */
+/**
+ * Nyckeltal: etikett, värde (slot) och en rad som sätter det i sammanhang.
+ * Platt, utan kortbakgrund; raden av nyckeltal (.stat-row) ritar avdelarna.
+ */
 interface Props {
   label: string;
   note?: string | undefined;
-  /** Blekare värde när underlaget är tunt. */
+  /** Märk värdet som osäkert (tunt underlag). Färgen ändras, inte opaciteten. */
   muted?: boolean;
 }
 const { label, note, muted = false } = Astro.props;
@@ -20,11 +23,7 @@ const { label, note, muted = false } = Astro.props;
   .stat {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-1);
-    padding: var(--sp-4) var(--sp-5) var(--sp-5);
-    background: var(--c-surface);
-    border: 1px solid var(--c-line);
-    border-radius: var(--radius);
+    gap: 2px;
     min-width: 0;
   }
   dt {
@@ -50,9 +49,6 @@ const { label, note, muted = false } = Astro.props;
     color: var(--c-ink-3);
   }
   @media (max-width: 640px) {
-    .stat {
-      padding: var(--sp-3) var(--sp-4) var(--sp-4);
-    }
     .stat-value {
       font-size: var(--fs-lg);
     }

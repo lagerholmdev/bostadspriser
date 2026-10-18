@@ -1,20 +1,46 @@
+import json
+
 from PIL import Image
 
 from prislandskap import og
-from prislandskap.palette import NODATA, PRICE_COLORS, change_color, price_color
+from prislandskap import palette
+from prislandskap.config import SCALES_FILE
+from prislandskap.palette import change_color, hex_rgb, price_color
+
+# Samma fil som web/src/lib/scales.ts importerar
+SCALES = json.loads(SCALES_FILE.read_text(encoding="utf-8"))
+
+
+def test_palette_is_read_from_design_scales_json():
+    assert [hex_rgb(c) for c in SCALES["price"]["colors"]] == list(palette.PRICE_COLORS)
+    assert list(palette.PRICE_BREAKS) == SCALES["price"]["breaks"]
+    assert palette.NODATA == hex_rgb(SCALES["nodata"])
+    assert palette.BUDGET_COLORS == {k: hex_rgb(SCALES["budget"][k]) for k in ("ok", "near", "no")}
+    assert og.BUDGET_NEAR == SCALES["budget"]["nearMargin"]
+    assert palette.CHANGE_MAX == SCALES["change"]["max"]
 
 
 def test_price_color_matches_scales_ts():
-    assert price_color(None) == NODATA
-    assert price_color(34_999) == PRICE_COLORS[0]
-    assert price_color(35_000) == PRICE_COLORS[1]
-    assert price_color(109_999) == PRICE_COLORS[4]
-    assert price_color(135_782) == PRICE_COLORS[5]
+    """Samma klassning som priceColor(): värdet under gränsen hamnar i klassen under."""
+    colors = [hex_rgb(c) for c in SCALES["price"]["colors"]]
+    breaks = SCALES["price"]["breaks"]
+    assert price_color(None) == hex_rgb(SCALES["nodata"])
+    assert price_color(0) == colors[0]
+    for i, limit in enumerate(breaks):
+        assert price_color(limit - 1) == colors[i]
+        assert price_color(limit) == colors[i + 1]
+    assert price_color(10**7) == colors[-1]
 
 
-def test_change_color_saturates():
+def test_change_color_matches_scales_ts():
+    change = SCALES["change"]
+    assert change_color(None) == hex_rgb(SCALES["nodata"])
+    assert change_color(0) == hex_rgb(change["flat"])
+    assert change_color(change["max"]) == hex_rgb(change["up"])
+    assert change_color(-change["max"]) == hex_rgb(change["down"])
     assert change_color(10) == change_color(25)
-    assert change_color(0) == (0xE7, 0xE8, 0xE3)
+    # Halvor avrundas uppåt som Math.round i scales.ts
+    assert palette.mix((0, 0, 0), (1, 3, 5), 0.5) == (1, 2, 3)
 
 
 def test_formatting():

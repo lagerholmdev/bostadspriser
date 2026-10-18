@@ -1,0 +1,1979 @@
+{
+ "updated": "2026-10-08",
+ "periods": {
+  "m3": "jul–sep 2026",
+  "m12": "okt 2025–sep 2026"
+ },
+ "source": {
+  "name": "Svensk Mäklarstatistik",
+  "url": "https://www.maklarstatistik.se/omrade/riket/stockholms-lan/"
+ },
+ "county": {
+  "name": "Stockholms län",
+  "apartment": {
+   "m3": {
+    "sales": 10961,
+    "pricePerSqm": 70849,
+    "meanPrice": 4416000,
+    "change": -1.0
+   },
+   "m12": {
+    "sales": 46042,
+    "pricePerSqm": 70720,
+    "meanPrice": 4444000,
+    "change": 6.5
+   }
+  },
+  "house": {
+   "m3": {
+    "sales": 2627,
+    "pricePerSqm": 55399,
+    "meanPrice": 7284000,
+    "change": 0.1
+   },
+   "m12": {
+    "sales": 10632,
+    "pricePerSqm": 55585,
+    "meanPrice": 7396000,
+    "change": 5.4
+   }
+  }
+ },
+ "areas": [
+  {
+   "slug": "botkyrka",
+   "name": "Botkyrka",
+   "kind": "municipality",
+   "label": [
+    17.82801,
+    59.14666
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "ekero",
+    "huddinge",
+    "salem",
+    "haninge",
+    "sodertalje",
+    "nynashamn"
+   ],
+   "bbox": [
+    17.66328,
+    59.04443,
+    17.9843,
+    59.26838
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 192,
+     "pricePerSqm": 28988,
+     "meanPrice": 2091000,
+     "change": -1.6
+    },
+    "m12": {
+     "sales": 790,
+     "pricePerSqm": 29333,
+     "meanPrice": 2109000,
+     "change": -0.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 142,
+     "pricePerSqm": 38276,
+     "meanPrice": 4816000,
+     "change": -0.5
+    },
+    "m12": {
+     "sales": 467,
+     "pricePerSqm": 38714,
+     "meanPrice": 4865000,
+     "change": 2.4
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "bromma-vasterled",
+   "name": "Bromma-Västerled",
+   "kind": "district",
+   "label": [
+    17.94057,
+    59.35381
+   ],
+   "neighbours": [
+    "essingen",
+    "hagersten-liljeholmen",
+    "hasselby-vallingby",
+    "kungsholmen",
+    "spanga-kista",
+    "ekero",
+    "sundbyberg",
+    "solna"
+   ],
+   "bbox": [
+    17.88541,
+    59.31365,
+    17.99464,
+    59.37018
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 559,
+     "pricePerSqm": 64714,
+     "meanPrice": 4032000,
+     "change": 0.1
+    },
+    "m12": {
+     "sales": 2303,
+     "pricePerSqm": 64485,
+     "meanPrice": 4103000,
+     "change": 2.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "brannkyrka-skarholmen",
+   "name": "Brännkyrka-Skärholmen",
+   "kind": "district",
+   "label": [
+    17.98957,
+    59.27577
+   ],
+   "neighbours": [
+    "enskede-skarpnack",
+    "farsta-vantor",
+    "hagersten-liljeholmen",
+    "ekero",
+    "huddinge",
+    "botkyrka"
+   ],
+   "bbox": [
+    17.86763,
+    59.26005,
+    18.04006,
+    59.30205
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 324,
+     "pricePerSqm": 49642,
+     "meanPrice": 3298000,
+     "change": 1.3
+    },
+    "m12": {
+     "sales": 1348,
+     "pricePerSqm": 48673,
+     "meanPrice": 3255000,
+     "change": 8.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "danderyd",
+   "name": "Danderyd",
+   "kind": "municipality",
+   "label": [
+    18.06128,
+    59.40212
+   ],
+   "neighbours": [
+    "ostermalm",
+    "osteraker",
+    "taby",
+    "sollentuna",
+    "solna",
+    "lidingo",
+    "vaxholm"
+   ],
+   "bbox": [
+    17.9915,
+    59.36574,
+    18.12223,
+    59.44122
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 95,
+     "pricePerSqm": 66627,
+     "meanPrice": 4496000,
+     "change": -0.9
+    },
+    "m12": {
+     "sales": 440,
+     "pricePerSqm": 65010,
+     "meanPrice": 4492000,
+     "change": -1.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 46,
+     "pricePerSqm": 98590,
+     "meanPrice": 15453000,
+     "change": 2.3
+    },
+    "m12": {
+     "sales": 207,
+     "pricePerSqm": 92414,
+     "meanPrice": 15902000,
+     "change": 6.3
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "ekero",
+   "name": "Ekerö",
+   "kind": "municipality",
+   "label": [
+    17.63973,
+    59.36249
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "bromma-vasterled",
+    "hagersten-liljeholmen",
+    "hasselby-vallingby",
+    "jarfalla",
+    "huddinge",
+    "botkyrka",
+    "salem",
+    "upplands-bro",
+    "sodertalje"
+   ],
+   "bbox": [
+    17.41119,
+    59.25957,
+    17.95451,
+    59.45139
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 38,
+     "pricePerSqm": 47297,
+     "meanPrice": 3560000,
+     "change": 0.7
+    },
+    "m12": {
+     "sales": 155,
+     "pricePerSqm": 48025,
+     "meanPrice": 3784000,
+     "change": 8.5
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 72,
+     "pricePerSqm": 49270,
+     "meanPrice": 6601000,
+     "change": -3.2
+    },
+    "m12": {
+     "sales": 329,
+     "pricePerSqm": 50845,
+     "meanPrice": 6939000,
+     "change": -2.6
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "enskede-skarpnack",
+   "name": "Enskede-Skarpnäck",
+   "kind": "district",
+   "label": [
+    18.09681,
+    59.28806
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "farsta-vantor",
+    "hagersten-liljeholmen",
+    "sodermalm",
+    "huddinge",
+    "nacka"
+   ],
+   "bbox": [
+    18.01944,
+    59.24209,
+    18.17644,
+    59.30847
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 578,
+     "pricePerSqm": 66495,
+     "meanPrice": 3857000,
+     "change": 0.6
+    },
+    "m12": {
+     "sales": 2547,
+     "pricePerSqm": 65390,
+     "meanPrice": 3794000,
+     "change": 6.8
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "essingen",
+   "name": "Essingen",
+   "kind": "district",
+   "label": [
+    17.99192,
+    59.32158
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "hagersten-liljeholmen",
+    "kungsholmen",
+    "sodermalm"
+   ],
+   "bbox": [
+    17.98036,
+    59.31679,
+    18.01052,
+    59.32703
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 102,
+     "pricePerSqm": 90642,
+     "meanPrice": 5266000,
+     "change": 0.5
+    },
+    "m12": {
+     "sales": 399,
+     "pricePerSqm": 89284,
+     "meanPrice": 4937000,
+     "change": 5.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "farsta-vantor",
+   "name": "Farsta-Vantör",
+   "kind": "district",
+   "label": [
+    18.06852,
+    59.26263
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "enskede-skarpnack",
+    "huddinge",
+    "tyreso",
+    "nacka"
+   ],
+   "bbox": [
+    17.99796,
+    59.2301,
+    18.19952,
+    59.28512
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 431,
+     "pricePerSqm": 46528,
+     "meanPrice": 2914000,
+     "change": 0.4
+    },
+    "m12": {
+     "sales": 1747,
+     "pricePerSqm": 46276,
+     "meanPrice": 2888000,
+     "change": 1.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "haninge",
+   "name": "Haninge",
+   "kind": "municipality",
+   "label": [
+    18.31407,
+    59.01735
+   ],
+   "neighbours": [
+    "varmdo",
+    "huddinge",
+    "botkyrka",
+    "tyreso",
+    "nynashamn"
+   ],
+   "bbox": [
+    17.91446,
+    58.77966,
+    18.67899,
+    59.21938
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 310,
+     "pricePerSqm": 33840,
+     "meanPrice": 2435000,
+     "change": 0.6
+    },
+    "m12": {
+     "sales": 1187,
+     "pricePerSqm": 32854,
+     "meanPrice": 2344000,
+     "change": 9.2
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 177,
+     "pricePerSqm": 44834,
+     "meanPrice": 5148000,
+     "change": 0.7
+    },
+    "m12": {
+     "sales": 640,
+     "pricePerSqm": 43949,
+     "meanPrice": 5213000,
+     "change": 1.0
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "huddinge",
+   "name": "Huddinge",
+   "kind": "municipality",
+   "label": [
+    18.03346,
+    59.20193
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "enskede-skarpnack",
+    "farsta-vantor",
+    "hagersten-liljeholmen",
+    "ekero",
+    "botkyrka",
+    "haninge",
+    "tyreso"
+   ],
+   "bbox": [
+    17.85615,
+    59.14136,
+    18.18279,
+    59.28757
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 310,
+     "pricePerSqm": 39149,
+     "meanPrice": 2909000,
+     "change": 2.0
+    },
+    "m12": {
+     "sales": 1205,
+     "pricePerSqm": 38858,
+     "meanPrice": 2815000,
+     "change": 1.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 153,
+     "pricePerSqm": 53416,
+     "meanPrice": 6492000,
+     "change": 1.2
+    },
+    "m12": {
+     "sales": 714,
+     "pricePerSqm": 53483,
+     "meanPrice": 6601000,
+     "change": 4.7
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "hagersten-liljeholmen",
+   "name": "Hägersten-Liljeholmen",
+   "kind": "district",
+   "label": [
+    17.96668,
+    59.29635
+   ],
+   "neighbours": [
+    "brannkyrka-skarholmen",
+    "bromma-vasterled",
+    "enskede-skarpnack",
+    "essingen",
+    "kungsholmen",
+    "sodermalm",
+    "ekero",
+    "huddinge"
+   ],
+   "bbox": [
+    17.93911,
+    59.27996,
+    18.03851,
+    59.31857
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 604,
+     "pricePerSqm": 80252,
+     "meanPrice": 4404000,
+     "change": -1.1
+    },
+    "m12": {
+     "sales": 2720,
+     "pricePerSqm": 79105,
+     "meanPrice": 4569000,
+     "change": 6.6
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "hasselby-vallingby",
+   "name": "Hässelby-Vällingby",
+   "kind": "district",
+   "label": [
+    17.86502,
+    59.36465
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "spanga-kista",
+    "jarfalla",
+    "ekero"
+   ],
+   "bbox": [
+    17.77005,
+    59.33701,
+    17.89969,
+    59.39889
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 165,
+     "pricePerSqm": 37465,
+     "meanPrice": 2711000,
+     "change": 1.0
+    },
+    "m12": {
+     "sales": 640,
+     "pricePerSqm": 36918,
+     "meanPrice": 2592000,
+     "change": 1.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "jarfalla",
+   "name": "Järfälla",
+   "kind": "municipality",
+   "label": [
+    17.81786,
+    59.42833
+   ],
+   "neighbours": [
+    "hasselby-vallingby",
+    "spanga-kista",
+    "upplands-vasby",
+    "ekero",
+    "upplands-bro",
+    "sollentuna"
+   ],
+   "bbox": [
+    17.73251,
+    59.38122,
+    17.89859,
+    59.50875
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 356,
+     "pricePerSqm": 34577,
+     "meanPrice": 2353000,
+     "change": -0.9
+    },
+    "m12": {
+     "sales": 1344,
+     "pricePerSqm": 34570,
+     "meanPrice": 2373000,
+     "change": 2.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 113,
+     "pricePerSqm": 42723,
+     "meanPrice": 6017000,
+     "change": 2.3
+    },
+    "m12": {
+     "sales": 412,
+     "pricePerSqm": 41830,
+     "meanPrice": 5725000,
+     "change": 5.4
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "kungsholmen",
+   "name": "Kungsholmen",
+   "kind": "district",
+   "label": [
+    18.01713,
+    59.33227
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "essingen",
+    "hagersten-liljeholmen",
+    "sodermalm",
+    "vasastan-norrmalm",
+    "solna"
+   ],
+   "bbox": [
+    17.99513,
+    59.32473,
+    18.05609,
+    59.34082
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 681,
+     "pricePerSqm": 112452,
+     "meanPrice": 5728000,
+     "change": -0.4
+    },
+    "m12": {
+     "sales": 3050,
+     "pricePerSqm": 110260,
+     "meanPrice": 6131000,
+     "change": 7.2
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "lidingo",
+   "name": "Lidingö",
+   "kind": "municipality",
+   "label": [
+    18.18082,
+    59.36039
+   ],
+   "neighbours": [
+    "ostermalm",
+    "osteraker",
+    "taby",
+    "danderyd",
+    "nacka",
+    "vaxholm"
+   ],
+   "bbox": [
+    18.08821,
+    59.32444,
+    18.3031,
+    59.40547
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 153,
+     "pricePerSqm": 69693,
+     "meanPrice": 4972000,
+     "change": 5.9
+    },
+    "m12": {
+     "sales": 701,
+     "pricePerSqm": 66107,
+     "meanPrice": 4769000,
+     "change": 2.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 48,
+     "pricePerSqm": 105579,
+     "meanPrice": 17018000,
+     "change": 6.3
+    },
+    "m12": {
+     "sales": 266,
+     "pricePerSqm": 95140,
+     "meanPrice": 15540000,
+     "change": 8.5
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "nacka",
+   "name": "Nacka",
+   "kind": "municipality",
+   "label": [
+    18.24183,
+    59.299
+   ],
+   "neighbours": [
+    "enskede-skarpnack",
+    "farsta-vantor",
+    "ostermalm",
+    "sodermalm",
+    "varmdo",
+    "tyreso",
+    "lidingo",
+    "vaxholm"
+   ],
+   "bbox": [
+    18.10577,
+    59.23174,
+    18.38863,
+    59.36887
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 616,
+     "pricePerSqm": 61290,
+     "meanPrice": 4385000,
+     "change": 2.0
+    },
+    "m12": {
+     "sales": 2426,
+     "pricePerSqm": 59469,
+     "meanPrice": 4359000,
+     "change": 5.7
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 139,
+     "pricePerSqm": 76420,
+     "meanPrice": 11222000,
+     "change": 1.2
+    },
+    "m12": {
+     "sales": 659,
+     "pricePerSqm": 75393,
+     "meanPrice": 10776000,
+     "change": 9.7
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "norrtalje",
+   "name": "Norrtälje",
+   "kind": "municipality",
+   "label": [
+    18.72379,
+    59.78432
+   ],
+   "neighbours": [
+    "vallentuna",
+    "osteraker",
+    "varmdo",
+    "sigtuna"
+   ],
+   "bbox": [
+    18.08544,
+    59.46961,
+    19.68204,
+    60.28113
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 206,
+     "pricePerSqm": 28564,
+     "meanPrice": 1956000,
+     "change": 1.9
+    },
+    "m12": {
+     "sales": 808,
+     "pricePerSqm": 28743,
+     "meanPrice": 2007000,
+     "change": -1.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 186,
+     "pricePerSqm": 34930,
+     "meanPrice": 3755000,
+     "change": -5.8
+    },
+    "m12": {
+     "sales": 612,
+     "pricePerSqm": 37521,
+     "meanPrice": 3899000,
+     "change": 4.0
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "nykvarn",
+   "name": "Nykvarn",
+   "kind": "municipality",
+   "label": [
+    17.39477,
+    59.18477
+   ],
+   "neighbours": [
+    "sodertalje"
+   ],
+   "bbox": [
+    17.24398,
+    59.11973,
+    17.56184,
+    59.27343
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 26,
+     "pricePerSqm": 32251,
+     "meanPrice": 2293000,
+     "change": -1.4
+    },
+    "m12": {
+     "sales": 94,
+     "pricePerSqm": 32244,
+     "meanPrice": 2395000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 55,
+     "pricePerSqm": 40287,
+     "meanPrice": 5037000,
+     "change": 10.9
+    },
+    "m12": {
+     "sales": 117,
+     "pricePerSqm": 38519,
+     "meanPrice": 4778000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "nynashamn",
+   "name": "Nynäshamn",
+   "kind": "municipality",
+   "label": [
+    17.88667,
+    58.92669
+   ],
+   "neighbours": [
+    "botkyrka",
+    "haninge",
+    "sodertalje"
+   ],
+   "bbox": [
+    17.70891,
+    58.67142,
+    18.09499,
+    59.12118
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 58,
+     "pricePerSqm": 25762,
+     "meanPrice": 1936000,
+     "change": 1.1
+    },
+    "m12": {
+     "sales": 239,
+     "pricePerSqm": 25317,
+     "meanPrice": 1903000,
+     "change": -5.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 54,
+     "pricePerSqm": 35607,
+     "meanPrice": 4192000,
+     "change": -6.6
+    },
+    "m12": {
+     "sales": 227,
+     "pricePerSqm": 38105,
+     "meanPrice": 4064000,
+     "change": 2.6
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "salem",
+   "name": "Salem",
+   "kind": "municipality",
+   "label": [
+    17.74702,
+    59.20682
+   ],
+   "neighbours": [
+    "ekero",
+    "botkyrka",
+    "sodertalje"
+   ],
+   "bbox": [
+    17.56252,
+    59.17906,
+    17.79811,
+    59.29796
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 42,
+     "pricePerSqm": 29599,
+     "meanPrice": 2160000,
+     "change": 2.2
+    },
+    "m12": {
+     "sales": 190,
+     "pricePerSqm": 29282,
+     "meanPrice": 2287000,
+     "change": -3.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 26,
+     "pricePerSqm": 34358,
+     "meanPrice": 4729000,
+     "change": -5.9
+    },
+    "m12": {
+     "sales": 147,
+     "pricePerSqm": 35133,
+     "meanPrice": 4781000,
+     "change": -1.9
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "sigtuna",
+   "name": "Sigtuna",
+   "kind": "municipality",
+   "label": [
+    17.89195,
+    59.62678
+   ],
+   "neighbours": [
+    "upplands-vasby",
+    "vallentuna",
+    "upplands-bro",
+    "norrtalje"
+   ],
+   "bbox": [
+    17.57385,
+    59.54866,
+    18.15285,
+    59.74511
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 97,
+     "pricePerSqm": 25562,
+     "meanPrice": 1851000,
+     "change": -4.9
+    },
+    "m12": {
+     "sales": 427,
+     "pricePerSqm": 26740,
+     "meanPrice": 2019000,
+     "change": -6.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 68,
+     "pricePerSqm": 40157,
+     "meanPrice": 5081000,
+     "change": -1.4
+    },
+    "m12": {
+     "sales": 256,
+     "pricePerSqm": 40208,
+     "meanPrice": 5321000,
+     "change": 5.9
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "sollentuna",
+   "name": "Sollentuna",
+   "kind": "municipality",
+   "label": [
+    17.92467,
+    59.46095
+   ],
+   "neighbours": [
+    "spanga-kista",
+    "upplands-vasby",
+    "jarfalla",
+    "taby",
+    "danderyd",
+    "sundbyberg",
+    "solna"
+   ],
+   "bbox": [
+    17.8246,
+    59.39528,
+    18.01041,
+    59.49729
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 277,
+     "pricePerSqm": 43531,
+     "meanPrice": 3315000,
+     "change": 1.0
+    },
+    "m12": {
+     "sales": 1106,
+     "pricePerSqm": 42876,
+     "meanPrice": 3205000,
+     "change": 3.5
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 98,
+     "pricePerSqm": 59997,
+     "meanPrice": 9104000,
+     "change": 3.1
+    },
+    "m12": {
+     "sales": 475,
+     "pricePerSqm": 60054,
+     "meanPrice": 8574000,
+     "change": 6.6
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "solna",
+   "name": "Solna",
+   "kind": "municipality",
+   "label": [
+    18.01203,
+    59.36032
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "kungsholmen",
+    "ostermalm",
+    "spanga-kista",
+    "vasastan-norrmalm",
+    "danderyd",
+    "sollentuna",
+    "sundbyberg"
+   ],
+   "bbox": [
+    17.96245,
+    59.33951,
+    18.05829,
+    59.39965
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 641,
+     "pricePerSqm": 66661,
+     "meanPrice": 4034000,
+     "change": 2.1
+    },
+    "m12": {
+     "sales": 2784,
+     "pricePerSqm": 64885,
+     "meanPrice": 4017000,
+     "change": 6.5
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 4,
+     "pricePerSqm": 76057,
+     "meanPrice": 13025000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    },
+    "m12": {
+     "sales": 37,
+     "pricePerSqm": 76476,
+     "meanPrice": 11683000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "spanga-kista",
+   "name": "Spånga-Kista",
+   "kind": "district",
+   "label": [
+    17.90897,
+    59.39308
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "hasselby-vallingby",
+    "jarfalla",
+    "sollentuna",
+    "sundbyberg",
+    "solna"
+   ],
+   "bbox": [
+    17.85124,
+    59.36153,
+    17.97438,
+    59.44011
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 160,
+     "pricePerSqm": 30244,
+     "meanPrice": 2087000,
+     "change": 3.7
+    },
+    "m12": {
+     "sales": 639,
+     "pricePerSqm": 30456,
+     "meanPrice": 2144000,
+     "change": -0.9
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "sundbyberg",
+   "name": "Sundbyberg",
+   "kind": "municipality",
+   "label": [
+    17.95736,
+    59.3785
+   ],
+   "neighbours": [
+    "bromma-vasterled",
+    "spanga-kista",
+    "sollentuna",
+    "solna"
+   ],
+   "bbox": [
+    17.92802,
+    59.3554,
+    17.98469,
+    59.40133
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 367,
+     "pricePerSqm": 64323,
+     "meanPrice": 3997000,
+     "change": -4.3
+    },
+    "m12": {
+     "sales": 1606,
+     "pricePerSqm": 65501,
+     "meanPrice": 4017000,
+     "change": 1.9
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 16,
+     "pricePerSqm": 64800,
+     "meanPrice": 9318000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    },
+    "m12": {
+     "sales": 54,
+     "pricePerSqm": 64192,
+     "meanPrice": 9587000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "sodermalm",
+   "name": "Södermalm",
+   "kind": "district",
+   "label": [
+    18.06878,
+    59.31285
+   ],
+   "neighbours": [
+    "enskede-skarpnack",
+    "essingen",
+    "hagersten-liljeholmen",
+    "kungsholmen",
+    "ostermalm",
+    "vasastan-norrmalm",
+    "nacka"
+   ],
+   "bbox": [
+    18.01535,
+    59.29983,
+    18.11393,
+    59.32294
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 879,
+     "pricePerSqm": 116680,
+     "meanPrice": 6703000,
+     "change": 2.0
+    },
+    "m12": {
+     "sales": 3874,
+     "pricePerSqm": 112903,
+     "meanPrice": 6433000,
+     "change": 10.5
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "sodertalje",
+   "name": "Södertälje",
+   "kind": "municipality",
+   "label": [
+    17.53678,
+    59.05541
+   ],
+   "neighbours": [
+    "ekero",
+    "botkyrka",
+    "salem",
+    "nykvarn",
+    "nynashamn"
+   ],
+   "bbox": [
+    17.3124,
+    58.81549,
+    17.74242,
+    59.3516
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 174,
+     "pricePerSqm": 26955,
+     "meanPrice": 1999000,
+     "change": -0.4
+    },
+    "m12": {
+     "sales": 697,
+     "pricePerSqm": 26395,
+     "meanPrice": 1955000,
+     "change": -2.4
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 83,
+     "pricePerSqm": 35986,
+     "meanPrice": 4667000,
+     "change": 3.4
+    },
+    "m12": {
+     "sales": 324,
+     "pricePerSqm": 34797,
+     "meanPrice": 4412000,
+     "change": 5.6
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "tyreso",
+   "name": "Tyresö",
+   "kind": "municipality",
+   "label": [
+    18.35887,
+    59.20128
+   ],
+   "neighbours": [
+    "farsta-vantor",
+    "varmdo",
+    "huddinge",
+    "haninge",
+    "nacka"
+   ],
+   "bbox": [
+    18.17472,
+    59.15858,
+    18.46789,
+    59.26324
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 125,
+     "pricePerSqm": 37861,
+     "meanPrice": 2803000,
+     "change": 0.9
+    },
+    "m12": {
+     "sales": 540,
+     "pricePerSqm": 37676,
+     "meanPrice": 2849000,
+     "change": 0.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 117,
+     "pricePerSqm": 53123,
+     "meanPrice": 6869000,
+     "change": -0.7
+    },
+    "m12": {
+     "sales": 419,
+     "pricePerSqm": 53151,
+     "meanPrice": 6869000,
+     "change": 4.2
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "taby",
+   "name": "Täby",
+   "kind": "municipality",
+   "label": [
+    18.07009,
+    59.47046
+   ],
+   "neighbours": [
+    "upplands-vasby",
+    "vallentuna",
+    "osteraker",
+    "danderyd",
+    "sollentuna",
+    "lidingo",
+    "vaxholm"
+   ],
+   "bbox": [
+    17.98204,
+    59.41234,
+    18.15329,
+    59.51103
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 383,
+     "pricePerSqm": 49466,
+     "meanPrice": 3637000,
+     "change": -2.3
+    },
+    "m12": {
+     "sales": 1628,
+     "pricePerSqm": 49699,
+     "meanPrice": 3669000,
+     "change": 5.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 137,
+     "pricePerSqm": 66138,
+     "meanPrice": 9896000,
+     "change": 3.0
+    },
+    "m12": {
+     "sales": 608,
+     "pricePerSqm": 62474,
+     "meanPrice": 9212000,
+     "change": 7.9
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "upplands-vasby",
+   "name": "Upplands Väsby",
+   "kind": "municipality",
+   "label": [
+    17.92142,
+    59.52702
+   ],
+   "neighbours": [
+    "vallentuna",
+    "jarfalla",
+    "upplands-bro",
+    "taby",
+    "sollentuna",
+    "sigtuna"
+   ],
+   "bbox": [
+    17.79996,
+    59.4575,
+    18.01426,
+    59.57536
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 155,
+     "pricePerSqm": 31073,
+     "meanPrice": 2405000,
+     "change": -0.8
+    },
+    "m12": {
+     "sales": 536,
+     "pricePerSqm": 31043,
+     "meanPrice": 2292000,
+     "change": 3.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 62,
+     "pricePerSqm": 44335,
+     "meanPrice": 6153000,
+     "change": 3.7
+    },
+    "m12": {
+     "sales": 254,
+     "pricePerSqm": 42655,
+     "meanPrice": 5815000,
+     "change": 10.8
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "upplands-bro",
+   "name": "Upplands-Bro",
+   "kind": "municipality",
+   "label": [
+    17.67553,
+    59.51038
+   ],
+   "neighbours": [
+    "upplands-vasby",
+    "jarfalla",
+    "ekero",
+    "sigtuna"
+   ],
+   "bbox": [
+    17.46516,
+    59.41864,
+    17.83536,
+    59.64958
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 90,
+     "pricePerSqm": 28549,
+     "meanPrice": 2156000,
+     "change": -0.5
+    },
+    "m12": {
+     "sales": 391,
+     "pricePerSqm": 28776,
+     "meanPrice": 2197000,
+     "change": 2.1
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 57,
+     "pricePerSqm": 38234,
+     "meanPrice": 4772000,
+     "change": -2.5
+    },
+    "m12": {
+     "sales": 201,
+     "pricePerSqm": 36965,
+     "meanPrice": 4792000,
+     "change": 7.1
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "vallentuna",
+   "name": "Vallentuna",
+   "kind": "municipality",
+   "label": [
+    18.21495,
+    59.59404
+   ],
+   "neighbours": [
+    "upplands-vasby",
+    "osteraker",
+    "taby",
+    "norrtalje",
+    "sigtuna"
+   ],
+   "bbox": [
+    17.96822,
+    59.48604,
+    18.43678,
+    59.68881
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 129,
+     "pricePerSqm": 33544,
+     "meanPrice": 2394000,
+     "change": 1.2
+    },
+    "m12": {
+     "sales": 485,
+     "pricePerSqm": 33190,
+     "meanPrice": 2356000,
+     "change": -1.9
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 93,
+     "pricePerSqm": 45940,
+     "meanPrice": 5888000,
+     "change": 4.7
+    },
+    "m12": {
+     "sales": 345,
+     "pricePerSqm": 43229,
+     "meanPrice": 5546000,
+     "change": 11.8
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "vasastan-norrmalm",
+   "name": "Vasastan-Norrmalm",
+   "kind": "district",
+   "label": [
+    18.04852,
+    59.34312
+   ],
+   "neighbours": [
+    "kungsholmen",
+    "ostermalm",
+    "sodermalm",
+    "solna"
+   ],
+   "bbox": [
+    18.02537,
+    59.32168,
+    18.09081,
+    59.35513
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 693,
+     "pricePerSqm": 135782,
+     "meanPrice": 8579000,
+     "change": 1.4
+    },
+    "m12": {
+     "sales": 3228,
+     "pricePerSqm": 130447,
+     "meanPrice": 8239000,
+     "change": 10.9
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "vaxholm",
+   "name": "Vaxholm",
+   "kind": "municipality",
+   "label": [
+    18.33805,
+    59.4031
+   ],
+   "neighbours": [
+    "osteraker",
+    "varmdo",
+    "taby",
+    "danderyd",
+    "nacka",
+    "lidingo"
+   ],
+   "bbox": [
+    18.12188,
+    59.35233,
+    18.45013,
+    59.45038
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 43,
+     "pricePerSqm": 46206,
+     "meanPrice": 3388000,
+     "change": 1.4
+    },
+    "m12": {
+     "sales": 168,
+     "pricePerSqm": 45408,
+     "meanPrice": 3521000,
+     "change": 1.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 41,
+     "pricePerSqm": 77502,
+     "meanPrice": 10376000,
+     "change": 3.8
+    },
+    "m12": {
+     "sales": 128,
+     "pricePerSqm": 71433,
+     "meanPrice": 9565000,
+     "change": null,
+     "missing": {
+      "change": "F"
+     }
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "varmdo",
+   "name": "Värmdö",
+   "kind": "municipality",
+   "label": [
+    18.82122,
+    59.32371
+   ],
+   "neighbours": [
+    "osteraker",
+    "haninge",
+    "tyreso",
+    "nacka",
+    "vaxholm",
+    "norrtalje"
+   ],
+   "bbox": [
+    18.31955,
+    58.99831,
+    19.35838,
+    59.51559
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 128,
+     "pricePerSqm": 48191,
+     "meanPrice": 3670000,
+     "change": 3.3
+    },
+    "m12": {
+     "sales": 498,
+     "pricePerSqm": 47043,
+     "meanPrice": 3464000,
+     "change": 3.3
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 152,
+     "pricePerSqm": 64422,
+     "meanPrice": 7315000,
+     "change": -0.6
+    },
+    "m12": {
+     "sales": 542,
+     "pricePerSqm": 60232,
+     "meanPrice": 7376000,
+     "change": 4.4
+    }
+   },
+   "houseScope": "area"
+  },
+  {
+   "slug": "ostermalm",
+   "name": "Östermalm",
+   "kind": "district",
+   "label": [
+    18.08637,
+    59.34779
+   ],
+   "neighbours": [
+    "sodermalm",
+    "vasastan-norrmalm",
+    "danderyd",
+    "nacka",
+    "solna",
+    "lidingo"
+   ],
+   "bbox": [
+    18.04092,
+    59.31957,
+    18.15512,
+    59.37555
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 645,
+     "pricePerSqm": 129172,
+     "meanPrice": 8057000,
+     "change": -0.3
+    },
+    "m12": {
+     "sales": 2554,
+     "pricePerSqm": 127553,
+     "meanPrice": 7888000,
+     "change": 7.0
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 359,
+     "pricePerSqm": 75494,
+     "meanPrice": 9756000,
+     "change": 0.2
+    },
+    "m12": {
+     "sales": 1607,
+     "pricePerSqm": 73427,
+     "meanPrice": 9458000,
+     "change": 7.7
+    }
+   },
+   "houseScope": "city"
+  },
+  {
+   "slug": "osteraker",
+   "name": "Österåker",
+   "kind": "municipality",
+   "label": [
+    18.58351,
+    59.51598
+   ],
+   "neighbours": [
+    "vallentuna",
+    "varmdo",
+    "taby",
+    "danderyd",
+    "lidingo",
+    "vaxholm",
+    "norrtalje"
+   ],
+   "bbox": [
+    18.12276,
+    59.40055,
+    19.00168,
+    59.5997
+   ],
+   "apartment": {
+    "m3": {
+     "sales": 115,
+     "pricePerSqm": 36141,
+     "meanPrice": 2805000,
+     "change": -2.7
+    },
+    "m12": {
+     "sales": 513,
+     "pricePerSqm": 36504,
+     "meanPrice": 2877000,
+     "change": -5.8
+    }
+   },
+   "house": {
+    "m3": {
+     "sales": 129,
+     "pricePerSqm": 49398,
+     "meanPrice": 5825000,
+     "change": -0.7
+    },
+    "m12": {
+     "sales": 585,
+     "pricePerSqm": 47197,
+     "meanPrice": 5988000,
+     "change": 4.7
+    }
+   },
+   "houseScope": "area"
+  }
+ ]
+}

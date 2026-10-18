@@ -5,6 +5,7 @@
  * Projektion: x = lon · cos(lat₀), y = −lat, där lat₀ är mitten av vyn. Det räcker
  * för ett så litet område som Stockholms län och håller formerna rätt proportionerade.
  */
+import { escape } from "./html";
 
 type Position = [number, number] | number[];
 type Ring = Position[];
@@ -43,6 +44,11 @@ export interface MinimapInput {
   padding?: number;
   /** Minsta bredd på vyn i projicerade grader, så små områden får sammanhang. */
   minSpan?: number;
+  /**
+   * Teckenstorlek (i bildens enheter) som fokusetiketten ska få plats med i sidled.
+   * Används när komponenten förstorar etiketten på smala skärmar.
+   */
+  focusReserveFont?: number;
 }
 
 export interface MinimapShape {
@@ -129,12 +135,13 @@ export function buildMinimap(input: MinimapInput): Minimap {
   const padding = input.padding ?? 2.2;
   const minSpan = input.minSpan ?? 0.07;
   const maxLabels = input.maxLabels ?? 4;
+  const focusReserve = Math.max(FOCUS_LABEL_FONT, input.focusReserveFont ?? FOCUS_LABEL_FONT);
 
   const feats = input.collection.features
     .filter((f) => f.properties?.slug && f.geometry)
     .map((f) => {
       const polys = polygonsOf(f.geometry);
-      return { slug: f.properties!.slug, polys, box: lonLatBox(polys) };
+      return { slug: f.properties?.slug ?? "", polys, box: lonLatBox(polys) };
     })
     .filter((f): f is { slug: string; polys: Ring[][]; box: Box } => f.box != null);
 
@@ -158,7 +165,7 @@ export function buildMinimap(input: MinimapInput): Minimap {
   const scale = width / spanX;
   const x0 = cx - spanX / 2;
   const y0 = cy - spanY / 2;
-  const project = (p: Position): [number, number] => [(p[0]! * k - x0) * scale, (-p[1]! - y0) * scale];
+  const project = (p: Position): [number, number] => [(p[0] * k - x0) * scale, (-p[1] - y0) * scale];
 
   // Ruta i lon/lat för att sortera bort det som ligger utanför, med lite marginal.
   const m = 0.05;
@@ -200,11 +207,13 @@ export function buildMinimap(input: MinimapInput): Minimap {
     const fs = isFocus ? FOCUS_LABEL_FONT : LABEL_FONT;
     const w = textWidth(text, fs);
     const h = fs * 1.3;
+    // Fokusetiketten hålls inom bilden även i den förstorade storleken.
+    const reserveW = isFocus ? textWidth(text, focusReserve) : w;
     let lx = x;
     // Skjut in etiketten om den sticker ut på sidorna, men bara en bit.
-    if (lx - w / 2 < inset) lx = inset + w / 2;
-    if (lx + w / 2 > width - inset) lx = width - inset - w / 2;
-    if (Math.abs(lx - x) > w / 2 || y - h / 2 < inset || y + h / 2 > height - inset) return false;
+    if (lx - reserveW / 2 < inset) lx = inset + reserveW / 2;
+    if (lx + reserveW / 2 > width - inset) lx = width - inset - reserveW / 2;
+    if (!isFocus && (Math.abs(lx - x) > w / 2 || y - h / 2 < inset || y + h / 2 > height - inset)) return false;
     const box: Box = [lx - w / 2 - 4, y - h / 2 - 2, lx + w / 2 + 4, y + h / 2 + 2];
     if (taken.some((t) => intersects(t, box))) return false;
     taken.push(box);
@@ -222,8 +231,6 @@ export function buildMinimap(input: MinimapInput): Minimap {
   return { width, height, shapes, outline, labels };
 }
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
 export interface SvgOptions {
   /** Tillgänglig beskrivning (aria-label). */
   label: string;
@@ -240,7 +247,7 @@ export function minimapSvg(map: Minimap, o: SvgOptions): string {
   const op = o.neighbourOpacity ?? 0.55;
   const parts: string[] = [];
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${map.width} ${map.height}" role="img" aria-label="${esc(o.label)}" preserveAspectRatio="xMidYMid slice">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${map.width} ${map.height}" role="img" aria-label="${escape(o.label)}" preserveAspectRatio="xMidYMid slice">`,
   );
   parts.push(`<rect class="mm-bg" width="${map.width}" height="${map.height}"/>`);
   for (const s of map.shapes) {
@@ -251,7 +258,7 @@ export function minimapSvg(map: Minimap, o: SvgOptions): string {
   if (map.outline) parts.push(`<path class="mm-focus" d="${map.outline}" fill="none"/>`);
   for (const l of map.labels) {
     parts.push(
-      `<text class="mm-label${l.focus ? " mm-label-focus" : ""}" x="${l.x}" y="${l.y}" text-anchor="middle" dominant-baseline="central">${esc(l.text)}</text>`,
+      `<text class="mm-label${l.focus ? " mm-label-focus" : ""}" x="${l.x}" y="${l.y}" text-anchor="middle" dominant-baseline="central">${escape(l.text)}</text>`,
     );
   }
   parts.push("</svg>");

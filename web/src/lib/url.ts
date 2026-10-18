@@ -146,3 +146,57 @@ export function sameState(a: AppState, b: AppState): boolean {
     a.area === b.area
   );
 }
+
+/* ---------- Kartsidans standardval per vy och bostadstyp ---------- */
+
+/** Förändring visas helst på ett år (jämnare än tre månader); övriga vyer på tre månader. */
+export function defaultPeriod(view: View): Period {
+  return view === "forandring" ? "m12" : "m3";
+}
+
+/** En villa är oftast större än en lägenhet, så "Var har jag råd?" börjar på 120 kvm för villor. */
+export const HOUSE_DEFAULT_SQM = 120;
+export function defaultSqm(housing: Housing): number {
+  return housing === "house" ? HOUSE_DEFAULT_SQM : SIZE_RANGE.default;
+}
+
+/**
+ * Som parseState, men med standardval som beror på vyn och bostadstypen: utan period i adressen
+ * visar Förändring ett år, och utan kvm räknar villor på 120 kvm.
+ */
+export function parseAppState(search: string | URLSearchParams, isKnown: (slug: string) => boolean): ParseResult {
+  const q = typeof search === "string" ? new URLSearchParams(search) : search;
+  const r = parseState(q, isKnown);
+  if (!q.has("period") && !q.has("per")) r.state.period = defaultPeriod(r.state.view);
+  if (!q.has("kvm")) r.state.sqm = defaultSqm(r.state.housing);
+  return r;
+}
+
+/** Frågesträng för parseAppState: standardval för vyn och bostadstypen skrivs inte ut. */
+export function serializeAppState(s: AppState): string {
+  const parts: string[] = [];
+  if (s.view !== DEFAULT_STATE.view) parts.push(`vy=${s.view}`);
+  if (s.housing !== DEFAULT_STATE.housing) parts.push("bostad=villa");
+  if (s.period !== defaultPeriod(s.view)) parts.push(`period=${s.period === "m12" ? "12" : "3"}`);
+  if (s.budget !== DEFAULT_STATE.budget) parts.push(`budget=${formatBudgetParam(s.budget)}`);
+  if (s.sqm !== defaultSqm(s.housing)) parts.push(`kvm=${s.sqm}`);
+  if (s.area) parts.push(`omrade=${encodeURIComponent(s.area)}`);
+  return parts.join("&");
+}
+
+export function appStateHref(s: AppState, pathname: string): string {
+  const q = serializeAppState(s);
+  return q ? `${pathname}?${q}` : pathname;
+}
+
+/** Byt vy. Har perioden inte valts uttryckligen (den är vyns standard) följer den med till nästa vys standard. */
+export function withView(s: AppState, view: View): AppState {
+  const period = s.period === defaultPeriod(s.view) ? defaultPeriod(view) : s.period;
+  return { ...s, view, period };
+}
+
+/** Byt bostadstyp. Boarean följer med till nästa standard om den inte ändrats. */
+export function withHousing(s: AppState, housing: Housing): AppState {
+  const sqm = s.sqm === defaultSqm(s.housing) ? defaultSqm(housing) : s.sqm;
+  return { ...s, housing, sqm };
+}

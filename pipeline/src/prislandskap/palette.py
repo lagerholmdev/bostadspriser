@@ -1,4 +1,17 @@
-"""Färger från docs/design.md och web/src/lib/scales.ts. Ändras de där ska de ändras här."""
+"""Färger för delningsbilderna.
+
+Skalorna (pris, förändring, budget, saknad data) läses från design/scales.json, samma fil som
+web/src/lib/scales.ts importerar. Övriga färger är desamma som i web/src/styles/tokens.css.
+"""
+
+import json
+import math
+from functools import cache
+from pathlib import Path
+from typing import Any
+
+from prislandskap.config import SCALES_FILE, display
+from prislandskap.errors import PipelineError
 
 Color = tuple[int, int, int]
 
@@ -7,30 +20,35 @@ def hex_rgb(value: str) -> Color:
     return int(value[1:3], 16), int(value[3:5], 16), int(value[5:7], 16)
 
 
+@cache
+def load_scales(path: Path = SCALES_FILE) -> dict[str, Any]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as err:
+        raise PipelineError(f"Kan inte läsa färgskalorna i {display(path)}: {err}") from err
+
+
+_SCALES = load_scales()
+
 PAGE = hex_rgb("#f3f4f1")
 SURFACE = hex_rgb("#ffffff")
 INK = hex_rgb("#1a1f1c")
 INK_2 = hex_rgb("#4d5650")
-INK_3 = hex_rgb("#737c76")
-LINE = hex_rgb("#dfe2dc")
+INK_3 = hex_rgb("#5f6762")
+LINE = hex_rgb("#dde0da")
 ACCENT = hex_rgb("#1f6f5c")
-NODATA = hex_rgb("#e4e6e1")
+NODATA = hex_rgb(_SCALES["nodata"])
 
-PRICE_COLORS: tuple[Color, ...] = tuple(
-    hex_rgb(c) for c in ("#f3e7c4", "#ecc884", "#dda052", "#c4713a", "#9c4a2b", "#652a21")
-)
-PRICE_BREAKS = (35_000, 50_000, 65_000, 85_000, 110_000)
+PRICE_COLORS: tuple[Color, ...] = tuple(hex_rgb(c) for c in _SCALES["price"]["colors"])
+PRICE_BREAKS: tuple[int, ...] = tuple(_SCALES["price"]["breaks"])
 
-CHANGE_DOWN = hex_rgb("#3d6a9e")
-CHANGE_FLAT = hex_rgb("#e7e8e3")
-CHANGE_UP = hex_rgb("#b0502a")
-CHANGE_MAX = 10.0
+CHANGE_DOWN = hex_rgb(_SCALES["change"]["down"])
+CHANGE_FLAT = hex_rgb(_SCALES["change"]["flat"])
+CHANGE_UP = hex_rgb(_SCALES["change"]["up"])
+CHANGE_MAX = float(_SCALES["change"]["max"])
 
-BUDGET_COLORS: dict[str, Color] = {
-    "ok": hex_rgb("#2f8a6c"),
-    "near": hex_rgb("#e3a948"),
-    "no": hex_rgb("#d4d7d1"),
-}
+BUDGET_COLORS: dict[str, Color] = {k: hex_rgb(_SCALES["budget"][k]) for k in ("ok", "near", "no")}
+BUDGET_NEAR_MARGIN = float(_SCALES["budget"]["nearMargin"])
 
 
 def price_color(value: float | None) -> Color:
@@ -44,7 +62,8 @@ def price_color(value: float | None) -> Color:
 
 
 def mix(a: Color, b: Color, t: float) -> Color:
-    return tuple(round(x + (y - x) * t) for x, y in zip(a, b, strict=True))  # type: ignore[return-value]
+    """Som mix() i scales.ts. Avrundar halvor uppåt som Math.round, inte till jämnt som round()."""
+    return tuple(math.floor(x + (y - x) * t + 0.5) for x, y in zip(a, b, strict=True))  # type: ignore[return-value]
 
 
 def change_color(value: float | None) -> Color:

@@ -3,8 +3,8 @@
  * går att testa och kan köras både i Astro vid bygget och i webbläsaren.
  */
 import { affordablePricePerSqm, affordableSize, budgetStatus, estimatedCost, type BudgetStatus } from "../../lib/budget";
-import { areas as ALL_AREAS, countyStat, isThin, stat } from "../../lib/data";
-import { BUDGET_COLORS, NODATA_COLOR, changeColor, priceColor } from "../../lib/scales";
+import { areas as ALL_AREAS, countyStat, isThin, shownStat } from "../../lib/data";
+import { BUDGET_COLORS, NODATA_COLOR, changeStepColor, priceColor } from "../../lib/scales";
 import type { Area, Housing, Period, Stat } from "../../lib/types";
 import type { AppState, View } from "../../lib/url";
 
@@ -32,7 +32,7 @@ export function entries(housing: Housing, period: Period, list: readonly Area[] 
   const out: Entry[] = [];
   let cityDone = false;
   for (const a of list) {
-    const s = stat(a, housing, period);
+    const s = shownStat(a, housing, period);
     if (!s) continue;
     if (housing === "house" && a.houseScope === "city") {
       if (cityDone) continue;
@@ -97,8 +97,11 @@ export interface BudgetEntry extends Entry {
 
 export interface BudgetModel {
   maxPerSqm: number;
+  /** Räcker: dyrast först, alltså närmast budgeten. */
   ok: BudgetEntry[];
+  /** Nästan: billigast först, alltså närmast budgeten. */
   near: BudgetEntry[];
+  /** Räcker inte: billigast först. */
   no: BudgetEntry[];
   /** Områden utan pris. */
   missing: Entry[];
@@ -123,12 +126,14 @@ export function budgetModel(housing: Housing, period: Period, budget: number, sq
     const be: BudgetEntry = { ...e, status, size: affordableSize(budget, p), cost: estimatedCost(p, sqm) };
     (status === "ok" ? ok : status === "near" ? near : no).push(be);
   }
-  // Störst bostad för pengarna först: det är svaret köparen letar efter.
-  const bySize = (a: BudgetEntry, b: BudgetEntry) => b.size - a.size;
-  ok.sort(bySize);
-  near.sort(bySize);
-  no.sort(bySize);
-  const all = [...ok, ...near, ...no];
+  // Dyrast du har råd med först: det är det område som ligger närmast det köparen letar efter.
+  // Över budget gäller det omvända, så där står det billigaste (närmast budgeten) först.
+  const dearest = (a: BudgetEntry, b: BudgetEntry) => b.size === a.size ? collator.compare(a.name, b.name) : a.size - b.size;
+  const cheapest = (a: BudgetEntry, b: BudgetEntry) => b.size === a.size ? collator.compare(a.name, b.name) : b.size - a.size;
+  ok.sort(dearest);
+  near.sort(cheapest);
+  no.sort(cheapest);
+  const all = [...ok, ...near, ...no].sort(cheapest);
   return {
     maxPerSqm: affordablePricePerSqm(budget, sqm),
     ok,
@@ -164,9 +169,11 @@ export function changeModel(housing: Housing, period: Period, top = 5): ChangeMo
     const b = base.get(e.slug);
     return b ? { ...e, stat: { ...e.stat, sales: b.stat.sales }, thin: b.thin } : e;
   });
-  const withValue = list.filter((e) => e.stat.change != null);
-  const all = [...withValue].sort((a, b) => b.stat.change! - a.stat.change! || collator.compare(a.name, b.name));
-  const rounded = (e: Entry) => Math.round(e.stat.change! * 10) / 10;
+  const changeOf = (e: Entry) => e.stat.change ?? 0;
+  const all = list
+    .filter((e) => e.stat.change != null)
+    .sort((a, b) => changeOf(b) - changeOf(a) || collator.compare(a.name, b.name));
+  const rounded = (e: Entry) => Math.round(changeOf(e) * 10) / 10;
   const ups = all.filter((e) => rounded(e) > 0);
   const downs = all.filter((e) => rounded(e) < 0).reverse();
   return {
@@ -181,52 +188,45 @@ export function changeModel(housing: Housing, period: Period, top = 5): ChangeMo
   };
 }
 
-/* ---------- Område ---------- */
-
-/** Plats i prislistan (1 = dyrast). Stadsdelar med villor delar stadens plats. */
-export function rankOf(area: Area, housing: Housing, period: Period): { rank: number; total: number } | null {
-  const priced = sortEntries(
-    entries(housing, period).filter((e) => e.stat.pricePerSqm != null),
-    "desc",
-  );
-  const key = housing === "house" && area.houseScope === "city" ? null : area.slug;
-  const i = priced.findIndex((e) => e.slug === key);
-  return i === -1 ? null : { rank: i + 1, total: priced.length };
-}
-
 /* ---------- Kartan ---------- */
 
 export interface Paint {
   color: Record<string, string>;
-  opacity: Record<string, number>;
   /** Pris per kvm för 3D-höjden (0 om värde saknas). */
   price: Record<string, number>;
+  /** Områden som ritas randiga: få affärer, eller villor som bara redovisas för hela staden. */
+  thin: string[];
+  /** Områden utan värde i vyn (ljusgrå och randiga). */
+  nodata: string[];
 }
 
-export const FILL_OPACITY = 0.72;
-export const THIN_OPACITY = 0.4;
+/** Samma täckning för alla områden; osäkerhet visas med ränder, inte med blekare färg. */
+export const FILL_OPACITY = 0.88;
 
-/** Färg och genomskinlighet per område för kartans aktuella vy. */
+/** Färg, höjd och ränder per område för kartans aktuella vy. */
 export function mapPaint(s: Pick<AppState, "view" | "housing" | "period" | "budget" | "sqm">): Paint {
   const color: Record<string, string> = {};
-  const opacity: Record<string, number> = {};
   const price: Record<string, number> = {};
+  const thin: string[] = [];
+  const nodata: string[] = [];
   for (const a of ALL_AREAS) {
-    const st = stat(a, s.housing, s.period);
-    color[a.slug] = areaColor(s.view, st, s.budget, s.sqm);
+    const st = shownStat(a, s.housing, s.period);
+    color[a.slug] = areaColor(s.view, st, s.budget, s.sqm, s.period);
     const hasValue = s.view === "forandring" ? st?.change != null : st?.pricePerSqm != null;
     // Förändringen bygger alltid på de senaste tre månaderna, så osäkerheten gör det också.
-    const thin = s.view === "forandring" ? isThin(stat(a, s.housing, "m3"), "m3") : isThin(st, s.period);
-    opacity[a.slug] = !hasValue ? 0.5 : thin ? THIN_OPACITY : FILL_OPACITY;
+    const few = s.view === "forandring" ? isThin(shownStat(a, s.housing, "m3"), "m3") : isThin(st, s.period);
+    const cityHouse = s.housing === "house" && a.houseScope === "city";
+    if (!hasValue) nodata.push(a.slug);
+    else if (few || cityHouse) thin.push(a.slug);
     price[a.slug] = st?.pricePerSqm ?? 0;
   }
-  return { color, opacity, price };
+  return { color, price, thin, nodata };
 }
 
-export function areaColor(view: View, st: Stat | null, budget: number, sqm: number): string {
+export function areaColor(view: View, st: Stat | null, budget: number, sqm: number, period: Period = "m3"): string {
   if (!st) return NODATA_COLOR;
   if (view === "pris") return priceColor(st.pricePerSqm);
-  if (view === "forandring") return changeColor(st.change);
+  if (view === "forandring") return changeStepColor(st.change, period);
   const status = budgetStatus(budget, sqm, st.pricePerSqm);
   return status ? BUDGET_COLORS[status] : NODATA_COLOR;
 }

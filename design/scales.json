@@ -1,0 +1,20 @@
+{
+  "$comment": "Enda källan för kartans färgskalor och budgetmarginalen. Läses av web/src/lib/scales.ts och pipeline/src/prislandskap/palette.py. web/src/styles/tokens.css har samma värden för hand; testet web/src/test/design.test.ts håller dem i takt. Se docs/design.md.",
+  "price": {
+    "colors": ["#efdba6", "#ecc884", "#dda052", "#c4713a", "#9c4a2b", "#652a21"],
+    "breaks": [35000, 50000, 65000, 85000, 110000]
+  },
+  "change": {
+    "down": "#3d6a9e",
+    "flat": "#d9d6cf",
+    "up": "#b0502a",
+    "max": 10
+  },
+  "budget": {
+    "ok": "#2e7f86",
+    "near": "#e3a948",
+    "no": "#b9bdb6",
+    "nearMargin": 0.1
+  },
+  "nodata": "#e4e6e1"
+}
