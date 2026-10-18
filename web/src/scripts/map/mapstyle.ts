@@ -14,6 +14,8 @@ import type {
   StyleSpecification,
 } from "maplibre-gl";
 import { NODATA_COLOR } from "../../lib/scales";
+import type { Area } from "../../lib/types";
+import { ghostLayer, LABEL_SOURCE, labelPoints, withoutNames } from "./basemap-labels";
 import { FILL_OPACITY, type Paint } from "./model";
 
 export const POSITRON_URL = "https://tiles.openfreemap.org/styles/positron";
@@ -188,8 +190,39 @@ export function waterIndex(layers: readonly LayerSpecification[]): number {
   return layers.findIndex((l) => l.type === "fill" && /water/i.test(l.id));
 }
 
+/** Källager med ytor på land: bostadsområden, skog, parker, byggnader och flygfält. */
+const LAND_SOURCE_LAYERS = new Set(["landuse", "landcover", "park", "building", "aeroway"]);
+
+/**
+ * Flytta baskartans landytor som ligger ovanför vattnet till strax under det. Våra områden läggs in
+ * precis före vattnet, så annars skulle bostadsområden och skog ritas ovanpå färgerna som ljusa
+ * fläckar. Ändrar listan på plats.
+ */
+export function moveLandBelowWater(layers: LayerSpecification[]): void {
+  const w = waterIndex(layers);
+  if (w === -1) return;
+  const land = layers
+    .slice(w + 1)
+    .filter(
+      (l) =>
+        l.type === "fill" && "source-layer" in l && LAND_SOURCE_LAYERS.has(l["source-layer"] ?? ""),
+    );
+  if (!land.length) return;
+  const rest = layers.filter((l) => !land.includes(l));
+  const at = waterIndex(rest);
+  rest.splice(at, 0, ...land);
+  layers.splice(0, layers.length, ...rest);
+}
+
 export function firstSymbolIndex(layers: readonly LayerSpecification[]): number {
   return layers.findIndex((l) => l.type === "symbol");
+}
+
+export interface LabelOptions {
+  /** Områden vars namn kartan visar; ger ett osynligt lager som baskartans etiketter viker för. */
+  areas: readonly Pick<Area, "slug" | "label">[];
+  /** Baskartans ortnamn med de här namnen tas bort. */
+  hideNames: readonly string[];
 }
 
 export interface ComposedStyle {
@@ -205,6 +238,7 @@ export function composeStyle(
   base: StyleSpecification | null,
   data: string,
   paint: Paint,
+  labels?: LabelOptions,
 ): ComposedStyle {
   const { below, above } = areaLayers(paint);
   const source = { type: "geojson" as const, data, attribution: "" };
@@ -230,12 +264,15 @@ export function composeStyle(
   }
 
   const layers: LayerSpecification[] = base.layers.map((l) => {
-    // Baskartans ortnamn (källager "place") visas först när man zoomat in.
+    // Baskartans ortnamn (källager "place") visas först när man zoomat in, och inte alls när de
+    // heter som ett av våra områden.
     if (l.type === "symbol" && "source-layer" in l && l["source-layer"] === "place") {
-      return { ...l, minzoom: Math.max(l.minzoom ?? 0, PLACE_LABEL_MINZOOM) };
+      const later = { ...l, minzoom: Math.max(l.minzoom ?? 0, PLACE_LABEL_MINZOOM) };
+      return labels ? withoutNames(later, labels.hideNames) : later;
     }
     return l;
   });
+  moveLandBelowWater(layers);
   let w = waterIndex(layers);
   const sym = firstSymbolIndex(layers);
   if (w === -1) w = sym === -1 ? layers.length : sym;
@@ -243,10 +280,13 @@ export function composeStyle(
   const s2 = firstSymbolIndex(layers);
   layers.splice(s2 === -1 ? layers.length : s2, 0, ...above);
 
-  return {
-    basemap: true,
-    style: { ...base, sources: { ...base.sources, [SOURCE]: source }, layers },
-  };
+  const sources: StyleSpecification["sources"] = { ...base.sources, [SOURCE]: source };
+  if (labels) {
+    // Överst, så att MapLibre placerar det först och baskartans etiketter viker undan.
+    sources[LABEL_SOURCE] = { type: "geojson", data: labelPoints(labels.areas) };
+    layers.push(ghostLayer());
+  }
+  return { basemap: true, style: { ...base, sources, layers } };
 }
 
 /** Hämta Positron, eller null om den inte svarar i tid (offline, blockerad, fel). */

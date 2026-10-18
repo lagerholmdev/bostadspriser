@@ -105,6 +105,33 @@ describe("mapstyle", () => {
     expect(place.minzoom).toBe(PLACE_LABEL_MINZOOM);
   });
 
+  it("lägger baskartans landytor under våra färger och vattnet över", () => {
+    // Positrons ordning: bostadsområden, skog och byggnader ligger ovanför vattnet.
+    const positron = {
+      ...base,
+      layers: [
+        layer("background", "background"),
+        layer("park", "fill", { "source-layer": "park" }),
+        layer("water", "fill", { "source-layer": "water" }),
+        layer("landuse_residential", "fill", { "source-layer": "landuse" }),
+        layer("landcover_wood", "fill", { "source-layer": "landcover" }),
+        layer("waterway", "line", { "source-layer": "waterway" }),
+        layer("building", "fill", { "source-layer": "building" }),
+        layer("road_area_pier", "fill", { "source-layer": "transportation" }),
+        layer("highway_major", "line"),
+        layer("place_town", "symbol", { "source-layer": "place" }),
+      ],
+    } as unknown as StyleSpecification;
+    const ids = composeStyle(positron, "areas.geojson", paint).style.layers.map((l) => l.id);
+    for (const land of ["park", "landuse_residential", "landcover_wood", "building"]) {
+      expect(ids.indexOf(land)).toBeLessThan(ids.indexOf(LAYER.fill));
+    }
+    expect(ids.indexOf(LAYER.fill)).toBeLessThan(ids.indexOf("water"));
+    // Bryggor ligger på vattnet och stannar ovanför det.
+    expect(ids.indexOf("road_area_pier")).toBeGreaterThan(ids.indexOf("water"));
+    expect(ids).toHaveLength(new Set(ids).size);
+  });
+
   it("ger en egen reservstil utan baskarta", () => {
     const { style, basemap } = composeStyle(null, "areas.geojson", paint);
     expect(basemap).toBe(false);
