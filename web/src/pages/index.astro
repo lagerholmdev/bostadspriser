@@ -1,6 +1,7 @@
 ---
 /**
- * Kartsidan: panel med sök, vyer och listor till vänster (under kartan på mobil), kartan till höger.
+ * Kartsidan: panel med sök, vyer och listor till vänster, kartan till höger. På mobilen fyller
+ * kartan skärmen, sök och vyer flyter överst och panelen dras upp nerifrån (scripts/map/mobile.ts).
  * Läget ligger i adressen (lib/url.ts). Klientkoden finns i src/scripts/map/.
  */
 import Base from "../layouts/Base.astro";
@@ -37,7 +38,27 @@ const description = `Vad kostar en bostad i Stockholm? Pris per kvm, var din bud
         }
       })(document.currentScript.parentElement);
     </script>
+    <div class="topbar" id="topbar"></div>
     <Panel base={base} />
+    <script is:inline>
+      // Mobilen: sök och flikar flyter över kartan och panelen dras upp nerifrån (scripts/map/mobile.ts).
+      // Görs här, innan något ritas, så att sidan inte hoppar när skriptet laddat.
+      (function (app) {
+        try {
+          if (!window.matchMedia("(max-width: 959px)").matches) return;
+          var bar = document.getElementById("topbar");
+          var search = app.querySelector(".search");
+          var tabs = app.querySelector(".tabs");
+          var panel = document.getElementById("panel");
+          if (!bar || !search || !tabs || !panel) return;
+          bar.append(search, tabs);
+          app.classList.add("has-sheet");
+          panel.setAttribute("data-sheet", app.hasAttribute("data-pending") ? "half" : "peek");
+        } catch (e) {
+          /* utan skriptet: kartan ovanför listan */
+        }
+      })(document.getElementById("app"));
+    </script>
     <MapView />
   </div>
   <script>

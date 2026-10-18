@@ -26,8 +26,10 @@ dela, och läget ska ligga i adressen.
    kartan och i listorna, och säger det i klartext. Villapriser med under 10 affärer visas inte alls.
 4. **Svenska och vardagsord.** "Pris per kvm", inte "kr/kvm-medel". "Senaste 3 månaderna", inte "m3".
    Siffror med mellanslag som tusentalsavgränsare och komma som decimaltecken.
-5. **Mobilen först.** Allt fungerar på 360 px. På mobil ligger kartan överst och innehållet under,
-   i vanligt sidflöde. Inga flytande paneler som täcker kartan.
+5. **Mobilen först.** Allt fungerar på 360 px. På mobil fungerar sidan som en kartapp (Google Maps):
+   kartan fyller skärmen och flyttas med ett finger, sökfältet och vyerna flyter överst och panelen
+   dras upp nerifrån i tre lägen (kik, halv, hel). Kameran centrerar i den del av kartan som syns.
+   Utan JavaScript ligger kartan överst och innehållet under, i vanligt sidflöde.
 6. **Platt som standard.** Kartan är 2D. 3D är ett val, inte startläget, eftersom vridbara kartor är
    svåra att navigera för de flesta.
 

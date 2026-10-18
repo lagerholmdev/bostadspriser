@@ -10,6 +10,7 @@ import type { Html } from "../../../lib/html";
 import { VIEWS, withHousing, withView, type AppState, type View } from "../../../lib/url";
 import { addTo, loadCompare, MAX_COMPARE, removeFrom, saveCompare } from "../compare-tray";
 import { budgetModel, changeModel, mapPaint, priceModel, type SortOrder } from "../model";
+import type { BottomSheet } from "../sheet";
 import type { HistoryMode, Store } from "../state";
 import { detail } from "./detail";
 import { legend, mapLegend } from "./legend";
@@ -49,13 +50,20 @@ export class PanelController {
   private rendered = new Map<string, string>();
   private readonly baseTitle = document.title;
   private q = <T extends Element = HTMLElement>(sel: string) => this.root.querySelector<T>(sel);
+  /** Flikarna (och sökfältet) kan ligga utanför panelen, i mobilens toppremsa över kartan. */
+  private readonly app: HTMLElement;
+  private tabs = () => [...this.app.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+  private selectedTab = () => this.app.querySelector<HTMLElement>("[role=tab][aria-selected=true]");
   /** Kopierar en adress (områdessidans); sätts av main.ts när delningen kopplats in. */
   copyLink: ((url: string, status: HTMLElement | null) => void) | null = null;
+  /** Mobilens dragbara panel; sätts av mobile.ts när den är påslagen. */
+  sheet: BottomSheet | null = null;
 
   constructor(
     private readonly root: HTMLElement,
     private readonly store: Store,
   ) {
+    this.app = root.closest<HTMLElement>(".app") ?? root;
     try {
       const s = sessionStorage.getItem(SORT_KEY);
       if (s === "asc" || s === "name" || s === "desc") this.sort = s;
@@ -89,7 +97,7 @@ export class PanelController {
 
   private bind(): void {
     // Flikar: klick och piltangenter (automatisk aktivering).
-    const tabs = [...this.root.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+    const tabs = this.tabs();
     for (const tab of tabs) {
       tab.addEventListener("click", () => this.setView(tab.dataset.view));
       tab.addEventListener("keydown", (e) => {
@@ -174,7 +182,8 @@ export class PanelController {
 
   /** På mobilen: lägg flikraden precis under sidhuvudet, så att den nya vyns innehåll syns. */
   private scrollTabsIntoView(): void {
-    if (isWide()) return;
+    // Med den dragbara panelen ligger flikarna fast över kartan; mobile.ts sköter panelen.
+    if (isWide() || this.sheet) return;
     const tabs = this.q<HTMLElement>(".tabs");
     if (!tabs) return;
     requestAnimationFrame(() => {
@@ -231,7 +240,7 @@ export class PanelController {
     if (wasFocusedInDetail) this.q<HTMLButtonElement>("[data-action=compare]")?.focus();
     else if (wasFocusedInTray) {
       const next = this.q<HTMLElement>("#tray .chip-x, #tray .tray-go");
-      (next ?? this.q<HTMLElement>("#detail-title, [role=tab][aria-selected=true]"))?.focus();
+      (next ?? this.selectedTab() ?? this.q<HTMLElement>("#detail-title"))?.focus();
     }
   }
 
@@ -259,7 +268,7 @@ export class PanelController {
     const app = this.root.closest<HTMLElement>(".app");
     if (app) app.dataset.view = s.view;
 
-    for (const tab of this.root.querySelectorAll<HTMLButtonElement>("[role=tab]")) {
+    for (const tab of this.tabs()) {
       const on = tab.dataset.view === s.view;
       tab.setAttribute("aria-selected", String(on));
       tab.tabIndex = on ? 0 : -1;
@@ -441,14 +450,17 @@ export class PanelController {
 
   /**
    * Visa områdesdetaljen med "Tillbaka till listan" synlig. På datorn scrollar panelen för sig;
-   * på mobilen scrollar sidan och bara om detaljen inte redan syns (eller om `force`).
+   * med mobilens dragbara panel flyttas innehållet dit (och panelen fälls ut från kikläget om
+   * `force`). Utan den scrollar sidan, bara om detaljen inte redan syns (eller om `force`).
    */
   private revealDetail(o: { focus: boolean; force?: boolean }): void {
     requestAnimationFrame(() => {
       const wrap = this.q<HTMLElement>("#detail");
       if (!wrap) return;
       const smooth = !!o.force && !reduced();
-      if (isWide()) {
+      if (this.sheet) {
+        this.sheet.revealDetail(!!o.force);
+      } else if (isWide()) {
         const sc = this.q<HTMLElement>("#panel-scroll");
         if (sc) {
           const box = sc.getBoundingClientRect();
@@ -484,7 +496,7 @@ export class PanelController {
       !!a.closest("[hidden]") ||
       (a.getAttribute("role") === "tab" && a.getAttribute("aria-selected") !== "true");
     if (!lost) return;
-    this.q<HTMLElement>("[role=tab][aria-selected=true]")?.focus();
+    this.selectedTab()?.focus();
   }
 
   private focusRow(slug: string): void {
@@ -497,7 +509,7 @@ export class PanelController {
         if (details && !details.open) details.open = true;
         row.focus();
       } else {
-        this.q<HTMLElement>("[role=tab][aria-selected=true]")?.focus();
+        this.selectedTab()?.focus();
       }
     });
   }
