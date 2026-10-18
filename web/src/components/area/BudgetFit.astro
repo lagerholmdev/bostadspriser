@@ -1,0 +1,95 @@
+---
+/** "Vad räcker pengarna till?": hur många kvm 3, 5 och 8 mkr motsvarar i området. */
+import { affordableSize, typicalRooms } from "../../lib/budget";
+import { number } from "../../lib/format";
+import { mapUrl } from "../../lib/links";
+
+interface Props {
+  slug: string;
+  name: string;
+  pricePerSqm: number;
+}
+const { slug, name, pricePerSqm } = Astro.props;
+const budgets = [3_000_000, 5_000_000, 8_000_000];
+const rows = budgets.map((b) => {
+  const size = Math.round(affordableSize(b, pricePerSqm));
+  return { budget: b / 1_000_000, size, rooms: typicalRooms(size) };
+});
+---
+
+<div class="fit">
+  <ul class="fit-list">
+    {rows.map((r) => (
+      <li>
+        <span class="fit-budget">{r.budget}&nbsp;mkr</span>
+        <span class="fit-size">ca {number(r.size)}&nbsp;kvm</span>
+        <span class="fit-rooms">ungefär {r.rooms}</span>
+      </li>
+    ))}
+  </ul>
+  <p class="fineprint">
+    Räknat på snittpriset för bostadsrätter i {name} de senaste 3 månaderna. Läge, skick och avgift
+    gör att en enskild bostad kan kosta mer eller mindre.{" "}
+    <a href={mapUrl({ vy: "budget", omrade: slug })}>Se var din budget räcker på kartan</a>
+  </p>
+</div>
+
+<style>
+  .fit {
+    display: grid;
+    gap: var(--sp-4);
+  }
+  .fit-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+  }
+  .fit-list li {
+    display: grid;
+    gap: 2px;
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .fit-list li + li {
+    border-left: 1px solid var(--c-line);
+  }
+  .fit-budget {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink-2);
+  }
+  .fit-size {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    line-height: var(--lh-tight);
+  }
+  .fit-rooms {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-3);
+  }
+  @media (max-width: 560px) {
+    .fit-list {
+      grid-template-columns: 1fr;
+    }
+    .fit-list li {
+      grid-template-columns: 4.5rem 1fr;
+      align-items: baseline;
+      column-gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+    }
+    .fit-list li + li {
+      border-left: 0;
+      border-top: 1px solid var(--c-line);
+    }
+    .fit-size {
+      font-size: var(--fs-lg);
+    }
+    .fit-rooms {
+      grid-column: 2;
+    }
+  }
+</style>

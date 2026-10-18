@@ -1,0 +1,9 @@
+# Byggt eller genererat: kontrolleras inte
+dist/
+.astro/
+node_modules/
+src/generated/
+public/og/
+# Fryst export från pipelinen, ska vara en exakt kopia
+src/test/fixtures/
+package-lock.json

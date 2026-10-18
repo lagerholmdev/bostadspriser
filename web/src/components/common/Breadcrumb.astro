@@ -1,0 +1,60 @@
+---
+/** Brödsmulor: "Områden / Södermalm". Sista posten är sidan själv och saknar länk. */
+interface Item {
+  label: string;
+  href?: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+---
+
+<nav class="crumbs" aria-label="Du är här">
+  <ol>
+    {items.map((it, i) => (
+      <li>
+        {it.href && i < items.length - 1 ? (
+          <a href={it.href}>{it.label}</a>
+        ) : (
+          <span aria-current="page">{it.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-2);
+  }
+  .crumbs li + li::before {
+    content: "/";
+    margin: 0 var(--sp-2);
+    color: var(--c-ink-3);
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    color: var(--c-ink-2);
+  }
+  .crumbs a:hover {
+    color: var(--c-accent);
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+  }
+  .crumbs span {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+/**
+ * Nyckeltal: etikett, värde (slot) och en rad som sätter det i sammanhang.
+ * Platt, utan kortbakgrund; raden av nyckeltal (.stat-row) ritar avdelarna.
+ */
+interface Props {
+  label: string;
+  note?: string | undefined;
+  /** Märk värdet som osäkert (tunt underlag). Färgen ändras, inte opaciteten. */
+  muted?: boolean;
+}
+const { label, note, muted = false } = Astro.props;
+---
+
+<div class="stat">
+  <dt>{label}</dt>
+  <dd class:list={["stat-value", { "thin-value": muted }]}>
+    <slot />
+  </dd>
+  {note && <dd class="stat-note">{note}</dd>}
+  <slot name="extra" />
+</div>
+
+<style>
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  dt {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink-2);
+  }
+  dd {
+    margin: 0;
+  }
+  .stat-value {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    line-height: var(--lh-tight);
+    letter-spacing: -0.01em;
+    margin-top: var(--sp-1);
+  }
+  .stat-value :global(.chg-word) {
+    font-size: var(--fs-md);
+  }
+  .stat-note {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-3);
+  }
+  @media (max-width: 640px) {
+    .stat-value {
+      font-size: var(--fs-lg);
+    }
+  }
+</style>

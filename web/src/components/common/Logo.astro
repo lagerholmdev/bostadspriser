@@ -1,0 +1,17 @@
+---
+/**
+ * Märket: tre gavlar i prisskalans färger, som fasader längs en kaj.
+ * Samma form används i favicon och delningsbilder (pipeline/src/prislandskap/og.py).
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+  <path d="M2 26V13l4-4 4 4v13z" fill="#dda052"></path>
+  <path d="M10 26V8l4-4.5L18 8v18z" fill="#9c4a2b"></path>
+  <path d="M18 26V11l4-4 4 4v15z" fill="#652a21"></path>
+  <rect x="1" y="25.5" width="26" height="1.5" rx="0.75" fill="#1f6f5c"></rect>
+</svg>

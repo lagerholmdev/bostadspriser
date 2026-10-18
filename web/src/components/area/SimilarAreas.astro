@@ -1,0 +1,102 @@
+---
+/** "Liknande grannområden": tre närliggande områden med pris nära det här. */
+import { KIND_SHORT, stat } from "../../lib/data";
+import { pricier, sqm } from "../../lib/format";
+import { priceColor } from "../../lib/scales";
+import type { Area } from "../../lib/types";
+import { areaUrl } from "../../lib/links";
+
+interface Props {
+  area: Area;
+  similar: Area[];
+}
+const { area, similar } = Astro.props;
+const me = stat(area, "apartment", "m3")?.pricePerSqm ?? null;
+---
+
+<ul class="similar">
+  {similar.map((a) => {
+    const p = stat(a, "apartment", "m3")?.pricePerSqm ?? null;
+    const diff = p != null && me ? p / me - 1 : null;
+    return (
+      <li>
+        <a href={areaUrl(a.slug)}>
+          <span class="sim-kind">{KIND_SHORT[a.kind]}</span>
+          <span class="sim-name">{a.name}</span>
+        </a>
+        <span class="sim-price">
+          <span class="swatch" style={`background:${priceColor(p)}`} />
+          {sqm(p)}
+        </span>
+        <span class="sim-diff">{diff == null ? "" : `${pricier(diff)} än ${area.name}`}</span>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .similar {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--sp-4);
+  }
+  li {
+    position: relative;
+    display: grid;
+    gap: var(--sp-1);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+  }
+  li:hover {
+    border-color: var(--c-ink-3);
+  }
+  li:focus-within {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+  }
+  a {
+    display: grid;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--c-ink);
+  }
+  a:focus-visible {
+    outline: none;
+  }
+  /* Hela kortet är klickbart. */
+  a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .sim-kind {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-3);
+  }
+  .sim-name {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    color: var(--c-accent);
+  }
+  li:hover .sim-name {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .sim-price {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-weight: 600;
+    margin-top: var(--sp-2);
+  }
+  .sim-diff {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-2);
+  }
+</style>

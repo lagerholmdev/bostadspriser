@@ -1,0 +1,46 @@
+---
+/** Sökruta (ARIA-kombinationsruta). Logiken finns i scripts/map/search.ts. */
+---
+
+<div class="search">
+  <label class="search-label" for="area-search">
+    Sök område eller kommun
+  </label>
+  <div class="search-field">
+    <svg class="search-icon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+      <circle
+        cx="8.5"
+        cy="8.5"
+        r="5.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+      ></circle>
+      <path
+        d="M13 13l4.5 4.5"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <input
+      id="area-search"
+      type="text"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-expanded="false"
+      aria-controls="area-search-list"
+      aria-describedby="area-search-hint"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      placeholder="T.ex. Södermalm, Solna eller Aspudden"
+    />
+    <ul id="area-search-list" class="search-list" role="listbox" aria-label="Förslag" hidden></ul>
+  </div>
+  <p id="area-search-hint" class="visually-hidden">
+    Skriv för att få förslag. Enter väljer det första, pil upp och ner flyttar mellan förslagen.
+  </p>
+  <p id="area-search-status" class="visually-hidden" role="status" aria-live="polite"></p>
+</div>

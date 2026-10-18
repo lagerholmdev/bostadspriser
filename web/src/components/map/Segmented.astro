@@ -1,0 +1,55 @@
+---
+/**
+ * Segmenterat val byggt på vanliga radioknappar: piltangenter och skärmläsare fungerar utan extra kod.
+ * Varje val har en lång text och en kort (`short`) som visas på smala skärmar.
+ */
+interface Option {
+  value: string;
+  label: string;
+  /** Kortare text för smala skärmar (t.ex. "3 mån"). */
+  short?: string;
+  /** Text som visas i Förändring-vyn (t.ex. "På ett år"). */
+  changeLabel?: string;
+  /** Kort text i Förändring-vyn. */
+  changeShort?: string;
+}
+interface Props {
+  name: string;
+  legend: string;
+  options: Option[];
+  value: string;
+  /** Visa förklaringen bara för skärmläsare. */
+  hideLegend?: boolean;
+  class?: string;
+}
+const { name, legend, options, value, hideLegend = false, class: cls } = Astro.props;
+---
+
+<fieldset class:list={["seg", cls]}>
+  <legend class:list={["seg-legend", { "visually-hidden": hideLegend }]}>{legend}</legend>
+  <div class="seg-options">
+    {options.map((o) => (
+      <label class="seg-option">
+        <input type="radio" name={name} value={o.value} checked={o.value === value} />
+        <span class="seg-face">
+          <span
+            class:list={{ "seg-full": !!o.short }}
+            data-label={o.label}
+            data-change-label={o.changeLabel}
+          >
+            {o.label}
+          </span>
+          {o.short && (
+            <span
+              class="seg-short"
+              data-label={o.short}
+              data-change-label={o.changeShort ?? o.changeLabel}
+            >
+              {o.short}
+            </span>
+          )}
+        </span>
+      </label>
+    ))}
+  </div>
+</fieldset>

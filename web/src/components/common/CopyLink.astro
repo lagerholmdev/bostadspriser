@@ -1,0 +1,59 @@
+---
+/**
+ * "Kopiera länk": kopierar sidans adress (med valen i adressen) till urklipp och
+ * bekräftar med en statusrad. Går urklipp inte att nå visas adressen markerad i ett
+ * fält, så att den kan kopieras för hand. Knappen syns först när skriptet har laddat.
+ */
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+---
+
+<div class:list={["copy-link", cls]} data-copy-link hidden>
+  <button type="button" class="btn" data-copy-btn>
+    Kopiera länk
+  </button>
+  <span class="copy-status" role="status" data-copy-status></span>
+  <label class="copy-fallback" data-copy-fallback hidden>
+    <span class="visually-hidden">Länk till sidan</span>
+    <input type="text" readonly data-copy-input />
+  </label>
+</div>
+
+<script>
+  import { initCopyLinks } from "../../scripts/copy-link";
+  initCopyLinks();
+</script>
+
+<style>
+  .copy-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2) var(--sp-3);
+    min-width: 0;
+  }
+  .copy-status {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-2);
+  }
+  .copy-status:empty {
+    display: none;
+  }
+  .copy-fallback {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .copy-fallback input {
+    width: 100%;
+    font: inherit;
+    font-size: var(--fs-sm);
+    min-height: var(--tap);
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--c-surface);
+    color: var(--c-ink);
+  }
+</style>

@@ -1,0 +1,55 @@
+name: CI
+
+# Körs på pull requests. deploy.yml anropar samma arbetsflöde (workflow_call) innan den bygger och
+# publicerar på main, så kontrollerna är desamma i båda.
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Vid workflow_call är github.workflow anroparens namn, så den gruppen krockar inte med CI:s egen.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.workflow == 'CI' }}
+
+jobs:
+  pipeline:
+    name: Pipeline (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pipeline-setup
+        with:
+          python-version: ${{ matrix.python }}
+      - name: ruff check
+        working-directory: pipeline
+        run: ruff check .
+      - name: ruff format --check
+        working-directory: pipeline
+        run: ruff format --check .
+      - name: pytest
+        working-directory: pipeline
+        run: pytest
+
+  web:
+    name: Webb (format, check, test, build)
+    needs: pipeline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pipeline-setup
+      - name: Exportera data och delningsbilder
+        run: python -m prislandskap all
+      - uses: ./.github/actions/web-build
+        with:
+          goatcounter: ${{ vars.PUBLIC_GOATCOUNTER }}

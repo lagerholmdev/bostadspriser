@@ -1,1148 +1,1160 @@
 {
- "uppdaterad": "2026-10-08",
- "period": {
-  "m3": "jul–sep 2026",
-  "m12": "okt 2025–sep 2026"
- },
- "kalla": "Svensk Mäklarstatistik",
- "omraden": [
-  {
-   "slug": "bromma-vasterled",
-   "namn": "Bromma-Västerled",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 559,
-     "kvm": 64714,
-     "medelpris": 4032000,
-     "utv": 0.1
-    },
-    "m12": {
-     "antal": 2303,
-     "kvm": 64485,
-     "medelpris": 4103000,
-     "utv": 2.3
-    }
-   }
+  "schema": 2,
+  "updated": "2026-10-08",
+  "source": {
+    "name": "Svensk Mäklarstatistik",
+    "url": "https://www.maklarstatistik.se/omrade/riket/stockholms-lan/"
   },
-  {
-   "slug": "brannkyrka-skarholmen",
-   "namn": "Brännkyrka-Skärholmen",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 324,
-     "kvm": 49642,
-     "medelpris": 3298000,
-     "utv": 1.3
+  "county": {
+    "name": "Stockholms län",
+    "apartment": {
+      "m3": {
+        "sales": 10961,
+        "pricePerSqm": 70849,
+        "meanPrice": 4416000,
+        "change": -1.0
+      },
+      "m12": {
+        "sales": 46042,
+        "pricePerSqm": 70720,
+        "meanPrice": 4444000,
+        "change": 6.5
+      }
     },
-    "m12": {
-     "antal": 1348,
-     "kvm": 48673,
-     "medelpris": 3255000,
-     "utv": 8.0
+    "house": {
+      "m3": {
+        "sales": 2627,
+        "pricePerSqm": 55399,
+        "meanPrice": 7284000,
+        "change": 0.1
+      },
+      "m12": {
+        "sales": 10632,
+        "pricePerSqm": 55585,
+        "meanPrice": 7396000,
+        "change": 5.4
+      }
     }
-   }
   },
-  {
-   "slug": "enskede-skarpnack",
-   "namn": "Enskede-Skarpnäck",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 578,
-     "kvm": 66495,
-     "medelpris": 3857000,
-     "utv": 0.6
+  "areas": [
+    {
+      "slug": "bromma-vasterled",
+      "name": "Bromma-Västerled",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 559,
+          "pricePerSqm": 64714,
+          "meanPrice": 4032000,
+          "change": 0.1
+        },
+        "m12": {
+          "sales": 2303,
+          "pricePerSqm": 64485,
+          "meanPrice": 4103000,
+          "change": 2.3
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 2547,
-     "kvm": 65390,
-     "medelpris": 3794000,
-     "utv": 6.8
-    }
-   }
-  },
-  {
-   "slug": "essingen",
-   "namn": "Essingen",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 102,
-     "kvm": 90642,
-     "medelpris": 5266000,
-     "utv": 0.5
+    {
+      "slug": "brannkyrka-skarholmen",
+      "name": "Brännkyrka-Skärholmen",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 324,
+          "pricePerSqm": 49642,
+          "meanPrice": 3298000,
+          "change": 1.3
+        },
+        "m12": {
+          "sales": 1348,
+          "pricePerSqm": 48673,
+          "meanPrice": 3255000,
+          "change": 8.0
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 399,
-     "kvm": 89284,
-     "medelpris": 4937000,
-     "utv": 5.3
-    }
-   }
-  },
-  {
-   "slug": "farsta-vantor",
-   "namn": "Farsta-Vantör",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 431,
-     "kvm": 46528,
-     "medelpris": 2914000,
-     "utv": 0.4
+    {
+      "slug": "enskede-skarpnack",
+      "name": "Enskede-Skarpnäck",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 578,
+          "pricePerSqm": 66495,
+          "meanPrice": 3857000,
+          "change": 0.6
+        },
+        "m12": {
+          "sales": 2547,
+          "pricePerSqm": 65390,
+          "meanPrice": 3794000,
+          "change": 6.8
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 1747,
-     "kvm": 46276,
-     "medelpris": 2888000,
-     "utv": 1.3
-    }
-   }
-  },
-  {
-   "slug": "hagersten-liljeholmen",
-   "namn": "Hägersten-Liljeholmen",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 604,
-     "kvm": 80252,
-     "medelpris": 4404000,
-     "utv": -1.1
+    {
+      "slug": "essingen",
+      "name": "Essingen",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 102,
+          "pricePerSqm": 90642,
+          "meanPrice": 5266000,
+          "change": 0.5
+        },
+        "m12": {
+          "sales": 399,
+          "pricePerSqm": 89284,
+          "meanPrice": 4937000,
+          "change": 5.3
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 2720,
-     "kvm": 79105,
-     "medelpris": 4569000,
-     "utv": 6.6
-    }
-   }
-  },
-  {
-   "slug": "hasselby-vallingby",
-   "namn": "Hässelby-Vällingby",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 165,
-     "kvm": 37465,
-     "medelpris": 2711000,
-     "utv": 1.0
+    {
+      "slug": "farsta-vantor",
+      "name": "Farsta-Vantör",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 431,
+          "pricePerSqm": 46528,
+          "meanPrice": 2914000,
+          "change": 0.4
+        },
+        "m12": {
+          "sales": 1747,
+          "pricePerSqm": 46276,
+          "meanPrice": 2888000,
+          "change": 1.3
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 640,
-     "kvm": 36918,
-     "medelpris": 2592000,
-     "utv": 1.1
-    }
-   }
-  },
-  {
-   "slug": "kungsholmen",
-   "namn": "Kungsholmen",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 681,
-     "kvm": 112452,
-     "medelpris": 5728000,
-     "utv": -0.4
+    {
+      "slug": "hagersten-liljeholmen",
+      "name": "Hägersten-Liljeholmen",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 604,
+          "pricePerSqm": 80252,
+          "meanPrice": 4404000,
+          "change": -1.1
+        },
+        "m12": {
+          "sales": 2720,
+          "pricePerSqm": 79105,
+          "meanPrice": 4569000,
+          "change": 6.6
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 3050,
-     "kvm": 110260,
-     "medelpris": 6131000,
-     "utv": 7.2
-    }
-   }
-  },
-  {
-   "slug": "spanga-kista",
-   "namn": "Spånga-Kista",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 160,
-     "kvm": 30244,
-     "medelpris": 2087000,
-     "utv": 3.7
+    {
+      "slug": "hasselby-vallingby",
+      "name": "Hässelby-Vällingby",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 165,
+          "pricePerSqm": 37465,
+          "meanPrice": 2711000,
+          "change": 1.0
+        },
+        "m12": {
+          "sales": 640,
+          "pricePerSqm": 36918,
+          "meanPrice": 2592000,
+          "change": 1.1
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 639,
-     "kvm": 30456,
-     "medelpris": 2144000,
-     "utv": -0.9
-    }
-   }
-  },
-  {
-   "slug": "sodermalm",
-   "namn": "Södermalm",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 879,
-     "kvm": 116680,
-     "medelpris": 6703000,
-     "utv": 2.0
+    {
+      "slug": "kungsholmen",
+      "name": "Kungsholmen",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 681,
+          "pricePerSqm": 112452,
+          "meanPrice": 5728000,
+          "change": -0.4
+        },
+        "m12": {
+          "sales": 3050,
+          "pricePerSqm": 110260,
+          "meanPrice": 6131000,
+          "change": 7.2
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 3874,
-     "kvm": 112903,
-     "medelpris": 6433000,
-     "utv": 10.5
-    }
-   }
-  },
-  {
-   "slug": "vasastan-norrmalm",
-   "namn": "Vasastan-Norrmalm",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 693,
-     "kvm": 135782,
-     "medelpris": 8579000,
-     "utv": 1.4
+    {
+      "slug": "spanga-kista",
+      "name": "Spånga-Kista",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 160,
+          "pricePerSqm": 30244,
+          "meanPrice": 2087000,
+          "change": 3.7
+        },
+        "m12": {
+          "sales": 639,
+          "pricePerSqm": 30456,
+          "meanPrice": 2144000,
+          "change": -0.9
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 3228,
-     "kvm": 130447,
-     "medelpris": 8239000,
-     "utv": 10.9
-    }
-   }
-  },
-  {
-   "slug": "ostermalm",
-   "namn": "Östermalm",
-   "typ": "stadsdel",
-   "br": {
-    "m3": {
-     "antal": 645,
-     "kvm": 129172,
-     "medelpris": 8057000,
-     "utv": -0.3
+    {
+      "slug": "sodermalm",
+      "name": "Södermalm",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 879,
+          "pricePerSqm": 116680,
+          "meanPrice": 6703000,
+          "change": 2.0
+        },
+        "m12": {
+          "sales": 3874,
+          "pricePerSqm": 112903,
+          "meanPrice": 6433000,
+          "change": 10.5
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 2554,
-     "kvm": 127553,
-     "medelpris": 7888000,
-     "utv": 7.0
-    }
-   }
-  },
-  {
-   "slug": "botkyrka",
-   "namn": "Botkyrka",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 192,
-     "kvm": 28988,
-     "medelpris": 2091000,
-     "utv": -1.6
+    {
+      "slug": "vasastan-norrmalm",
+      "name": "Vasastan-Norrmalm",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 693,
+          "pricePerSqm": 135782,
+          "meanPrice": 8579000,
+          "change": 1.4
+        },
+        "m12": {
+          "sales": 3228,
+          "pricePerSqm": 130447,
+          "meanPrice": 8239000,
+          "change": 10.9
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 790,
-     "kvm": 29333,
-     "medelpris": 2109000,
-     "utv": -0.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 142,
-     "kvm": 38276,
-     "medelpris": 4816000,
-     "utv": -0.5
+    {
+      "slug": "ostermalm",
+      "name": "Östermalm",
+      "kind": "district",
+      "apartment": {
+        "m3": {
+          "sales": 645,
+          "pricePerSqm": 129172,
+          "meanPrice": 8057000,
+          "change": -0.3
+        },
+        "m12": {
+          "sales": 2554,
+          "pricePerSqm": 127553,
+          "meanPrice": 7888000,
+          "change": 7.0
+        }
+      },
+      "house": null
     },
-    "m12": {
-     "antal": 467,
-     "kvm": 38714,
-     "medelpris": 4865000,
-     "utv": 2.4
-    }
-   }
-  },
-  {
-   "slug": "danderyd",
-   "namn": "Danderyd",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 95,
-     "kvm": 66627,
-     "medelpris": 4496000,
-     "utv": -0.9
+    {
+      "slug": "botkyrka",
+      "name": "Botkyrka",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 192,
+          "pricePerSqm": 28988,
+          "meanPrice": 2091000,
+          "change": -1.6
+        },
+        "m12": {
+          "sales": 790,
+          "pricePerSqm": 29333,
+          "meanPrice": 2109000,
+          "change": -0.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 142,
+          "pricePerSqm": 38276,
+          "meanPrice": 4816000,
+          "change": -0.5
+        },
+        "m12": {
+          "sales": 467,
+          "pricePerSqm": 38714,
+          "meanPrice": 4865000,
+          "change": 2.4
+        }
+      }
     },
-    "m12": {
-     "antal": 440,
-     "kvm": 65010,
-     "medelpris": 4492000,
-     "utv": -1.3
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 46,
-     "kvm": 98590,
-     "medelpris": 15453000,
-     "utv": 2.3
+    {
+      "slug": "danderyd",
+      "name": "Danderyd",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 95,
+          "pricePerSqm": 66627,
+          "meanPrice": 4496000,
+          "change": -0.9
+        },
+        "m12": {
+          "sales": 440,
+          "pricePerSqm": 65010,
+          "meanPrice": 4492000,
+          "change": -1.3
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 46,
+          "pricePerSqm": 98590,
+          "meanPrice": 15453000,
+          "change": 2.3
+        },
+        "m12": {
+          "sales": 207,
+          "pricePerSqm": 92414,
+          "meanPrice": 15902000,
+          "change": 6.3
+        }
+      }
     },
-    "m12": {
-     "antal": 207,
-     "kvm": 92414,
-     "medelpris": 15902000,
-     "utv": 6.3
-    }
-   }
-  },
-  {
-   "slug": "ekero",
-   "namn": "Ekerö",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 38,
-     "kvm": 47297,
-     "medelpris": 3560000,
-     "utv": 0.7
+    {
+      "slug": "ekero",
+      "name": "Ekerö",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 38,
+          "pricePerSqm": 47297,
+          "meanPrice": 3560000,
+          "change": 0.7
+        },
+        "m12": {
+          "sales": 155,
+          "pricePerSqm": 48025,
+          "meanPrice": 3784000,
+          "change": 8.5
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 72,
+          "pricePerSqm": 49270,
+          "meanPrice": 6601000,
+          "change": -3.2
+        },
+        "m12": {
+          "sales": 329,
+          "pricePerSqm": 50845,
+          "meanPrice": 6939000,
+          "change": -2.6
+        }
+      }
     },
-    "m12": {
-     "antal": 155,
-     "kvm": 48025,
-     "medelpris": 3784000,
-     "utv": 8.5
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 72,
-     "kvm": 49270,
-     "medelpris": 6601000,
-     "utv": -3.2
+    {
+      "slug": "haninge",
+      "name": "Haninge",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 310,
+          "pricePerSqm": 33840,
+          "meanPrice": 2435000,
+          "change": 0.6
+        },
+        "m12": {
+          "sales": 1187,
+          "pricePerSqm": 32854,
+          "meanPrice": 2344000,
+          "change": 9.2
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 177,
+          "pricePerSqm": 44834,
+          "meanPrice": 5148000,
+          "change": 0.7
+        },
+        "m12": {
+          "sales": 640,
+          "pricePerSqm": 43949,
+          "meanPrice": 5213000,
+          "change": 1.0
+        }
+      }
     },
-    "m12": {
-     "antal": 329,
-     "kvm": 50845,
-     "medelpris": 6939000,
-     "utv": -2.6
-    }
-   }
-  },
-  {
-   "slug": "haninge",
-   "namn": "Haninge",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 310,
-     "kvm": 33840,
-     "medelpris": 2435000,
-     "utv": 0.6
+    {
+      "slug": "huddinge",
+      "name": "Huddinge",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 310,
+          "pricePerSqm": 39149,
+          "meanPrice": 2909000,
+          "change": 2.0
+        },
+        "m12": {
+          "sales": 1205,
+          "pricePerSqm": 38858,
+          "meanPrice": 2815000,
+          "change": 1.0
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 153,
+          "pricePerSqm": 53416,
+          "meanPrice": 6492000,
+          "change": 1.2
+        },
+        "m12": {
+          "sales": 714,
+          "pricePerSqm": 53483,
+          "meanPrice": 6601000,
+          "change": 4.7
+        }
+      }
     },
-    "m12": {
-     "antal": 1187,
-     "kvm": 32854,
-     "medelpris": 2344000,
-     "utv": 9.2
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 177,
-     "kvm": 44834,
-     "medelpris": 5148000,
-     "utv": 0.7
+    {
+      "slug": "jarfalla",
+      "name": "Järfälla",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 356,
+          "pricePerSqm": 34577,
+          "meanPrice": 2353000,
+          "change": -0.9
+        },
+        "m12": {
+          "sales": 1344,
+          "pricePerSqm": 34570,
+          "meanPrice": 2373000,
+          "change": 2.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 113,
+          "pricePerSqm": 42723,
+          "meanPrice": 6017000,
+          "change": 2.3
+        },
+        "m12": {
+          "sales": 412,
+          "pricePerSqm": 41830,
+          "meanPrice": 5725000,
+          "change": 5.4
+        }
+      }
     },
-    "m12": {
-     "antal": 640,
-     "kvm": 43949,
-     "medelpris": 5213000,
-     "utv": 1.0
-    }
-   }
-  },
-  {
-   "slug": "huddinge",
-   "namn": "Huddinge",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 310,
-     "kvm": 39149,
-     "medelpris": 2909000,
-     "utv": 2.0
+    {
+      "slug": "lidingo",
+      "name": "Lidingö",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 153,
+          "pricePerSqm": 69693,
+          "meanPrice": 4972000,
+          "change": 5.9
+        },
+        "m12": {
+          "sales": 701,
+          "pricePerSqm": 66107,
+          "meanPrice": 4769000,
+          "change": 2.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 48,
+          "pricePerSqm": 105579,
+          "meanPrice": 17018000,
+          "change": 6.3
+        },
+        "m12": {
+          "sales": 266,
+          "pricePerSqm": 95140,
+          "meanPrice": 15540000,
+          "change": 8.5
+        }
+      }
     },
-    "m12": {
-     "antal": 1205,
-     "kvm": 38858,
-     "medelpris": 2815000,
-     "utv": 1.0
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 153,
-     "kvm": 53416,
-     "medelpris": 6492000,
-     "utv": 1.2
+    {
+      "slug": "nacka",
+      "name": "Nacka",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 616,
+          "pricePerSqm": 61290,
+          "meanPrice": 4385000,
+          "change": 2.0
+        },
+        "m12": {
+          "sales": 2426,
+          "pricePerSqm": 59469,
+          "meanPrice": 4359000,
+          "change": 5.7
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 139,
+          "pricePerSqm": 76420,
+          "meanPrice": 11222000,
+          "change": 1.2
+        },
+        "m12": {
+          "sales": 659,
+          "pricePerSqm": 75393,
+          "meanPrice": 10776000,
+          "change": 9.7
+        }
+      }
     },
-    "m12": {
-     "antal": 714,
-     "kvm": 53483,
-     "medelpris": 6601000,
-     "utv": 4.7
-    }
-   }
-  },
-  {
-   "slug": "jarfalla",
-   "namn": "Järfälla",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 356,
-     "kvm": 34577,
-     "medelpris": 2353000,
-     "utv": -0.9
+    {
+      "slug": "norrtalje",
+      "name": "Norrtälje",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 206,
+          "pricePerSqm": 28564,
+          "meanPrice": 1956000,
+          "change": 1.9
+        },
+        "m12": {
+          "sales": 808,
+          "pricePerSqm": 28743,
+          "meanPrice": 2007000,
+          "change": -1.3
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 186,
+          "pricePerSqm": 34930,
+          "meanPrice": 3755000,
+          "change": -5.8
+        },
+        "m12": {
+          "sales": 612,
+          "pricePerSqm": 37521,
+          "meanPrice": 3899000,
+          "change": 4.0
+        }
+      }
     },
-    "m12": {
-     "antal": 1344,
-     "kvm": 34570,
-     "medelpris": 2373000,
-     "utv": 2.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 113,
-     "kvm": 42723,
-     "medelpris": 6017000,
-     "utv": 2.3
+    {
+      "slug": "nykvarn",
+      "name": "Nykvarn",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 26,
+          "pricePerSqm": 32251,
+          "meanPrice": 2293000,
+          "change": -1.4
+        },
+        "m12": {
+          "sales": 94,
+          "pricePerSqm": 32244,
+          "meanPrice": 2395000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 55,
+          "pricePerSqm": 40287,
+          "meanPrice": 5037000,
+          "change": 10.9
+        },
+        "m12": {
+          "sales": 117,
+          "pricePerSqm": 38519,
+          "meanPrice": 4778000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        }
+      }
     },
-    "m12": {
-     "antal": 412,
-     "kvm": 41830,
-     "medelpris": 5725000,
-     "utv": 5.4
-    }
-   }
-  },
-  {
-   "slug": "lidingo",
-   "namn": "Lidingö",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 153,
-     "kvm": 69693,
-     "medelpris": 4972000,
-     "utv": 5.9
+    {
+      "slug": "nynashamn",
+      "name": "Nynäshamn",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 58,
+          "pricePerSqm": 25762,
+          "meanPrice": 1936000,
+          "change": 1.1
+        },
+        "m12": {
+          "sales": 239,
+          "pricePerSqm": 25317,
+          "meanPrice": 1903000,
+          "change": -5.3
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 54,
+          "pricePerSqm": 35607,
+          "meanPrice": 4192000,
+          "change": -6.6
+        },
+        "m12": {
+          "sales": 227,
+          "pricePerSqm": 38105,
+          "meanPrice": 4064000,
+          "change": 2.6
+        }
+      }
     },
-    "m12": {
-     "antal": 701,
-     "kvm": 66107,
-     "medelpris": 4769000,
-     "utv": 2.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 48,
-     "kvm": 105579,
-     "medelpris": 17018000,
-     "utv": 6.3
+    {
+      "slug": "salem",
+      "name": "Salem",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 42,
+          "pricePerSqm": 29599,
+          "meanPrice": 2160000,
+          "change": 2.2
+        },
+        "m12": {
+          "sales": 190,
+          "pricePerSqm": 29282,
+          "meanPrice": 2287000,
+          "change": -3.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 26,
+          "pricePerSqm": 34358,
+          "meanPrice": 4729000,
+          "change": -5.9
+        },
+        "m12": {
+          "sales": 147,
+          "pricePerSqm": 35133,
+          "meanPrice": 4781000,
+          "change": -1.9
+        }
+      }
     },
-    "m12": {
-     "antal": 266,
-     "kvm": 95140,
-     "medelpris": 15540000,
-     "utv": 8.5
-    }
-   }
-  },
-  {
-   "slug": "nacka",
-   "namn": "Nacka",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 616,
-     "kvm": 61290,
-     "medelpris": 4385000,
-     "utv": 2.0
+    {
+      "slug": "sigtuna",
+      "name": "Sigtuna",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 97,
+          "pricePerSqm": 25562,
+          "meanPrice": 1851000,
+          "change": -4.9
+        },
+        "m12": {
+          "sales": 427,
+          "pricePerSqm": 26740,
+          "meanPrice": 2019000,
+          "change": -6.0
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 68,
+          "pricePerSqm": 40157,
+          "meanPrice": 5081000,
+          "change": -1.4
+        },
+        "m12": {
+          "sales": 256,
+          "pricePerSqm": 40208,
+          "meanPrice": 5321000,
+          "change": 5.9
+        }
+      }
     },
-    "m12": {
-     "antal": 2426,
-     "kvm": 59469,
-     "medelpris": 4359000,
-     "utv": 5.7
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 139,
-     "kvm": 76420,
-     "medelpris": 11222000,
-     "utv": 1.2
+    {
+      "slug": "sollentuna",
+      "name": "Sollentuna",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 277,
+          "pricePerSqm": 43531,
+          "meanPrice": 3315000,
+          "change": 1.0
+        },
+        "m12": {
+          "sales": 1106,
+          "pricePerSqm": 42876,
+          "meanPrice": 3205000,
+          "change": 3.5
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 98,
+          "pricePerSqm": 59997,
+          "meanPrice": 9104000,
+          "change": 3.1
+        },
+        "m12": {
+          "sales": 475,
+          "pricePerSqm": 60054,
+          "meanPrice": 8574000,
+          "change": 6.6
+        }
+      }
     },
-    "m12": {
-     "antal": 659,
-     "kvm": 75393,
-     "medelpris": 10776000,
-     "utv": 9.7
-    }
-   }
-  },
-  {
-   "slug": "norrtalje",
-   "namn": "Norrtälje",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 206,
-     "kvm": 28564,
-     "medelpris": 1956000,
-     "utv": 1.9
+    {
+      "slug": "solna",
+      "name": "Solna",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 641,
+          "pricePerSqm": 66661,
+          "meanPrice": 4034000,
+          "change": 2.1
+        },
+        "m12": {
+          "sales": 2784,
+          "pricePerSqm": 64885,
+          "meanPrice": 4017000,
+          "change": 6.5
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 4,
+          "pricePerSqm": 76057,
+          "meanPrice": 13025000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        },
+        "m12": {
+          "sales": 37,
+          "pricePerSqm": 76476,
+          "meanPrice": 11683000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        }
+      }
     },
-    "m12": {
-     "antal": 808,
-     "kvm": 28743,
-     "medelpris": 2007000,
-     "utv": -1.3
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 186,
-     "kvm": 34930,
-     "medelpris": 3755000,
-     "utv": -5.8
+    {
+      "slug": "stockholm",
+      "name": "Stockholm",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 5835,
+          "pricePerSqm": 91997,
+          "meanPrice": 5443000,
+          "change": -0.2
+        },
+        "m12": {
+          "sales": 25084,
+          "pricePerSqm": 90815,
+          "meanPrice": 5439000,
+          "change": 7.9
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 359,
+          "pricePerSqm": 75494,
+          "meanPrice": 9756000,
+          "change": 0.2
+        },
+        "m12": {
+          "sales": 1607,
+          "pricePerSqm": 73427,
+          "meanPrice": 9458000,
+          "change": 7.7
+        }
+      }
     },
-    "m12": {
-     "antal": 612,
-     "kvm": 37521,
-     "medelpris": 3899000,
-     "utv": 4.0
-    }
-   }
-  },
-  {
-   "slug": "nykvarn",
-   "namn": "Nykvarn",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 26,
-     "kvm": 32251,
-     "medelpris": 2293000,
-     "utv": -1.4
+    {
+      "slug": "sundbyberg",
+      "name": "Sundbyberg",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 367,
+          "pricePerSqm": 64323,
+          "meanPrice": 3997000,
+          "change": -4.3
+        },
+        "m12": {
+          "sales": 1606,
+          "pricePerSqm": 65501,
+          "meanPrice": 4017000,
+          "change": 1.9
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 16,
+          "pricePerSqm": 64800,
+          "meanPrice": 9318000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        },
+        "m12": {
+          "sales": 54,
+          "pricePerSqm": 64192,
+          "meanPrice": 9587000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        }
+      }
     },
-    "m12": {
-     "antal": 94,
-     "kvm": 32244,
-     "medelpris": 2395000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 55,
-     "kvm": 40287,
-     "medelpris": 5037000,
-     "utv": 10.9
+    {
+      "slug": "sodertalje",
+      "name": "Södertälje",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 174,
+          "pricePerSqm": 26955,
+          "meanPrice": 1999000,
+          "change": -0.4
+        },
+        "m12": {
+          "sales": 697,
+          "pricePerSqm": 26395,
+          "meanPrice": 1955000,
+          "change": -2.4
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 83,
+          "pricePerSqm": 35986,
+          "meanPrice": 4667000,
+          "change": 3.4
+        },
+        "m12": {
+          "sales": 324,
+          "pricePerSqm": 34797,
+          "meanPrice": 4412000,
+          "change": 5.6
+        }
+      }
     },
-    "m12": {
-     "antal": 117,
-     "kvm": 38519,
-     "medelpris": 4778000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    }
-   }
-  },
-  {
-   "slug": "nynashamn",
-   "namn": "Nynäshamn",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 58,
-     "kvm": 25762,
-     "medelpris": 1936000,
-     "utv": 1.1
+    {
+      "slug": "tyreso",
+      "name": "Tyresö",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 125,
+          "pricePerSqm": 37861,
+          "meanPrice": 2803000,
+          "change": 0.9
+        },
+        "m12": {
+          "sales": 540,
+          "pricePerSqm": 37676,
+          "meanPrice": 2849000,
+          "change": 0.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 117,
+          "pricePerSqm": 53123,
+          "meanPrice": 6869000,
+          "change": -0.7
+        },
+        "m12": {
+          "sales": 419,
+          "pricePerSqm": 53151,
+          "meanPrice": 6869000,
+          "change": 4.2
+        }
+      }
     },
-    "m12": {
-     "antal": 239,
-     "kvm": 25317,
-     "medelpris": 1903000,
-     "utv": -5.3
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 54,
-     "kvm": 35607,
-     "medelpris": 4192000,
-     "utv": -6.6
+    {
+      "slug": "taby",
+      "name": "Täby",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 383,
+          "pricePerSqm": 49466,
+          "meanPrice": 3637000,
+          "change": -2.3
+        },
+        "m12": {
+          "sales": 1628,
+          "pricePerSqm": 49699,
+          "meanPrice": 3669000,
+          "change": 5.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 137,
+          "pricePerSqm": 66138,
+          "meanPrice": 9896000,
+          "change": 3.0
+        },
+        "m12": {
+          "sales": 608,
+          "pricePerSqm": 62474,
+          "meanPrice": 9212000,
+          "change": 7.9
+        }
+      }
     },
-    "m12": {
-     "antal": 227,
-     "kvm": 38105,
-     "medelpris": 4064000,
-     "utv": 2.6
-    }
-   }
-  },
-  {
-   "slug": "salem",
-   "namn": "Salem",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 42,
-     "kvm": 29599,
-     "medelpris": 2160000,
-     "utv": 2.2
+    {
+      "slug": "upplands-vasby",
+      "name": "Upplands Väsby",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 155,
+          "pricePerSqm": 31073,
+          "meanPrice": 2405000,
+          "change": -0.8
+        },
+        "m12": {
+          "sales": 536,
+          "pricePerSqm": 31043,
+          "meanPrice": 2292000,
+          "change": 3.0
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 62,
+          "pricePerSqm": 44335,
+          "meanPrice": 6153000,
+          "change": 3.7
+        },
+        "m12": {
+          "sales": 254,
+          "pricePerSqm": 42655,
+          "meanPrice": 5815000,
+          "change": 10.8
+        }
+      }
     },
-    "m12": {
-     "antal": 190,
-     "kvm": 29282,
-     "medelpris": 2287000,
-     "utv": -3.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 26,
-     "kvm": 34358,
-     "medelpris": 4729000,
-     "utv": -5.9
+    {
+      "slug": "upplands-bro",
+      "name": "Upplands-Bro",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 90,
+          "pricePerSqm": 28549,
+          "meanPrice": 2156000,
+          "change": -0.5
+        },
+        "m12": {
+          "sales": 391,
+          "pricePerSqm": 28776,
+          "meanPrice": 2197000,
+          "change": 2.1
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 57,
+          "pricePerSqm": 38234,
+          "meanPrice": 4772000,
+          "change": -2.5
+        },
+        "m12": {
+          "sales": 201,
+          "pricePerSqm": 36965,
+          "meanPrice": 4792000,
+          "change": 7.1
+        }
+      }
     },
-    "m12": {
-     "antal": 147,
-     "kvm": 35133,
-     "medelpris": 4781000,
-     "utv": -1.9
-    }
-   }
-  },
-  {
-   "slug": "sigtuna",
-   "namn": "Sigtuna",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 97,
-     "kvm": 25562,
-     "medelpris": 1851000,
-     "utv": -4.9
+    {
+      "slug": "vallentuna",
+      "name": "Vallentuna",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 129,
+          "pricePerSqm": 33544,
+          "meanPrice": 2394000,
+          "change": 1.2
+        },
+        "m12": {
+          "sales": 485,
+          "pricePerSqm": 33190,
+          "meanPrice": 2356000,
+          "change": -1.9
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 93,
+          "pricePerSqm": 45940,
+          "meanPrice": 5888000,
+          "change": 4.7
+        },
+        "m12": {
+          "sales": 345,
+          "pricePerSqm": 43229,
+          "meanPrice": 5546000,
+          "change": 11.8
+        }
+      }
     },
-    "m12": {
-     "antal": 427,
-     "kvm": 26740,
-     "medelpris": 2019000,
-     "utv": -6.0
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 68,
-     "kvm": 40157,
-     "medelpris": 5081000,
-     "utv": -1.4
+    {
+      "slug": "vaxholm",
+      "name": "Vaxholm",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 43,
+          "pricePerSqm": 46206,
+          "meanPrice": 3388000,
+          "change": 1.4
+        },
+        "m12": {
+          "sales": 168,
+          "pricePerSqm": 45408,
+          "meanPrice": 3521000,
+          "change": 1.0
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 41,
+          "pricePerSqm": 77502,
+          "meanPrice": 10376000,
+          "change": 3.8
+        },
+        "m12": {
+          "sales": 128,
+          "pricePerSqm": 71433,
+          "meanPrice": 9565000,
+          "change": null,
+          "missing": {
+            "change": "F"
+          }
+        }
+      }
     },
-    "m12": {
-     "antal": 256,
-     "kvm": 40208,
-     "medelpris": 5321000,
-     "utv": 5.9
-    }
-   }
-  },
-  {
-   "slug": "sollentuna",
-   "namn": "Sollentuna",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 277,
-     "kvm": 43531,
-     "medelpris": 3315000,
-     "utv": 1.0
+    {
+      "slug": "varmdo",
+      "name": "Värmdö",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 128,
+          "pricePerSqm": 48191,
+          "meanPrice": 3670000,
+          "change": 3.3
+        },
+        "m12": {
+          "sales": 498,
+          "pricePerSqm": 47043,
+          "meanPrice": 3464000,
+          "change": 3.3
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 152,
+          "pricePerSqm": 64422,
+          "meanPrice": 7315000,
+          "change": -0.6
+        },
+        "m12": {
+          "sales": 542,
+          "pricePerSqm": 60232,
+          "meanPrice": 7376000,
+          "change": 4.4
+        }
+      }
     },
-    "m12": {
-     "antal": 1106,
-     "kvm": 42876,
-     "medelpris": 3205000,
-     "utv": 3.5
+    {
+      "slug": "osteraker",
+      "name": "Österåker",
+      "kind": "municipality",
+      "apartment": {
+        "m3": {
+          "sales": 115,
+          "pricePerSqm": 36141,
+          "meanPrice": 2805000,
+          "change": -2.7
+        },
+        "m12": {
+          "sales": 513,
+          "pricePerSqm": 36504,
+          "meanPrice": 2877000,
+          "change": -5.8
+        }
+      },
+      "house": {
+        "m3": {
+          "sales": 129,
+          "pricePerSqm": 49398,
+          "meanPrice": 5825000,
+          "change": -0.7
+        },
+        "m12": {
+          "sales": 585,
+          "pricePerSqm": 47197,
+          "meanPrice": 5988000,
+          "change": 4.7
+        }
+      }
     }
-   },
-   "villa": {
-    "m3": {
-     "antal": 98,
-     "kvm": 59997,
-     "medelpris": 9104000,
-     "utv": 3.1
-    },
-    "m12": {
-     "antal": 475,
-     "kvm": 60054,
-     "medelpris": 8574000,
-     "utv": 6.6
-    }
-   }
-  },
-  {
-   "slug": "solna",
-   "namn": "Solna",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 641,
-     "kvm": 66661,
-     "medelpris": 4034000,
-     "utv": 2.1
-    },
-    "m12": {
-     "antal": 2784,
-     "kvm": 64885,
-     "medelpris": 4017000,
-     "utv": 6.5
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 4,
-     "kvm": 76057,
-     "medelpris": 13025000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    },
-    "m12": {
-     "antal": 37,
-     "kvm": 76476,
-     "medelpris": 11683000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    }
-   }
-  },
-  {
-   "slug": "stockholm",
-   "namn": "Stockholm",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 5835,
-     "kvm": 91997,
-     "medelpris": 5443000,
-     "utv": -0.2
-    },
-    "m12": {
-     "antal": 25084,
-     "kvm": 90815,
-     "medelpris": 5439000,
-     "utv": 7.9
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 359,
-     "kvm": 75494,
-     "medelpris": 9756000,
-     "utv": 0.2
-    },
-    "m12": {
-     "antal": 1607,
-     "kvm": 73427,
-     "medelpris": 9458000,
-     "utv": 7.7
-    }
-   }
-  },
-  {
-   "slug": "sundbyberg",
-   "namn": "Sundbyberg",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 367,
-     "kvm": 64323,
-     "medelpris": 3997000,
-     "utv": -4.3
-    },
-    "m12": {
-     "antal": 1606,
-     "kvm": 65501,
-     "medelpris": 4017000,
-     "utv": 1.9
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 16,
-     "kvm": 64800,
-     "medelpris": 9318000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    },
-    "m12": {
-     "antal": 54,
-     "kvm": 64192,
-     "medelpris": 9587000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    }
-   }
-  },
-  {
-   "slug": "sodertalje",
-   "namn": "Södertälje",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 174,
-     "kvm": 26955,
-     "medelpris": 1999000,
-     "utv": -0.4
-    },
-    "m12": {
-     "antal": 697,
-     "kvm": 26395,
-     "medelpris": 1955000,
-     "utv": -2.4
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 83,
-     "kvm": 35986,
-     "medelpris": 4667000,
-     "utv": 3.4
-    },
-    "m12": {
-     "antal": 324,
-     "kvm": 34797,
-     "medelpris": 4412000,
-     "utv": 5.6
-    }
-   }
-  },
-  {
-   "slug": "tyreso",
-   "namn": "Tyresö",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 125,
-     "kvm": 37861,
-     "medelpris": 2803000,
-     "utv": 0.9
-    },
-    "m12": {
-     "antal": 540,
-     "kvm": 37676,
-     "medelpris": 2849000,
-     "utv": 0.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 117,
-     "kvm": 53123,
-     "medelpris": 6869000,
-     "utv": -0.7
-    },
-    "m12": {
-     "antal": 419,
-     "kvm": 53151,
-     "medelpris": 6869000,
-     "utv": 4.2
-    }
-   }
-  },
-  {
-   "slug": "taby",
-   "namn": "Täby",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 383,
-     "kvm": 49466,
-     "medelpris": 3637000,
-     "utv": -2.3
-    },
-    "m12": {
-     "antal": 1628,
-     "kvm": 49699,
-     "medelpris": 3669000,
-     "utv": 5.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 137,
-     "kvm": 66138,
-     "medelpris": 9896000,
-     "utv": 3.0
-    },
-    "m12": {
-     "antal": 608,
-     "kvm": 62474,
-     "medelpris": 9212000,
-     "utv": 7.9
-    }
-   }
-  },
-  {
-   "slug": "upplands-vasby",
-   "namn": "Upplands Väsby",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 155,
-     "kvm": 31073,
-     "medelpris": 2405000,
-     "utv": -0.8
-    },
-    "m12": {
-     "antal": 536,
-     "kvm": 31043,
-     "medelpris": 2292000,
-     "utv": 3.0
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 62,
-     "kvm": 44335,
-     "medelpris": 6153000,
-     "utv": 3.7
-    },
-    "m12": {
-     "antal": 254,
-     "kvm": 42655,
-     "medelpris": 5815000,
-     "utv": 10.8
-    }
-   }
-  },
-  {
-   "slug": "upplands-bro",
-   "namn": "Upplands-Bro",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 90,
-     "kvm": 28549,
-     "medelpris": 2156000,
-     "utv": -0.5
-    },
-    "m12": {
-     "antal": 391,
-     "kvm": 28776,
-     "medelpris": 2197000,
-     "utv": 2.1
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 57,
-     "kvm": 38234,
-     "medelpris": 4772000,
-     "utv": -2.5
-    },
-    "m12": {
-     "antal": 201,
-     "kvm": 36965,
-     "medelpris": 4792000,
-     "utv": 7.1
-    }
-   }
-  },
-  {
-   "slug": "vallentuna",
-   "namn": "Vallentuna",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 129,
-     "kvm": 33544,
-     "medelpris": 2394000,
-     "utv": 1.2
-    },
-    "m12": {
-     "antal": 485,
-     "kvm": 33190,
-     "medelpris": 2356000,
-     "utv": -1.9
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 93,
-     "kvm": 45940,
-     "medelpris": 5888000,
-     "utv": 4.7
-    },
-    "m12": {
-     "antal": 345,
-     "kvm": 43229,
-     "medelpris": 5546000,
-     "utv": 11.8
-    }
-   }
-  },
-  {
-   "slug": "vaxholm",
-   "namn": "Vaxholm",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 43,
-     "kvm": 46206,
-     "medelpris": 3388000,
-     "utv": 1.4
-    },
-    "m12": {
-     "antal": 168,
-     "kvm": 45408,
-     "medelpris": 3521000,
-     "utv": 1.0
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 41,
-     "kvm": 77502,
-     "medelpris": 10376000,
-     "utv": 3.8
-    },
-    "m12": {
-     "antal": 128,
-     "kvm": 71433,
-     "medelpris": 9565000,
-     "utv": null,
-     "flaggor": {
-      "utv": "F"
-     }
-    }
-   }
-  },
-  {
-   "slug": "varmdo",
-   "namn": "Värmdö",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 128,
-     "kvm": 48191,
-     "medelpris": 3670000,
-     "utv": 3.3
-    },
-    "m12": {
-     "antal": 498,
-     "kvm": 47043,
-     "medelpris": 3464000,
-     "utv": 3.3
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 152,
-     "kvm": 64422,
-     "medelpris": 7315000,
-     "utv": -0.6
-    },
-    "m12": {
-     "antal": 542,
-     "kvm": 60232,
-     "medelpris": 7376000,
-     "utv": 4.4
-    }
-   }
-  },
-  {
-   "slug": "osteraker",
-   "namn": "Österåker",
-   "typ": "kommun",
-   "br": {
-    "m3": {
-     "antal": 115,
-     "kvm": 36141,
-     "medelpris": 2805000,
-     "utv": -2.7
-    },
-    "m12": {
-     "antal": 513,
-     "kvm": 36504,
-     "medelpris": 2877000,
-     "utv": -5.8
-    }
-   },
-   "villa": {
-    "m3": {
-     "antal": 129,
-     "kvm": 49398,
-     "medelpris": 5825000,
-     "utv": -0.7
-    },
-    "m12": {
-     "antal": 585,
-     "kvm": 47197,
-     "medelpris": 5988000,
-     "utv": 4.7
-    }
-   }
-  }
- ],
- "lan": {
-  "namn": "Stockholms län",
-  "br": {
-   "m3": {
-    "antal": 10961,
-    "kvm": 70849,
-    "medelpris": 4416000,
-    "utv": -1.0
-   },
-   "m12": {
-    "antal": 46042,
-    "kvm": 70720,
-    "medelpris": 4444000,
-    "utv": 6.5
-   }
-  },
-  "villa": {
-   "m3": {
-    "antal": 2627,
-    "kvm": 55399,
-    "medelpris": 7284000,
-    "utv": 0.1
-   },
-   "m12": {
-    "antal": 10632,
-    "kvm": 55585,
-    "medelpris": 7396000,
-    "utv": 5.4
-   }
-  }
- }
+  ]
 }

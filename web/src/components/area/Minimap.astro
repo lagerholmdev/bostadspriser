@@ -1,0 +1,152 @@
+---
+/**
+ * Minikarta: området i sin prisfärg med accentkant, grannarna blekare runt om.
+ * Ritas i bygget som ren SVG, ingen kartmotor behövs.
+ */
+import geo from "../../generated/areas.geojson?raw";
+import { bySlug, isThin } from "../../lib/data";
+import { sqm } from "../../lib/format";
+import { buildMinimap, minimapSvg, type MinimapCollection } from "../../lib/minimap";
+import { priceColor } from "../../lib/scales";
+import type { Area } from "../../lib/types";
+import PriceLegend from "../common/PriceLegend.astro";
+
+interface Props {
+  area: Area;
+}
+const { area } = Astro.props;
+const collection = JSON.parse(geo) as MinimapCollection;
+const price = (slug: string) => bySlug.get(slug)?.apartment?.m3.pricePerSqm ?? null;
+
+const map = buildMinimap({
+  collection,
+  focus: area.slug,
+  fill: (slug) => priceColor(price(slug)),
+  // Få affärer och ett visat pris: ränder, som på kartan.
+  thin: (slug) => {
+    const s = bySlug.get(slug)?.apartment?.m3 ?? null;
+    return s?.pricePerSqm != null && isThin(s, "m3");
+  },
+  name: (slug) => bySlug.get(slug)?.name,
+  labelPoint: (slug) => bySlug.get(slug)?.label,
+  neighbours: [...area.neighbours].sort(
+    (a, b) =>
+      (bySlug.get(a)?.kind === area.kind ? -1 : 0) - (bySlug.get(b)?.kind === area.kind ? -1 : 0),
+  ),
+  width: 520,
+  height: 400,
+  // På smala skärmar förstoras fokusetiketten till 20 enheter (se CSS nedan).
+  focusReserveFont: 20,
+});
+
+const shown = map.labels.filter((l) => !l.focus).map((l) => l.text);
+const hasThin = map.shapes.some((s) => s.thin);
+const names = area.neighbours.map((s) => bySlug.get(s)?.name).filter(Boolean) as string[];
+const label =
+  `Karta över ${area.name} och områdena runt omkring` +
+  (names.length ? `: ${names.slice(0, 6).join(", ")}${names.length > 6 ? " med flera" : ""}` : "") +
+  `. ${area.name} har ${sqm(price(area.slug))} och är markerat med grön kant.`;
+const svg = minimapSvg(map, { label });
+---
+
+<figure class="minimap">
+  <div class="mm" set:html={svg} />
+  <figcaption>
+    <PriceLegend title="Pris per kvm, tusen kr" />
+    {shown.length > 0 && (
+      <p class="mm-note">{area.name} har grön kant. Grannområdena visas blekare.</p>
+    )}
+    {hasThin && (
+      <p class="mm-note mm-note-hatch">
+        <span class="mm-hatch-key" aria-hidden="true"></span>Randigt = få affärer, osäkert värde
+      </p>
+    )}
+  </figcaption>
+</figure>
+
+<style>
+  .minimap {
+    margin: 0;
+    display: grid;
+    gap: var(--sp-3);
+  }
+  .mm {
+    container-type: inline-size;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--c-line);
+    aspect-ratio: 13 / 10;
+    background: var(--c-sunken);
+  }
+  .mm :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .mm :global(.mm-bg) {
+    fill: var(--c-sunken);
+  }
+  .mm :global(.mm-area) {
+    stroke: var(--c-surface);
+    stroke-width: 1.25px;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .mm :global(.mm-focus) {
+    stroke: var(--c-accent);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .mm :global(.mm-label) {
+    font-family: var(--f-sans);
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--c-ink-2);
+    stroke: var(--c-surface);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+  }
+  .mm :global(.mm-label-focus) {
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--c-ink);
+  }
+  /*
+   * Bilden är 520 enheter bred. Under 477 px skulle grannetiketterna (12 enheter) bli
+   * mindre än 11 px, så de döljs, och områdets egen etikett förstoras så att den
+   * håller minst 11 px ner till 288 px bredd (320 px skärm).
+   */
+  @container (max-width: 476px) {
+    .mm :global(.mm-label:not(.mm-label-focus)) {
+      display: none;
+    }
+    .mm :global(.mm-label-focus) {
+      font-size: 20px;
+      stroke-width: 4px;
+    }
+  }
+  figcaption {
+    display: grid;
+    gap: var(--sp-2);
+  }
+  .mm-note {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-3);
+  }
+  .mm-note-hatch {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .mm-hatch-key {
+    flex: none;
+    width: 14px;
+    height: 12px;
+    border-radius: 3px;
+    background-color: var(--c-price-3);
+    background-image: var(--hatch);
+    box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.08);
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+/**
+ * Områdesrad i listan: namn, pris per kvm med stapel i prisfärgen, förändring 12 månader
+ * och antal sålda. Hela raden är klickbar. På mobil staplas raden (se omrade/index.astro).
+ * data-attributen används av scripts/area-list.ts för sökning och sortering.
+ */
+import { isThin, stat } from "../../lib/data";
+import { number, sqm } from "../../lib/format";
+import { areaUrl } from "../../lib/links";
+import { priceColor } from "../../lib/scales";
+import type { Area } from "../../lib/types";
+import ChangeValue from "./ChangeValue.astro";
+
+interface Props {
+  area: Area;
+  /** Högsta pris i listan, för stapelns längd. */
+  max: number;
+}
+const { area, max } = Astro.props;
+const s3 = stat(area, "apartment", "m3");
+const s12 = stat(area, "apartment", "m12");
+const price = s3?.pricePerSqm ?? null;
+const thin = isThin(s3, "m3");
+const width = price ? Math.max(2, (price / max) * 100).toFixed(1) : "0";
+---
+
+<tr
+  class:list={["area-row", { "is-thin": thin }]}
+  data-slug={area.slug}
+  data-name={area.name}
+  data-price={price ?? 0}
+>
+  <th scope="row">
+    <a class="row-name" href={areaUrl(area.slug)}>
+      {area.name}
+    </a>
+    <span class="row-via" data-via hidden></span>
+    <span class="row-sub">
+      {s3?.sales != null ? `${number(s3.sales)} sålda` : "antal saknas"}
+      {thin && <span class="thin-tag">få affärer</span>}
+    </span>
+  </th>
+  <td class="col-price">
+    <span class="price">{price != null ? sqm(price) : "saknas"}</span>
+    <span class="price-bar" aria-hidden="true">
+      <span style={`width:${width}%;background-color:${priceColor(price)}`}></span>
+    </span>
+  </td>
+  <td class="col-chg">
+    <ChangeValue value={s12?.change} missing={s12?.missing?.change} />
+    {s12?.change != null && <span class="chg-unit">på ett år</span>}
+  </td>
+  <td class="col-sales">
+    {s3?.sales != null ? number(s3.sales) : "–"}
+    {thin && <span class="thin-tag">få affärer</span>}
+  </td>
+</tr>

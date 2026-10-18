@@ -1,11 +1,22 @@
-.cache/
+# Node och Astro
+node_modules/
+web/dist/
+web/.astro/
+
+# Skrivs av pipelinen (python -m prislandskap export/og), checkas inte in
+web/src/generated/
+web/public/og/
+
+# Python
 __pycache__/
-dist/
-# Genereras av scripts/build_site.py i varje bygge
-site/index.html
-site/omrade/
-site/vy/
-site/jamfor/
-site/og/
-site/sitemap.xml
-site/robots.txt
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+
+# Skrapans cache
+.cache/
+
+# Editor/OS
+.DS_Store

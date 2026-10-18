@@ -1,0 +1,29 @@
+---
+/**
+ * Prisförändring med tecken, färg och ord, så att färgen aldrig är enda signalen.
+ * Saknas värdet visas ett streck och skälet i klartext.
+ */
+import { change, changeDirection, changeWord, MISSING_TEXT } from "../../lib/format";
+import type { MissingReason } from "../../lib/types";
+
+interface Props {
+  value: number | null | undefined;
+  missing?: MissingReason | undefined;
+  /** Skriv ut "upp", "ner" eller "oförändrat" efter siffran. */
+  word?: boolean;
+}
+const { value, missing, word = false } = Astro.props;
+const dir = changeDirection(value);
+---
+
+{dir ? (
+  <span class:list={["chg", `chg-${dir}`]}>
+    {change(value)}
+    {word && <span class="chg-word">{changeWord(value)}</span>}
+  </span>
+) : (
+  <span class="chg chg-none">
+    <span aria-hidden="true">–</span>
+    <span class="miss">{missing ? MISSING_TEXT[missing] : "saknas"}</span>
+  </span>
+)}

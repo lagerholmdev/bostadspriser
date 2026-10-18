@@ -1,0 +1,82 @@
+name: Uppdatera och publicera
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 10 * *" # den 10:e varje månad 06:17 UTC; Mäklarstatistik publicerar runt den 8:e
+  workflow_dispatch:
+
+# Varje jobb får bara de rättigheter det behöver.
+permissions: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  build:
+    name: Hämta, bygg och spara
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # checka in ny ögonblicksbild
+      pages: read # configure-pages
+    steps:
+      # Bygg toppen av main när jobbet startar, inte den commit som startade körningen. Annars kan
+      # en köad körning publicera om förra månadens data efter att månadsjobbet checkat in ny.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: ./.github/actions/pipeline-setup
+
+      - name: Hämta ny statistik
+        if: github.event_name != 'push'
+        run: python -m prislandskap scrape
+      - name: Exportera data och delningsbilder
+        run: python -m prislandskap all
+
+      # Kontrollera och bygg med den nya datan innan något checkas in.
+      # Kontraktstestet läser den nya exporten; övriga tester kör mot en fryst fixtur.
+      - uses: ./.github/actions/web-build
+        with:
+          goatcounter: ${{ vars.PUBLIC_GOATCOUNTER }}
+
+      - name: Spara ny ögonblicksbild
+        if: github.event_name != 'push'
+        run: |
+          git add data/snapshots
+          if git diff --cached --quiet; then
+            echo "Ingen ny statistik."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Uppdatera data $(date -u +%Y-%m)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    name: Publicera
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

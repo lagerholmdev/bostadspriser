@@ -1,0 +1,46 @@
+---
+/**
+ * Kartsidan: panel med sök, vyer och listor till vänster (under kartan på mobil), kartan till höger.
+ * Läget ligger i adressen (lib/url.ts). Klientkoden finns i src/scripts/map/.
+ */
+import Base from "../layouts/Base.astro";
+import MapView from "../components/map/MapView.astro";
+import Panel from "../components/map/Panel.astro";
+import "../components/map/map-page.css";
+import { areas, countyStat } from "../lib/data";
+import { number } from "../lib/format";
+import { base as siteBase } from "../lib/links";
+
+const base = siteBase();
+const county = countyStat("apartment", "m3").pricePerSqm;
+const description = `Vad kostar en bostad i Stockholm? Pris per kvm, var din budget räcker och hur priserna förändras i ${areas.length} stadsdelar och kommuner. Länets snitt för bostadsrätter: ${number(county)} kr/kvm.`;
+---
+
+<Base
+  title="Bostadspriser i Stockholm, pris per kvm | Stockholms prislandskap"
+  description={description}
+  fullBleed
+>
+  <div class="app" id="app">
+    <script is:inline>
+      // Visa rätt vy redan innan sidans skript laddat, så att det inte blinkar.
+      (function (app) {
+        try {
+          var q = new URLSearchParams(location.search);
+          var vy = q.get("vy");
+          if (vy === "trend") vy = "forandring";
+          app.setAttribute("data-view", vy === "budget" || vy === "forandring" ? vy : "pris");
+          if (q.get("omrade") || q.get("omr") || q.get("jamfor"))
+            app.setAttribute("data-pending", "");
+        } catch (e) {
+          app.setAttribute("data-view", "pris");
+        }
+      })(document.currentScript.parentElement);
+    </script>
+    <Panel base={base} />
+    <MapView />
+  </div>
+  <script>
+    import "../scripts/map/main";
+  </script>
+</Base>
