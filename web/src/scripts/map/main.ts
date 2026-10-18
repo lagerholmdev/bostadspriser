@@ -7,6 +7,7 @@ import { compareUrl } from "../../lib/links";
 import { appStateHref, parseAppState, type AppState } from "../../lib/url";
 import { trackViewOnce } from "./analytics";
 import { fetchBaseStyle } from "./mapstyle";
+import { MobileLayout } from "./mobile";
 import { mapPaint } from "./model";
 import { PanelController } from "./panel/controller";
 import { tooltipHtml } from "./panel/quick";
@@ -46,6 +47,8 @@ function start(): void {
 
   const panel = new PanelController(panelEl, store);
   panel.start();
+  // Efter panelen, så att panelen hunnit rita om innan den dragbara panelen mäter.
+  const mobile = new MobileLayout(app, panelEl, store, panel);
 
   const input = $<HTMLInputElement>("area-search");
   const listbox = $<HTMLUListElement>("area-search-list");
@@ -73,14 +76,14 @@ function start(): void {
     if (s.view !== prev.view) trackViewOnce(s.view);
   });
 
-  startMap(store, panel);
+  startMap(store, panel, mobile);
 }
 
 function paintKey(s: AppState): string {
   return [s.view, s.housing, s.period, s.view === "budget" ? `${s.budget}/${s.sqm}` : ""].join("|");
 }
 
-function startMap(store: Store, panel: PanelController): void {
+function startMap(store: Store, panel: PanelController, mobile: MobileLayout): void {
   const wrap = $("map-wrap");
   const canvas = $("map");
   const labels = $("map-labels");
@@ -102,8 +105,11 @@ function startMap(store: Store, panel: PanelController): void {
         selected: initial.area,
         baseStyle,
         tooltipContent: (slug) => tooltipHtml(slug, store.state),
+        insets: () => mobile.insets(),
+        oneFingerPan: mobile.active,
         onSelect: (slug) => {
           if (slug) {
+            mobile.markFromMap();
             panel.selectArea(slug, { focus: false });
             if (window.matchMedia("(min-width: 960px)").matches) panel.revealDetailQuietly();
           } else if (store.state.area) {
@@ -114,6 +120,7 @@ function startMap(store: Store, panel: PanelController): void {
     )
     .then((map) => {
       wrap.classList.add("is-ready");
+      mobile.onToggle((on) => map.setOneFingerPan(on));
       let painted = paintKey(initial);
       let selected = initial.area;
       const sync = (s: AppState) => {

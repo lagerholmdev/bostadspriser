@@ -492,7 +492,8 @@
   .app .legend-notes {
     display: grid;
   }
-  .app .map-wrap .map-legend {
+  /* Kartan ovanför listan är för liten för förklaringen; den finns i listan. */
+  .app:not(.has-sheet) .map-wrap .map-legend {
     display: none !important;
   }
 }
@@ -1612,5 +1613,265 @@
   }
   .app .maplibregl-ctrl-top-right .maplibregl-ctrl {
     margin: 8px 8px 0 0;
+  }
+}
+
+/* ---------- Mobilen: kartan i helskärm, panelen dras upp nerifrån ---------- */
+
+/*
+ * Som i Google Maps. Sökfältet och vyerna flyter överst, panelen ligger över kartan och har tre
+ * lägen (kik, halv, hel) som scripts/map/sheet.ts sätter i data-sheet och höjden. Klassen
+ * has-sheet sätts av ett litet skript i sidan; utan JavaScript ligger kartan ovanför listan.
+ */
+.app .topbar,
+.app .sheet-handle {
+  display: none;
+}
+
+@media (max-width: 959px) {
+  html:has(.app.has-sheet),
+  body:has(.app.has-sheet) {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .app.has-sheet {
+    --sheet-radius: 16px;
+    position: relative;
+    display: block;
+    height: calc(100vh - var(--header-h) - 1px);
+    height: calc(100dvh - var(--header-h) - 1px - env(safe-area-inset-top, 0px));
+    overflow: hidden;
+    background: var(--map-bg);
+  }
+  .app.has-sheet .map-wrap {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    min-height: 0;
+    border-bottom: 0;
+  }
+
+  /* Sök och vyer flyter över kartan. */
+  .app.has-sheet .topbar {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 6;
+    padding: var(--sp-3) var(--gutter-r) 0 var(--gutter);
+    pointer-events: none;
+  }
+  .app.has-sheet .topbar > * {
+    pointer-events: auto;
+  }
+  .app.has-sheet .topbar .search {
+    margin: 0;
+  }
+  .app.has-sheet .topbar .search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .app.has-sheet .topbar #area-search {
+    border: 0;
+    border-radius: 999px;
+    padding-left: 44px;
+    box-shadow:
+      0 1px 3px rgb(26 31 28 / 0.12),
+      0 4px 16px rgb(26 31 28 / 0.1);
+  }
+  .app.has-sheet .topbar #area-search:focus {
+    box-shadow:
+      0 0 0 2px var(--c-accent),
+      0 4px 16px rgb(26 31 28 / 0.1);
+  }
+  .app.has-sheet .topbar .search-icon {
+    left: 16px;
+  }
+  .app.has-sheet .topbar .search-list {
+    max-height: min(360px, 60dvh);
+    box-shadow:
+      0 1px 3px rgb(26 31 28 / 0.12),
+      0 8px 24px rgb(26 31 28 / 0.14);
+  }
+  /* Vyerna som chips, som Googles "Restauranger, Kaffe". Rullar i sidled om de inte får plats. */
+  .app.has-sheet .topbar .tabs {
+    gap: var(--sp-2);
+    margin: var(--sp-2) calc(var(--gutter-r) * -1) 0 calc(var(--gutter) * -1);
+    padding: 2px var(--gutter-r) var(--sp-2) var(--gutter);
+    border-bottom: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .app.has-sheet .topbar .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .app.has-sheet .topbar .tab {
+    flex: none;
+    min-height: 40px;
+    padding: 0 var(--sp-4);
+    border-radius: 999px;
+    background: var(--c-surface);
+    color: var(--c-ink);
+    font-size: var(--fs-sm);
+    box-shadow:
+      0 1px 3px rgb(26 31 28 / 0.12),
+      0 2px 8px rgb(26 31 28 / 0.08);
+  }
+  .app.has-sheet .topbar .tab::after {
+    display: none;
+  }
+  .app.has-sheet[data-view="pris"] .topbar .tab[data-view="pris"],
+  .app.has-sheet[data-view="budget"] .topbar .tab[data-view="budget"],
+  .app.has-sheet[data-view="forandring"] .topbar .tab[data-view="forandring"] {
+    background: var(--c-accent);
+    color: var(--c-on-accent);
+  }
+  .app.has-sheet .topbar .tab:focus-visible {
+    border-radius: 999px;
+    outline-offset: 2px;
+  }
+
+  /* Kartans knappar under sökfältet; zoom sköts med fingrarna. */
+  .app.has-sheet .maplibregl-ctrl-top-right {
+    top: var(--topbar-h, 116px);
+  }
+  .app.has-sheet .maplibregl-ctrl-top-right .maplibregl-ctrl {
+    margin: 4px var(--gutter-r) 0 0;
+  }
+  .app.has-sheet .maplibregl-ctrl-group:not(.map-ctrl-text) {
+    display: none;
+  }
+  .app.has-sheet .maplibregl-ctrl-group.map-ctrl-text {
+    flex-direction: column;
+    border-radius: var(--radius);
+  }
+  .app.has-sheet .maplibregl-ctrl-group.map-ctrl-text button + button {
+    border-left: 0;
+    border-top: 1px solid var(--c-line);
+  }
+  /* Förklaringen och källorna ligger precis ovanför panelen och följer med när den dras. */
+  .app.has-sheet .map-legend .ml-notes {
+    display: none;
+  }
+  .app.has-sheet .map-legend {
+    bottom: calc(var(--sheet-h, 180px) + 8px);
+  }
+  .app.has-sheet .maplibregl-ctrl-bottom-right {
+    bottom: var(--sheet-h, 180px);
+  }
+  .app.has-sheet.sheet-settling .map-legend,
+  .app.has-sheet.sheet-settling .maplibregl-ctrl-bottom-right {
+    transition: bottom 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .app.has-sheet .map-wrap:not(.is-ready):not(.is-failed)::after,
+  .app.has-sheet .map-message {
+    top: calc(var(--topbar-h, 116px) + (100% - var(--topbar-h, 116px) - var(--sheet-h, 180px)) / 2);
+  }
+
+  /* Panelen. */
+  .app.has-sheet .panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    height: 190px;
+    max-height: calc(100% - 4px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+    box-shadow:
+      0 -1px 3px rgb(26 31 28 / 0.08),
+      0 -6px 24px rgb(26 31 28 / 0.1);
+    overflow: hidden;
+  }
+  .app.has-sheet .panel[data-sheet="half"] {
+    height: 50%;
+  }
+  .app.has-sheet .panel.is-settling {
+    transition: height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .app.has-sheet .sheet-handle {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: grab;
+    touch-action: none;
+  }
+  .app.has-sheet .panel.is-dragging .sheet-handle {
+    cursor: grabbing;
+  }
+  .app.has-sheet .sheet-grip {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--c-line-strong);
+    opacity: 0.6;
+  }
+  .app.has-sheet .sheet-handle:focus-visible {
+    outline-offset: -4px;
+    border-radius: var(--sheet-radius) var(--sheet-radius) var(--radius-sm) var(--radius-sm);
+  }
+  .app.has-sheet .panel-scroll {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-top: var(--sp-1);
+  }
+  .app.has-sheet .panel.is-dragging .panel-scroll {
+    overflow-y: hidden;
+  }
+  /* Remsan med det valda området: överst i panelen, under handtaget. */
+  .app.has-sheet .peek {
+    border-bottom: 0;
+    background: none;
+    padding-top: var(--sp-1);
+  }
+  .app.has-sheet .peek-name {
+    font-size: var(--fs-lg);
+  }
+  .app.has-sheet .panel[data-sheet="peek"] .peek-text {
+    cursor: pointer;
+  }
+  /* Utfälld visar panelen områdets detalj, som redan börjar med namn och pris. */
+  .app.has-sheet .panel[data-sheet]:not([data-sheet="peek"]):not(.is-measuring) .peek {
+    display: none;
+  }
+  .app.has-sheet .panel-head h1 {
+    font-size: var(--fs-md);
+  }
+  .app.has-sheet .filters {
+    margin-top: var(--sp-3);
+  }
+  .app.has-sheet .tray {
+    flex: none;
+    position: static;
+    padding-bottom: var(--sp-3);
+    box-shadow: none;
+  }
+  .app.has-sheet .detail-wrap {
+    scroll-margin-top: 0;
+  }
+}
+
+@media (max-width: 959px) and (prefers-reduced-motion: reduce) {
+  .app.has-sheet .panel.is-settling,
+  .app.has-sheet.sheet-settling .map-legend,
+  .app.has-sheet.sheet-settling .maplibregl-ctrl-bottom-right {
+    transition: none;
   }
 }

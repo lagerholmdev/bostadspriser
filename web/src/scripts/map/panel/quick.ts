@@ -61,7 +61,7 @@ export function tooltipHtml(slug: string, s: AppState): Html {
     <p class="tt-meta">${q.meta}</p>`;
 }
 
-/** Remsan under kartan på mobilen när ett område är valt. */
+/** Remsan överst i mobilens panel när ett område är valt. */
 export function peekHtml(slug: string, s: AppState): Html {
   const q = quick(slug, s);
   if (!q) return html``;
@@ -70,6 +70,6 @@ export function peekHtml(slug: string, s: AppState): Html {
       <p class="peek-value">${q.value} <span class="peek-meta">${q.meta}</span></p>
     </div>
     <button type="button" class="btn peek-go" data-action="peek-go">
-      Visa mer <span aria-hidden="true">↓</span>
+      Visa mer <span aria-hidden="true">↑</span>
     </button>`;
 }

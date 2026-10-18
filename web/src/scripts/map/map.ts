@@ -36,6 +36,7 @@ import {
   type HatchKind,
 } from "./mapstyle";
 import { unionBbox, type Paint } from "./model";
+import { fitPadding } from "./sheet-model";
 import { NODATA_COLOR } from "../../lib/scales";
 import { Tooltip } from "./tooltip";
 
@@ -88,6 +89,10 @@ export interface AreaMapOptions {
   baseStyle: Promise<StyleSpecification | null>;
   onSelect: (slug: string | null) => void;
   tooltipContent: (slug: string) => Html;
+  /** Mobilen: hur mycket av kartan sökfältet (överst) och panelen (nederst) täcker. */
+  insets?: () => { top: number; bottom: number } | null;
+  /** Mobilen med kartan i helskärm: ett finger flyttar kartan, som i en kartapp. */
+  oneFingerPan?: boolean;
 }
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -133,7 +138,14 @@ export class AreaMap {
       style,
       bounds: selectedArea ? selectedArea.bbox : isWide() ? INNER_BBOX : CITY_BBOX,
       fitBoundsOptions: {
-        padding: isWide() ? 48 : 16,
+        padding: isWide()
+          ? 48
+          : fitPadding(opts.canvas.clientHeight, opts.insets?.() ?? null, {
+              top: 16,
+              bottom: 16,
+              left: 16,
+              right: 16,
+            }),
         maxZoom: isWide() ? AREA_MAX_ZOOM : AREA_MAX_ZOOM - 0.75,
       },
       maxBounds: MAX_BOUNDS,
@@ -146,7 +158,7 @@ export class AreaMap {
       attributionControl: false,
       locale: LOCALE,
       fadeDuration: 0,
-      cooperativeGestures: isTouch(),
+      cooperativeGestures: isTouch() && !opts.oneFingerPan,
     });
     // Rändermönstren ritas här i stället för att laddas som bilder.
     const ratio = window.devicePixelRatio || 1;
@@ -217,12 +229,23 @@ export class AreaMap {
     this.fit(COUNTY_BBOX, 14);
   }
 
+  /** Mobilen går mellan helskärm (ett finger flyttar) och kartan ovanför listan (två fingrar). */
+  setOneFingerPan(on: boolean): void {
+    if (isTouch() && !on) this.map.cooperativeGestures.enable();
+    else this.map.cooperativeGestures.disable();
+  }
+
   private fit(bbox: Bbox, maxZoom: number): void {
     const wide = isWide();
     this.map.fitBounds(bbox, {
       padding: wide
         ? { top: 72, bottom: 96, left: 72, right: 72 }
-        : { top: 32, bottom: 48, left: 24, right: 24 },
+        : fitPadding(this.opts.canvas.clientHeight, this.opts.insets?.() ?? null, {
+            top: 32,
+            bottom: 48,
+            left: 24,
+            right: 24,
+          }),
       maxZoom,
       bearing: this.map.getBearing(),
       pitch: this.map.getPitch(),
