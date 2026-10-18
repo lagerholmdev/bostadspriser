@@ -44,6 +44,9 @@
   /* Saknad data */
   --c-nodata: #e4e6e1;
 
+  /* Få affärer: mörka diagonala ränder (/) ovanpå färgen, samma som kartans (mapstyle HATCH.thin). */
+  --hatch: repeating-linear-gradient(135deg, rgb(26 31 28 / 0.25) 0 1px, transparent 1px 4px);
+
   /* Typ */
   --f-sans: "Familjen Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
   --fs-xs: 0.75rem; /* 12 */

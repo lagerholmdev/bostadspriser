@@ -22,8 +22,8 @@ dela, och läget ska ligga i adressen.
    utforskas. Ingen vy har fler än två reglage.
 2. **Kartan stöder, listan svarar.** Varje vy har en lista som ger svaret i text. Kartan visar var.
    Allt som går att göra på kartan går också att göra i listan, med tangentbord.
-3. **Visa osäkerhet.** Antal affärer syns intill varje pris. Värden med få affärer är blekare och
-   säger det i klartext.
+3. **Visa osäkerhet.** Antal affärer syns intill varje pris. Värden med få affärer är randiga, på
+   kartan och i listorna, och säger det i klartext. Villapriser med under 10 affärer visas inte alls.
 4. **Svenska och vardagsord.** "Pris per kvm", inte "kr/kvm-medel". "Senaste 3 månaderna", inte "m3".
    Siffror med mellanslag som tusentalsavgränsare och komma som decimaltecken.
 5. **Mobilen först.** Allt fungerar på 360 px. På mobil ligger kartan överst och innehållet under,

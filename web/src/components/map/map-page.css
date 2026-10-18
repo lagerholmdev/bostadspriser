@@ -571,18 +571,13 @@
   text-align: right;
   white-space: nowrap;
 }
-/* Få affärer: texten står kvar i full kontrast; bara färgen bleknar och får kartans ränder. */
+/* Få affärer: texten står kvar i full kontrast; färgen får kartans ränder (inte blekare). */
 .app .row.is-thin .row-name {
   color: var(--c-ink-2);
 }
 .app .row.is-thin .row-bar > span,
 .app .row.is-thin .swatch {
-  opacity: 0.6;
-  background-image: repeating-linear-gradient(
-    135deg,
-    rgb(26 31 28 / 0.35) 0 1px,
-    transparent 1px 4px
-  );
+  background-image: var(--hatch);
 }
 .app .row-value.is-missing {
   font-weight: 400;
@@ -1279,8 +1274,8 @@
   width: 14px;
   height: 12px;
   border-radius: 3px;
-  background: var(--c-price-3)
-    repeating-linear-gradient(135deg, rgb(26 31 28 / 0.45) 0 1px, transparent 1px 4px);
+  background-color: var(--c-price-3);
+  background-image: var(--hatch);
   box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.08);
 }
 .app .hatch-nodata {
