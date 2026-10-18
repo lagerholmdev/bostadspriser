@@ -49,14 +49,27 @@ export function initSearch(el: SearchElements, onPick: (slug: string) => void): 
     listbox.innerHTML = hits.length
       ? hits
           .map(
-            (h, i) => html`<li role="option" id="${optionId(i)}" data-slug="${h.area.slug}" aria-selected="false">
-              <span class="opt-name">${h.area.name}</span>
-              <span class="opt-meta">${h.via ? `${h.via} ligger här` : KIND_LABEL[h.area.kind]}</span>
-            </li>`.value,
+            (h, i) =>
+              html`<li
+                role="option"
+                id="${optionId(i)}"
+                data-slug="${h.area.slug}"
+                aria-selected="false"
+              >
+                <span class="opt-name">${h.area.name}</span>
+                <span class="opt-meta"
+                  >${h.via ? `${h.via} ligger här` : KIND_LABEL[h.area.kind]}</span
+                >
+              </li>`.value,
           )
           .join("")
-      : html`<li class="opt-empty" role="presentation">Inget område matchar ”${q}”. Prova en kommun eller stadsdel, till exempel Solna eller Aspudden.</li>`.value;
-    status.textContent = hits.length ? `${hits.length} ${hits.length === 1 ? "träff" : "träffar"}` : "Inga träffar";
+      : html`<li class="opt-empty" role="presentation">
+          Inget område matchar ”${q}”. Prova en kommun eller stadsdel, till exempel Solna eller
+          Aspudden.
+        </li>`.value;
+    status.textContent = hits.length
+      ? `${hits.length} ${hits.length === 1 ? "träff" : "träffar"}`
+      : "Inga träffar";
     open(true);
     // Ingen träff markeras i förväg: Enter väljer ändå den första, och skärmläsaren läser inte upp ett val som inte gjorts.
     setActive(-1);

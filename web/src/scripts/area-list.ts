@@ -21,7 +21,9 @@ function init(): void {
   if (!tools || !input || !status || !groups.length) return;
   tools.hidden = false;
 
-  const rows: RowInfo[] = Array.from(document.querySelectorAll<HTMLTableRowElement>("tr.area-row")).map((row) => ({
+  const rows: RowInfo[] = Array.from(
+    document.querySelectorAll<HTMLTableRowElement>("tr.area-row"),
+  ).map((row) => ({
     slug: row.dataset.slug ?? "",
     name: row.dataset.name ?? "",
     row,

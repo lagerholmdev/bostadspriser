@@ -9,18 +9,144 @@
 import { searchKey } from "./format";
 
 export const ALIASES: Record<string, string[]> = {
-  "vasastan-norrmalm": ["Norrmalm", "Vasastaden", "Vasastan", "Gamla stan", "Riddarholmen", "Skeppsholmen", "City", "Sankt Eriksplan", "Odenplan"],
-  ostermalm: ["Djurgården", "Norra Djurgården", "Gärdet", "Ladugårdsgärdet", "Hjorthagen", "Lärkstaden"],
+  "vasastan-norrmalm": [
+    "Norrmalm",
+    "Vasastaden",
+    "Vasastan",
+    "Gamla stan",
+    "Riddarholmen",
+    "Skeppsholmen",
+    "City",
+    "Sankt Eriksplan",
+    "Odenplan",
+  ],
+  ostermalm: [
+    "Djurgården",
+    "Norra Djurgården",
+    "Gärdet",
+    "Ladugårdsgärdet",
+    "Hjorthagen",
+    "Lärkstaden",
+  ],
   kungsholmen: ["Fredhäll", "Kristineberg", "Marieberg", "Stadshagen", "Fridhemsplan", "Hornsberg"],
   essingen: ["Lilla Essingen", "Stora Essingen"],
-  sodermalm: ["Långholmen", "Reimersholme", "Hammarby sjöstad", "Södra Hammarbyhamnen", "SoFo", "Hornstull", "Slussen"],
-  "hagersten-liljeholmen": ["Aspudden", "Fruängen", "Gröndal", "Hägersten", "Hägerstensåsen", "Liljeholmen", "Midsommarkransen", "Mälarhöjden", "Västberga", "Västertorp"],
-  "brannkyrka-skarholmen": ["Herrängen", "Liseberg", "Långbro", "Långsjö", "Solberga", "Älvsjö", "Örby slott", "Bredäng", "Sätra", "Skärholmen", "Vårberg"],
-  "enskede-skarpnack": ["Enskede", "Enskede gård", "Enskedefältet", "Enskededalen", "Gamla Enskede", "Johanneshov", "Årsta", "Östberga", "Bagarmossen", "Björkhagen", "Hammarbyhöjden", "Kärrtorp", "Skarpnäck", "Flaten"],
-  "farsta-vantor": ["Bandhagen", "Hagsätra", "Högdalen", "Rågsved", "Örby", "Stureby", "Svedmyra", "Farsta", "Farsta strand", "Fagersjö", "Gubbängen", "Hökarängen", "Larsboda", "Sköndal", "Tallkrogen"],
-  "spanga-kista": ["Akalla", "Bromsten", "Flysta", "Hansta", "Husby", "Kista", "Lunda", "Rinkeby", "Solhem", "Sundby", "Tensta", "Spånga"],
-  "hasselby-vallingby": ["Blackeberg", "Grimsta", "Hässelby gård", "Hässelby strand", "Hässelby villastad", "Kälvesta", "Nälsta", "Råcksta", "Vinsta", "Vällingby", "Hässelby"],
-  "bromma-vasterled": ["Bromma", "Abrahamsberg", "Alvik", "Beckomberga", "Bällsta", "Eneby", "Höglandet", "Mariehäll", "Nockeby", "Norra Ängby", "Olovslund", "Riksby", "Smedslätten", "Stora mossen", "Södra Ängby", "Traneberg", "Ulvsunda", "Åkeshov", "Åkeslund", "Ålsten", "Äppelviken"],
+  sodermalm: [
+    "Långholmen",
+    "Reimersholme",
+    "Hammarby sjöstad",
+    "Södra Hammarbyhamnen",
+    "SoFo",
+    "Hornstull",
+    "Slussen",
+  ],
+  "hagersten-liljeholmen": [
+    "Aspudden",
+    "Fruängen",
+    "Gröndal",
+    "Hägersten",
+    "Hägerstensåsen",
+    "Liljeholmen",
+    "Midsommarkransen",
+    "Mälarhöjden",
+    "Västberga",
+    "Västertorp",
+  ],
+  "brannkyrka-skarholmen": [
+    "Herrängen",
+    "Liseberg",
+    "Långbro",
+    "Långsjö",
+    "Solberga",
+    "Älvsjö",
+    "Örby slott",
+    "Bredäng",
+    "Sätra",
+    "Skärholmen",
+    "Vårberg",
+  ],
+  "enskede-skarpnack": [
+    "Enskede",
+    "Enskede gård",
+    "Enskedefältet",
+    "Enskededalen",
+    "Gamla Enskede",
+    "Johanneshov",
+    "Årsta",
+    "Östberga",
+    "Bagarmossen",
+    "Björkhagen",
+    "Hammarbyhöjden",
+    "Kärrtorp",
+    "Skarpnäck",
+    "Flaten",
+  ],
+  "farsta-vantor": [
+    "Bandhagen",
+    "Hagsätra",
+    "Högdalen",
+    "Rågsved",
+    "Örby",
+    "Stureby",
+    "Svedmyra",
+    "Farsta",
+    "Farsta strand",
+    "Fagersjö",
+    "Gubbängen",
+    "Hökarängen",
+    "Larsboda",
+    "Sköndal",
+    "Tallkrogen",
+  ],
+  "spanga-kista": [
+    "Akalla",
+    "Bromsten",
+    "Flysta",
+    "Hansta",
+    "Husby",
+    "Kista",
+    "Lunda",
+    "Rinkeby",
+    "Solhem",
+    "Sundby",
+    "Tensta",
+    "Spånga",
+  ],
+  "hasselby-vallingby": [
+    "Blackeberg",
+    "Grimsta",
+    "Hässelby gård",
+    "Hässelby strand",
+    "Hässelby villastad",
+    "Kälvesta",
+    "Nälsta",
+    "Råcksta",
+    "Vinsta",
+    "Vällingby",
+    "Hässelby",
+  ],
+  "bromma-vasterled": [
+    "Bromma",
+    "Abrahamsberg",
+    "Alvik",
+    "Beckomberga",
+    "Bällsta",
+    "Eneby",
+    "Höglandet",
+    "Mariehäll",
+    "Nockeby",
+    "Norra Ängby",
+    "Olovslund",
+    "Riksby",
+    "Smedslätten",
+    "Stora mossen",
+    "Södra Ängby",
+    "Traneberg",
+    "Ulvsunda",
+    "Åkeshov",
+    "Åkeslund",
+    "Ålsten",
+    "Äppelviken",
+  ],
   botkyrka: ["Tumba", "Tullinge", "Hallunda", "Alby", "Fittja", "Norsborg", "Vårsta"],
   danderyd: ["Djursholm", "Stocksund", "Enebyberg", "Mörby"],
   ekero: ["Stenhamra", "Färentuna", "Munsö", "Adelsö"],
@@ -28,7 +154,16 @@ export const ALIASES: Record<string, string[]> = {
   huddinge: ["Flemingsberg", "Skogås", "Trångsund", "Stuvsta", "Segeltorp", "Vårby", "Sjödalen"],
   jarfalla: ["Jakobsberg", "Kallhäll", "Viksjö", "Barkarby"],
   lidingo: ["Torsvik", "Käppala", "Bodal"],
-  nacka: ["Saltsjöbaden", "Fisksätra", "Saltsjö-Boo", "Orminge", "Sickla", "Älta", "Finntorp", "Henriksdal"],
+  nacka: [
+    "Saltsjöbaden",
+    "Fisksätra",
+    "Saltsjö-Boo",
+    "Orminge",
+    "Sickla",
+    "Älta",
+    "Finntorp",
+    "Henriksdal",
+  ],
   norrtalje: ["Rimbo", "Hallstavik", "Grisslehamn"],
   nykvarn: ["Turinge"],
   nynashamn: ["Ösmo", "Sorunda"],
@@ -80,7 +215,10 @@ export function findAreas<T extends Searchable>(query: string, list: readonly T[
   if (!q) return [];
   const best = new Map<string, AreaMatch<T>>();
   for (const area of list) {
-    const terms: [string, string | null][] = [[area.name, null], ...(ALIASES[area.slug] ?? []).map((a): [string, string] => [a, a])];
+    const terms: [string, string | null][] = [
+      [area.name, null],
+      ...(ALIASES[area.slug] ?? []).map((a): [string, string] => [a, a]),
+    ];
     for (const [label, via] of terms) {
       const s = matchScore(searchKey(label), q);
       if (s < 0) continue;
@@ -89,7 +227,9 @@ export function findAreas<T extends Searchable>(query: string, list: readonly T[
       if (!prev || score < prev.score) best.set(area.slug, { area, via, score });
     }
   }
-  return [...best.values()].sort((a, b) => a.score - b.score || a.area.name.localeCompare(b.area.name, "sv"));
+  return [...best.values()].sort(
+    (a, b) => a.score - b.score || a.area.name.localeCompare(b.area.name, "sv"),
+  );
 }
 
 /** Antal redigeringar (Levenshtein) mellan två strängar. */
@@ -110,7 +250,10 @@ export function editDistance(a: string, b: string): number {
  * "Menade du …?" på 404-sidan. Tar t.ex. "sodermalmm", "hagersten" eller "aspudden".
  * Returnerar null när inget ligger tillräckligt nära.
  */
-export function suggestArea<T extends Searchable>(segment: string, list: readonly T[]): AreaMatch<T> | null {
+export function suggestArea<T extends Searchable>(
+  segment: string,
+  list: readonly T[],
+): AreaMatch<T> | null {
   let decoded = segment;
   try {
     decoded = decodeURIComponent(segment);
@@ -134,7 +277,10 @@ export function suggestArea<T extends Searchable>(segment: string, list: readonl
     ];
     for (const [label, via] of terms) {
       const key = searchKey(label.replace(/-/g, " "));
-      const d = key.startsWith(q) || q.startsWith(key) ? Math.abs(key.length - q.length) * 0.5 : editDistance(key, q);
+      const d =
+        key.startsWith(q) || q.startsWith(key)
+          ? Math.abs(key.length - q.length) * 0.5
+          : editDistance(key, q);
       if (d < bestDist || (d === bestDist && best?.via && !via)) {
         bestDist = d;
         best = { area, via, score: d };

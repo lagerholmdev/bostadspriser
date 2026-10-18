@@ -11,7 +11,9 @@ const { class: cls } = Astro.props;
 ---
 
 <div class:list={["copy-link", cls]} data-copy-link hidden>
-  <button type="button" class="btn" data-copy-btn>Kopiera länk</button>
+  <button type="button" class="btn" data-copy-btn>
+    Kopiera länk
+  </button>
   <span class="copy-status" role="status" data-copy-status></span>
   <label class="copy-fallback" data-copy-fallback hidden>
     <span class="visually-hidden">Länk till sidan</span>

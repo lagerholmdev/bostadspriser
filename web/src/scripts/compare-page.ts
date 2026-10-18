@@ -4,8 +4,27 @@
  * med replaceState, så att länken alltid går att dela.
  */
 import { affordableSize } from "../lib/budget";
-import { areasFor, bySlug, countyRatio, dataset, isThin, KIND_SHORT, parseCompareParams, similarNeighbours, stat } from "../lib/data";
-import { change, changeDirection, changeWord, MISSING_TEXT, money, number, pricier, relative } from "../lib/format";
+import {
+  areasFor,
+  bySlug,
+  countyRatio,
+  dataset,
+  isThin,
+  KIND_SHORT,
+  parseCompareParams,
+  similarNeighbours,
+  stat,
+} from "../lib/data";
+import {
+  change,
+  changeDirection,
+  changeWord,
+  MISSING_TEXT,
+  money,
+  number,
+  pricier,
+  relative,
+} from "../lib/format";
 import { html, type Html } from "../lib/html";
 import { areaUrl, compareUrl } from "../lib/links";
 import { priceColor } from "../lib/scales";
@@ -17,14 +36,19 @@ const BUDGET = 5_000_000;
 const SITE = "Stockholms prislandskap";
 
 function missing(reason: MissingReason | undefined): Html {
-  return html`<span class="chg chg-none"><span aria-hidden="true">–</span><span class="miss">${reason ? MISSING_TEXT[reason] : "saknas"}</span></span>`;
+  return html`<span class="chg chg-none"
+    ><span aria-hidden="true">–</span
+    ><span class="miss">${reason ? MISSING_TEXT[reason] : "saknas"}</span></span
+  >`;
 }
 
 function changeHtml(s: Stat | null | undefined): Html {
   const v = s?.change;
   const dir = changeDirection(v);
   if (!dir) return missing(s?.missing?.change);
-  return html`<span class="chg chg-${dir}">${change(v)}<span class="chg-word">${changeWord(v)}</span></span>`;
+  return html`<span class="chg chg-${dir}"
+    >${change(v)}<span class="chg-word">${changeWord(v)}</span></span
+  >`;
 }
 
 /** "116 680 kr/kvm" med enheten i ett eget element, så att den kan brytas snyggt på mobil. */
@@ -56,7 +80,10 @@ function rows(list: readonly Area[]): Row[] {
       cell: (a) => {
         const s = p3(a);
         if (s?.pricePerSqm == null) return missing(s?.missing?.pricePerSqm);
-        return html`<span class="${thin(a) ? "val-main thin-value" : "val-main"}"><span class="swatch" style="${`background:${priceColor(s.pricePerSqm)}`}"></span>${sqmHtml(s.pricePerSqm)}</span>`;
+        return html`<span class="${thin(a) ? "val-main thin-value" : "val-main"}"
+          ><span class="swatch" style="${`background:${priceColor(s.pricePerSqm)}`}"></span
+          >${sqmHtml(s.pricePerSqm)}</span
+        >`;
       },
     },
     {
@@ -69,7 +96,9 @@ function rows(list: readonly Area[]): Row[] {
     {
       label: `Mot ${first.name}`,
       cell: (a, i) => {
-        if (i === 0) return html`<span class="ref" aria-hidden="true">–</span><span class="visually-hidden">jämförs med</span>`;
+        if (i === 0)
+          return html`<span class="ref" aria-hidden="true">–</span
+            ><span class="visually-hidden">jämförs med</span>`;
         const p = p3(a)?.pricePerSqm;
         return p == null || !firstPrice ? missing(undefined) : html`${pricier(p / firstPrice - 1)}`;
       },
@@ -107,26 +136,50 @@ function rows(list: readonly Area[]): Row[] {
       label: "5 mkr räcker till",
       cell: (a) => {
         const p = p3(a)?.pricePerSqm;
-        return p == null ? missing(undefined) : html`ca ${number(Math.round(affordableSize(BUDGET, p)))}&nbsp;kvm`;
+        return p == null
+          ? missing(undefined)
+          : html`ca ${number(Math.round(affordableSize(BUDGET, p)))}&nbsp;kvm`;
       },
     },
   ];
 }
 
 function tableHtml(list: readonly Area[]): Html {
-  return html`<div class="table-clip"><table class="data-table" style="${`--n:${list.length}`}">
-<caption class="visually-hidden">Jämförelse av ${names(list)}. Bostadsrätter om inget annat anges.</caption>
-<thead><tr><td class="label-col"></td>${list.map(
-    (a) =>
-      html`<th scope="col" class="col-head"><a href="${areaUrl(a.slug)}">${a.name}</a><span class="col-kind">${kindLabel(a)}</span></th>`,
-  )}</tr></thead>
-<tbody>${rows(list).map((r) => html`<tr><th scope="row">${r.label}</th>${list.map((a, i) => html`<td>${r.cell(a, i)}</td>`)}</tr>`)}</tbody>
-</table></div>`;
+  return html`<div class="table-clip">
+    <table class="data-table" style="${`--n:${list.length}`}">
+      <caption class="visually-hidden">
+        Jämförelse av ${names(list)}. Bostadsrätter om inget annat anges.
+      </caption>
+      <thead>
+        <tr>
+          <td class="label-col"></td>
+          ${list.map(
+            (a) =>
+              html`<th scope="col" class="col-head">
+                <a href="${areaUrl(a.slug)}">${a.name}</a
+                ><span class="col-kind">${kindLabel(a)}</span>
+              </th>`,
+          )}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows(list).map(
+          (r) =>
+            html`<tr>
+              <th scope="row">${r.label}</th>
+              ${list.map((a, i) => html`<td>${r.cell(a, i)}</td>`)}
+            </tr>`,
+        )}
+      </tbody>
+    </table>
+  </div>`;
 }
 
 function suggestionHtml(list: readonly Area[]): Html {
   const slugs = list.map((a) => a.slug);
-  return html`<li><a class="btn" href="${compareUrl(slugs)}" data-suggest="${slugs.join(",")}">${names(list)}</a></li>`;
+  return html`<li>
+    <a class="btn" href="${compareUrl(slugs)}" data-suggest="${slugs.join(",")}">${names(list)}</a>
+  </li>`;
 }
 
 function init(): void {
@@ -189,8 +242,10 @@ function init(): void {
       const only = list[0];
       if (only) {
         const sim = similarNeighbours(only, 2);
-        if (emptyTitle) emptyTitle.textContent = `Välj ett område till att jämföra med ${only.name}`;
-        suggest.innerHTML = (sim.length ? suggestionHtml([only, ...sim]).value : "") + staticSuggest;
+        if (emptyTitle)
+          emptyTitle.textContent = `Välj ett område till att jämföra med ${only.name}`;
+        suggest.innerHTML =
+          (sim.length ? suggestionHtml([only, ...sim]).value : "") + staticSuggest;
       } else {
         if (emptyTitle) emptyTitle.textContent = "Välj minst två områden";
         suggest.innerHTML = staticSuggest;

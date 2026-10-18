@@ -4,8 +4,11 @@
  */
 import { changeDirection, ordinal } from "./format";
 
-const NBSP = " ";
-const oneDec = new Intl.NumberFormat("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const NBSP = "\u00a0";
+const oneDec = new Intl.NumberFormat("sv-SE", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 /** 6.6 -> "6,6 %" (utan tecken; riktningen står i ord). */
 function amount(v: number): string {
@@ -17,7 +20,10 @@ function amount(v: number): string {
  * "Priserna har gått upp 6,6 % på ett år, men ner 1,1 % de senaste tre månaderna."
  * `year` är "Förändring 12 mån", `quarter` är "Förändring 3 mån". Null när båda saknas.
  */
-export function changeSentence(year: number | null | undefined, quarter: number | null | undefined): string | null {
+export function changeSentence(
+  year: number | null | undefined,
+  quarter: number | null | undefined,
+): string | null {
   const y = changeDirection(year);
   const q = changeDirection(quarter);
   const Q = "de senaste tre månaderna";
@@ -25,18 +31,23 @@ export function changeSentence(year: number | null | undefined, quarter: number 
 
   if (!y && !q) return null;
   if (y && !q) {
-    return y === "flat" ? `Priserna är oförändrade ${Y}.` : `Priserna har gått ${y === "up" ? "upp" : "ner"} ${amount(year as number)} ${Y}.`;
+    return y === "flat"
+      ? `Priserna är oförändrade ${Y}.`
+      : `Priserna har gått ${y === "up" ? "upp" : "ner"} ${amount(year as number)} ${Y}.`;
   }
   if (!y && q) {
     const head =
-      q === "flat" ? `Priserna är oförändrade ${Q}` : `Priserna har gått ${q === "up" ? "upp" : "ner"} ${amount(quarter as number)} ${Q}`;
+      q === "flat"
+        ? `Priserna är oförändrade ${Q}`
+        : `Priserna har gått ${q === "up" ? "upp" : "ner"} ${amount(quarter as number)} ${Q}`;
     return `${head}. Förändringen ${Y} saknas.`;
   }
 
   const yv = year as number;
   const qv = quarter as number;
   if (y === "flat" && q === "flat") return `Priserna är oförändrade, både ${Y} och ${Q}.`;
-  if (y === "flat") return `Priserna är oförändrade ${Y}, men har gått ${q === "up" ? "upp" : "ner"} ${amount(qv)} ${Q}.`;
+  if (y === "flat")
+    return `Priserna är oförändrade ${Y}, men har gått ${q === "up" ? "upp" : "ner"} ${amount(qv)} ${Q}.`;
   const yWord = y === "up" ? "upp" : "ner";
   if (q === "flat") return `Priserna har gått ${yWord} ${amount(yv)} ${Y}, men stått still ${Q}.`;
   if (y === q) return `Priserna har gått ${yWord} ${amount(yv)} ${Y} och ${amount(qv)} ${Q}.`;

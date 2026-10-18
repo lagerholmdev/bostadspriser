@@ -34,7 +34,9 @@ const dearest = ranked[0];
 const title = "Bostadspriser i Stockholms län, område för område | Stockholms prislandskap";
 const description =
   `Pris per kvm för bostadsrätter i alla ${areas.length} områden i Stockholms län, ${dataset.periods.m3}.` +
-  (cheapest && dearest ? ` Från ${sqm(price(cheapest))} i ${cheapest.name} till ${sqm(price(dearest))} i ${dearest.name}.` : "");
+  (cheapest && dearest
+    ? ` Från ${sqm(price(cheapest))} i ${cheapest.name} till ${sqm(price(dearest))} i ${dearest.name}.`
+    : "");
 ---
 
 <Base title={title} description={description} image="og/start.png">
@@ -42,13 +44,17 @@ const description =
     <header class="intro">
       <h1>Bostadspriser i Stockholms län, område för område</h1>
       <p class="lead">
-        Snittpris per kvm för bostadsrätter i {areas.length} områden, sålda {dataset.periods.m3}. Länets snitt är {
-          sqm(county.pricePerSqm)
-        }. Välj ett område för att se fler siffror, grannområden och vad din budget räcker till.
+        Snittpris per kvm för bostadsrätter i {areas.length} områden, sålda {dataset.periods.m3}.
+        Länets snitt är {sqm(county.pricePerSqm)}. Välj ett område för att se fler siffror,
+        grannområden och vad din budget räcker till.
       </p>
       <p class="intro-links">
-        <a class="btn" href={compareUrl()}>Jämför områden</a>
-        <a class="btn" href={mapUrl()}>Visa på kartan</a>
+        <a class="btn" href={compareUrl()}>
+          Jämför områden
+        </a>
+        <a class="btn" href={mapUrl()}>
+          Visa på kartan
+        </a>
       </p>
     </header>
 
@@ -67,51 +73,62 @@ const description =
       <fieldset class="sort">
         <legend>Sortera</legend>
         <div class="seg">
-          <label><input type="radio" name="sort" value="pris" checked /> <span>Pris</span></label>
-          <label><input type="radio" name="sort" value="namn" /> <span>Namn</span></label>
+          <label>
+            <input type="radio" name="sort" value="pris" checked /> <span>Pris</span>
+          </label>
+          <label>
+            <input type="radio" name="sort" value="namn" /> <span>Namn</span>
+          </label>
         </div>
       </fieldset>
     </div>
     <p id="search-status" class="status" aria-live="polite"></p>
 
-    {
-      groups.map((g) => (
-        <section class="group" aria-labelledby={`g-${g.id}`} data-group>
-          <div class="group-head">
-            <h2 id={`g-${g.id}`}>{g.title}</h2>
-            <p>{g.note}</p>
-          </div>
-          <div class="table-box">
-            <table class="data-table area-table">
-              <caption class="visually-hidden">
-                {g.title}: pris per kvm för bostadsrätter de senaste 3 månaderna, <span data-sort-caption>dyrast först</span>
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Område</th>
-                  <th scope="col" class="col-price">Pris per kvm, 3 mån</th>
-                  <th scope="col" class="col-chg">Förändring, 12 mån</th>
-                  <th scope="col" class="col-sales">Sålda, 3 mån</th>
-                </tr>
-              </thead>
-              <tbody>
-                {g.list.map((a) => (
-                  <AreaRow area={a} max={max} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ))
-    }
+    {groups.map((g) => (
+      <section class="group" aria-labelledby={`g-${g.id}`} data-group>
+        <div class="group-head">
+          <h2 id={`g-${g.id}`}>{g.title}</h2>
+          <p>{g.note}</p>
+        </div>
+        <div class="table-box">
+          <table class="data-table area-table">
+            <caption class="visually-hidden">
+              {g.title}: pris per kvm för bostadsrätter de senaste 3 månaderna,{" "}
+              <span data-sort-caption>dyrast först</span>
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Område</th>
+                <th scope="col" class="col-price">
+                  Pris per kvm, 3 mån
+                </th>
+                <th scope="col" class="col-chg">
+                  Förändring, 12 mån
+                </th>
+                <th scope="col" class="col-sales">
+                  Sålda, 3 mån
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {g.list.map((a) => (
+                <AreaRow area={a} max={max} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    ))}
 
     <div class="after">
       <PriceLegend title="Färgerna i staplarna: pris per kvm, tusen kr" />
       <p class="fineprint">
-        Förändring är prisutvecklingen på ett år: de senaste tre månaderna jämfört med samma månader året innan. Områden med
-        få affärer är märkta, eftersom snittet där kan svänga mycket. Källa: <a href={dataset.source.url} rel="noopener"
-          >{dataset.source.name}</a
-        >.
+        Förändring är prisutvecklingen på ett år: de senaste tre månaderna jämfört med samma månader
+        året innan. Områden med få affärer är märkta, eftersom snittet där kan svänga mycket. Källa:{" "}
+        <a href={dataset.source.url} rel="noopener">
+          {dataset.source.name}
+        </a>
+        .
       </p>
     </div>
   </div>

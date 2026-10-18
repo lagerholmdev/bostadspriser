@@ -3,9 +3,9 @@
  * och ansluts när den är klar. Går kartan inte att visa fungerar listan ändå.
  */
 import { bySlug } from "../../lib/data";
+import { compareUrl } from "../../lib/links";
 import { appStateHref, parseAppState, type AppState } from "../../lib/url";
 import { trackViewOnce } from "./analytics";
-import { compareHref } from "./compare";
 import { fetchBaseStyle } from "./mapstyle";
 import { mapPaint } from "./model";
 import { PanelController } from "./panel/controller";
@@ -15,7 +15,8 @@ import { initShare } from "./share";
 import { Store } from "./state";
 
 const isKnown = (slug: string) => bySlug.has(slug);
-const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
+const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+  document.getElementById(id) as T | null;
 
 function start(): void {
   const app = $("app");
@@ -27,14 +28,18 @@ function start(): void {
 
   // Äldre länk till en jämförelse (?jamfor=a,b): jämförelsen har nu en egen sida.
   if (parsed.compare.length) {
-    location.replace(compareHref(base, parsed.compare));
+    location.replace(compareUrl(parsed.compare));
     return;
   }
 
   const store = new Store(parsed.state, isKnown);
   if (parsed.legacy) {
     try {
-      history.replaceState(history.state, "", appStateHref(parsed.state, location.pathname) + location.hash);
+      history.replaceState(
+        history.state,
+        "",
+        appStateHref(parsed.state, location.pathname) + location.hash,
+      );
     } catch {
       /* ok */
     }
@@ -47,7 +52,9 @@ function start(): void {
   const listbox = $<HTMLUListElement>("area-search-list");
   const searchStatus = $("area-search-status");
   if (input && listbox && searchStatus) {
-    initSearch({ input, listbox, status: searchStatus }, (slug) => panel.selectArea(slug, { focus: true }));
+    initSearch({ input, listbox, status: searchStatus }, (slug) =>
+      panel.selectArea(slug, { focus: true }),
+    );
   }
 
   const shareBtn = $<HTMLButtonElement>("share");
@@ -136,4 +143,3 @@ function startMap(store: Store, panel: PanelController): void {
 }
 
 start();
-

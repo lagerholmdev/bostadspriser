@@ -7,7 +7,12 @@
  * Ytorna ligger under vattnet så att hav och sjöar målas över dem: kommungränser som går ut i
  * havet syns då inte som färgade block. Markering och 3D ligger över vägarna men under texten.
  */
-import type { ExpressionSpecification, FilterSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
+import type {
+  ExpressionSpecification,
+  FilterSpecification,
+  LayerSpecification,
+  StyleSpecification,
+} from "maplibre-gl";
 import { NODATA_COLOR } from "../../lib/scales";
 import { FILL_OPACITY, type Paint } from "./model";
 
@@ -42,7 +47,10 @@ export type HatchKind = keyof typeof HATCH;
  * Diagonala ränder (/) i en ruta på 8 × 8 px, 1 px linjer, som RGBA-pixlar.
  * `ratio` är skärmens pixeltäthet, så att linjerna blir skarpa på högupplösta skärmar.
  */
-export function hatchImage(kind: HatchKind, ratio = 1): { width: number; height: number; data: Uint8Array } {
+export function hatchImage(
+  kind: HatchKind,
+  ratio = 1,
+): { width: number; height: number; data: Uint8Array } {
   const r = Math.max(1, Math.round(ratio));
   const size = 8 * r;
   const { color, alpha } = HATCH[kind];
@@ -68,7 +76,10 @@ export function slugsFilter(slugs: readonly string[]): FilterSpecification {
 type Matchable = Record<string, string | number>;
 
 /** ["match", ["get","slug"], "a", v1, "b", v2, fallback] */
-export function matchBySlug<T extends string | number>(values: Record<string, T>, fallback: T): ExpressionSpecification {
+export function matchBySlug<T extends string | number>(
+  values: Record<string, T>,
+  fallback: T,
+): ExpressionSpecification {
   const pairs = Object.entries(values as Matchable).flat();
   if (!pairs.length) return ["literal", fallback] as unknown as ExpressionSpecification;
   return ["match", ["get", "slug"], ...pairs, fallback] as unknown as ExpressionSpecification;
@@ -76,7 +87,8 @@ export function matchBySlug<T extends string | number>(values: Record<string, T>
 
 export function heightExpression(paint: Paint): ExpressionSpecification {
   const h: Record<string, number> = {};
-  for (const [slug, p] of Object.entries(paint.price)) h[slug] = Math.round(p * HEIGHT_PER_SQM_PRICE);
+  for (const [slug, p] of Object.entries(paint.price))
+    h[slug] = Math.round(p * HEIGHT_PER_SQM_PRICE);
   return matchBySlug(h, 0);
 }
 
@@ -85,7 +97,10 @@ export function slugFilter(slug: string | null): FilterSpecification {
 }
 
 /** Våra lager. `below` ska under vattnet, `above` över vägarna men under etiketterna. */
-export function areaLayers(paint: Paint): { below: LayerSpecification[]; above: LayerSpecification[] } {
+export function areaLayers(paint: Paint): {
+  below: LayerSpecification[];
+  above: LayerSpecification[];
+} {
   const below: LayerSpecification[] = [
     {
       id: LAYER.fill,
@@ -186,7 +201,11 @@ export interface ComposedStyle {
  * Bygg den slutliga stilen. `base` är Positron-stilen (eller null för reservstilen),
  * `data` adressen till geometrin.
  */
-export function composeStyle(base: StyleSpecification | null, data: string, paint: Paint): ComposedStyle {
+export function composeStyle(
+  base: StyleSpecification | null,
+  data: string,
+  paint: Paint,
+): ComposedStyle {
   const { below, above } = areaLayers(paint);
   const source = { type: "geojson" as const, data, attribution: "" };
 
@@ -197,7 +216,15 @@ export function composeStyle(base: StyleSpecification | null, data: string, pain
         version: 8,
         name: "Stockholms prislandskap (reserv)",
         sources: { [SOURCE]: source },
-        layers: [{ id: "background", type: "background", paint: { "background-color": FALLBACK_BACKGROUND } }, ...below, ...above],
+        layers: [
+          {
+            id: "background",
+            type: "background",
+            paint: { "background-color": FALLBACK_BACKGROUND },
+          },
+          ...below,
+          ...above,
+        ],
       },
     };
   }
@@ -223,7 +250,10 @@ export function composeStyle(base: StyleSpecification | null, data: string, pain
 }
 
 /** Hämta Positron, eller null om den inte svarar i tid (offline, blockerad, fel). */
-export async function fetchBaseStyle(timeoutMs = 4000, url = POSITRON_URL): Promise<StyleSpecification | null> {
+export async function fetchBaseStyle(
+  timeoutMs = 4000,
+  url = POSITRON_URL,
+): Promise<StyleSpecification | null> {
   if (typeof fetch !== "function") return null;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeoutMs);

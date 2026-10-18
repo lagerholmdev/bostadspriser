@@ -164,7 +164,10 @@ export function defaultSqm(housing: Housing): number {
  * Som parseState, men med standardval som beror på vyn och bostadstypen: utan period i adressen
  * visar Förändring ett år, och utan kvm räknar villor på 120 kvm.
  */
-export function parseAppState(search: string | URLSearchParams, isKnown: (slug: string) => boolean): ParseResult {
+export function parseAppState(
+  search: string | URLSearchParams,
+  isKnown: (slug: string) => boolean,
+): ParseResult {
   const q = typeof search === "string" ? new URLSearchParams(search) : search;
   const r = parseState(q, isKnown);
   if (!q.has("period") && !q.has("per")) r.state.period = defaultPeriod(r.state.view);

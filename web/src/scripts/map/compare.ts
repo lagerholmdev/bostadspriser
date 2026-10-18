@@ -24,17 +24,15 @@ export function removeFrom(list: readonly string[], slug: string): string[] {
   return list.filter((s) => s !== slug);
 }
 
-export function compareHref(base: string, list: readonly string[]): string {
-  return `${base}jamfor/?omraden=${list.map(encodeURIComponent).join(",")}`;
-}
-
 export function loadCompare(isKnown: (slug: string) => boolean): string[] {
   try {
     const raw = sessionStorage.getItem(KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((s): s is string => typeof s === "string" && isKnown(s)).slice(0, MAX_COMPARE);
+    return parsed
+      .filter((s): s is string => typeof s === "string" && isKnown(s))
+      .slice(0, MAX_COMPARE);
   } catch {
     return [];
   }

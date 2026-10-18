@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_STATE, parseBudget, parseSqm, parseState, sameState, serializeState, stateHref } from "./url";
+import {
+  DEFAULT_STATE,
+  parseBudget,
+  parseSqm,
+  parseState,
+  sameState,
+  serializeState,
+  stateHref,
+} from "./url";
 
 const known = (s: string) => ["sodermalm", "kungsholmen", "solna", "nacka"].includes(s);
 
@@ -12,7 +20,10 @@ describe("parseState", () => {
   });
 
   it("läser alla parametrar", () => {
-    const r = parseState("?vy=budget&bostad=villa&period=12&budget=5.5&kvm=70&omrade=sodermalm", known);
+    const r = parseState(
+      "?vy=budget&bostad=villa&period=12&budget=5.5&kvm=70&omrade=sodermalm",
+      known,
+    );
     expect(r.state).toEqual({
       view: "budget",
       housing: "house",
@@ -63,7 +74,9 @@ describe("parseState", () => {
   });
 
   it("tar emot URLSearchParams", () => {
-    expect(parseState(new URLSearchParams({ vy: "forandring" }), known).state.view).toBe("forandring");
+    expect(parseState(new URLSearchParams({ vy: "forandring" }), known).state.view).toBe(
+      "forandring",
+    );
   });
 });
 
@@ -76,14 +89,23 @@ describe("serializeState", () => {
   it("skriver bara det som avviker, i fast ordning", () => {
     const s = { ...DEFAULT_STATE, view: "budget" as const, budget: 5_250_000, area: "solna" };
     expect(serializeState(s)).toBe("vy=budget&budget=5.25&omrade=solna");
-    expect(stateHref(s, "/bostadspriser/")).toBe("/bostadspriser/?vy=budget&budget=5.25&omrade=solna");
+    expect(stateHref(s, "/bostadspriser/")).toBe(
+      "/bostadspriser/?vy=budget&budget=5.25&omrade=solna",
+    );
     expect(serializeState({ ...DEFAULT_STATE, housing: "house", period: "m12", sqm: 85 })).toBe(
       "bostad=villa&period=12&kvm=85",
     );
   });
 
   it("går fram och tillbaka utan förlust", () => {
-    const s = { view: "forandring" as const, housing: "house" as const, period: "m12" as const, budget: 12_750_000, sqm: 145, area: "nacka" };
+    const s = {
+      view: "forandring" as const,
+      housing: "house" as const,
+      period: "m12" as const,
+      budget: 12_750_000,
+      sqm: 145,
+      area: "nacka",
+    };
     const back = parseState(serializeState(s), known).state;
     expect(sameState(back, s)).toBe(true);
     expect(sameState(back, { ...s, sqm: 140 })).toBe(false);

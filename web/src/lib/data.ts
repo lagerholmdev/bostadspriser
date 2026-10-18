@@ -9,8 +9,14 @@ export const dataset = raw as unknown as Dataset;
 export const areas: Area[] = dataset.areas;
 export const bySlug: ReadonlyMap<string, Area> = new Map(areas.map((a) => [a.slug, a]));
 
-export const HOUSING_LABEL: Record<Housing, string> = { apartment: "Bostadsrätter", house: "Villor" };
-export const PERIOD_LABEL: Record<Period, string> = { m3: "Senaste 3 månaderna", m12: "Senaste 12 månaderna" };
+export const HOUSING_LABEL: Record<Housing, string> = {
+  apartment: "Bostadsrätter",
+  house: "Villor",
+};
+export const PERIOD_LABEL: Record<Period, string> = {
+  m3: "Senaste 3 månaderna",
+  m12: "Senaste 12 månaderna",
+};
 
 /** Vad för slags område, i klartext. */
 export const KIND_LABEL: Record<Area["kind"], string> = {
@@ -26,6 +32,9 @@ export const KIND_SHORT: Record<Area["kind"], string> = {
 
 /** Under så här många affärer räknas värdet som osäkert och visas blekt. */
 export const THIN_SALES: Record<Period, number> = { m3: 60, m12: 200 };
+
+/** Villor med färre affärer än så under perioden visas utan pris ("för få affärer"). */
+export const MIN_HOUSE_SALES = 10;
 
 export function getArea(slug: string): Area | undefined {
   return bySlug.get(slug);
@@ -48,8 +57,28 @@ export function isThin(s: Stat | null, period: Period): boolean {
   return !s || s.sales == null || s.sales < THIN_SALES[period];
 }
 
+/**
+ * Som stat(), men döljer pris, medelpris och förändring för villor med färre än
+ * MIN_HOUSE_SALES affärer: ett snitt av ett par försäljningar säger inget om området.
+ */
+export function shownStat(area: Area, housing: Housing, period: Period): Stat | null {
+  const s = stat(area, housing, period);
+  if (!s || housing !== "house" || s.sales == null || s.sales >= MIN_HOUSE_SALES) return s;
+  return {
+    ...s,
+    pricePerSqm: null,
+    meanPrice: null,
+    change: null,
+    missing: { ...s.missing, pricePerSqm: "F", meanPrice: "F", change: "F" },
+  };
+}
+
 /** Kvot mot länets snitt: 0.65 = 65 % över. */
-export function countyRatio(value: number | null | undefined, housing: Housing = "apartment", period: Period = "m3"): number | null {
+export function countyRatio(
+  value: number | null | undefined,
+  housing: Housing = "apartment",
+  period: Period = "m3",
+): number | null {
   const c = countyStat(housing, period).pricePerSqm;
   return value == null || !c ? null : value / c - 1;
 }
@@ -81,6 +110,26 @@ export function priceRank(
 }
 
 /**
+ * Områdets plats i prislistan (1 = dyrast) bland områden med visat pris. För villor delar
+ * Stockholms stadsdelar stadens plats, eftersom villorna bara redovisas för hela staden.
+ */
+export function placeInCounty(
+  area: Area,
+  housing: Housing,
+  period: Period,
+): { rank: number; total: number } | null {
+  const list = rankByPrice(housing, period).filter(
+    (a) => shownStat(a, housing, period)?.pricePerSqm != null,
+  );
+  const key =
+    housing === "house" && area.houseScope === "city"
+      ? list.find((a) => a.houseScope === "city")?.slug
+      : area.slug;
+  const i = list.findIndex((a) => a.slug === key);
+  return i === -1 ? null : { rank: i + 1, total: list.length };
+}
+
+/**
  * Vilka platser i en rangordning som ska visas runt ett område: första och sista,
  * området självt och `radius` grannar åt varje håll. `null` markerar ett hopp ("…").
  * rankWindow(37, 2) -> [0, 1, 2, 3, 4, 5, null, 36]
@@ -104,7 +153,12 @@ export function rankWindow(total: number, index: number, radius = 3): (number | 
 }
 
 /** Upp till n grannar med pris närmast området, i första hand direkta grannar. */
-export function similarNeighbours(area: Area, n = 3, housing: Housing = "apartment", period: Period = "m3"): Area[] {
+export function similarNeighbours(
+  area: Area,
+  n = 3,
+  housing: Housing = "apartment",
+  period: Period = "m3",
+): Area[] {
   const me = stat(area, housing, period)?.pricePerSqm ?? 0;
   const seen = new Set([area.slug]);
   let frontier = [area.slug];
@@ -127,7 +181,11 @@ export function similarNeighbours(area: Area, n = 3, housing: Housing = "apartme
 }
 
 /** Läser områden att jämföra ur adressen: ?omraden=a,b,c, äldre ?jamfor=a,b och ?a=&b=&c=. */
-export function parseCompareParams(params: URLSearchParams, max = 3, known: (slug: string) => boolean = (s) => bySlug.has(s)): string[] {
+export function parseCompareParams(
+  params: URLSearchParams,
+  max = 3,
+  known: (slug: string) => boolean = (s) => bySlug.has(s),
+): string[] {
   const raw: string[] = [];
   for (const key of ["omraden", "jamfor"]) {
     for (const v of params.getAll(key)) raw.push(...v.split(","));
@@ -142,36 +200,4 @@ export function parseCompareParams(params: URLSearchParams, max = 3, known: (slu
     if (out.length === max) break;
   }
   return out;
-}
-
-/* Tillägg för kartsidan. */
-
-/** Villor med färre affärer än så under perioden visas utan pris ("för få affärer"). */
-export const MIN_HOUSE_SALES = 10;
-
-/**
- * Som stat(), men döljer pris, medelpris och förändring för villor med färre än
- * MIN_HOUSE_SALES affärer: ett snitt av ett par försäljningar säger inget om området.
- */
-export function shownStat(area: Area, housing: Housing, period: Period): Stat | null {
-  const s = stat(area, housing, period);
-  if (!s || housing !== "house" || s.sales == null || s.sales >= MIN_HOUSE_SALES) return s;
-  return {
-    ...s,
-    pricePerSqm: null,
-    meanPrice: null,
-    change: null,
-    missing: { ...s.missing, pricePerSqm: "F", meanPrice: "F", change: "F" },
-  };
-}
-
-/**
- * Områdets plats i prislistan (1 = dyrast) bland områden med visat pris. För villor delar
- * Stockholms stadsdelar stadens plats, eftersom villorna bara redovisas för hela staden.
- */
-export function placeInCounty(area: Area, housing: Housing, period: Period): { rank: number; total: number } | null {
-  const list = rankByPrice(housing, period).filter((a) => shownStat(a, housing, period)?.pricePerSqm != null);
-  const key = housing === "house" && area.houseScope === "city" ? list.find((a) => a.houseScope === "city")?.slug : area.slug;
-  const i = list.findIndex((a) => a.slug === key);
-  return i === -1 ? null : { rank: i + 1, total: list.length };
 }

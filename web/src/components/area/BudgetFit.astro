@@ -19,21 +19,17 @@ const rows = budgets.map((b) => {
 
 <div class="fit">
   <ul class="fit-list">
-    {
-      rows.map((r) => (
-        <li>
-          <span class="fit-budget">{r.budget}&nbsp;mkr</span>
-          <span class="fit-size">
-            ca {number(r.size)}&nbsp;kvm
-          </span>
-          <span class="fit-rooms">ungefär {r.rooms}</span>
-        </li>
-      ))
-    }
+    {rows.map((r) => (
+      <li>
+        <span class="fit-budget">{r.budget}&nbsp;mkr</span>
+        <span class="fit-size">ca {number(r.size)}&nbsp;kvm</span>
+        <span class="fit-rooms">ungefär {r.rooms}</span>
+      </li>
+    ))}
   </ul>
   <p class="fineprint">
-    Räknat på snittpriset för bostadsrätter i {name} de senaste 3 månaderna. Läge, skick och avgift gör att en
-    enskild bostad kan kosta mer eller mindre.{" "}
+    Räknat på snittpriset för bostadsrätter i {name} de senaste 3 månaderna. Läge, skick och avgift
+    gör att en enskild bostad kan kosta mer eller mindre.{" "}
     <a href={mapUrl({ vy: "budget", omrade: slug })}>Se var din budget räcker på kartan</a>
   </p>
 </div>

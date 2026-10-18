@@ -2,7 +2,13 @@
  * Vad panelen och kartan ska visa, räknat ur datasetet. Rena funktioner utan DOM, så de
  * går att testa och kan köras både i Astro vid bygget och i webbläsaren.
  */
-import { affordablePricePerSqm, affordableSize, budgetStatus, estimatedCost, type BudgetStatus } from "../../lib/budget";
+import {
+  affordablePricePerSqm,
+  affordableSize,
+  budgetStatus,
+  estimatedCost,
+  type BudgetStatus,
+} from "../../lib/budget";
 import { areas as ALL_AREAS, countyStat, isThin, shownStat } from "../../lib/data";
 import { BUDGET_COLORS, NODATA_COLOR, changeStepColor, priceColor } from "../../lib/scales";
 import type { Area, Housing, Period, Stat } from "../../lib/types";
@@ -23,12 +29,20 @@ export interface Entry {
 export const CITY_NAME = "Stockholms stad";
 
 export type SortOrder = "desc" | "asc" | "name";
-export const SORT_LABEL: Record<SortOrder, string> = { desc: "Dyrast först", asc: "Billigast först", name: "A–Ö" };
+export const SORT_LABEL: Record<SortOrder, string> = {
+  desc: "Dyrast först",
+  asc: "Billigast först",
+  name: "A–Ö",
+};
 
 const collator = new Intl.Collator("sv");
 
 /** Alla rader för en bostadstyp och period, med villor i staden som en rad. */
-export function entries(housing: Housing, period: Period, list: readonly Area[] = ALL_AREAS): Entry[] {
+export function entries(
+  housing: Housing,
+  period: Period,
+  list: readonly Area[] = ALL_AREAS,
+): Entry[] {
   const out: Entry[] = [];
   let cityDone = false;
   for (const a of list) {
@@ -70,7 +84,11 @@ export interface PriceModel {
   max: number;
 }
 
-export function priceModel(housing: Housing, period: Period, order: SortOrder = "desc"): PriceModel {
+export function priceModel(
+  housing: Housing,
+  period: Period,
+  order: SortOrder = "desc",
+): PriceModel {
   const all = entries(housing, period);
   const priced = sortEntries(
     all.filter((e) => e.stat.pricePerSqm != null),
@@ -111,7 +129,12 @@ export interface BudgetModel {
   cheapest: BudgetEntry | null;
 }
 
-export function budgetModel(housing: Housing, period: Period, budget: number, sqm: number): BudgetModel {
+export function budgetModel(
+  housing: Housing,
+  period: Period,
+  budget: number,
+  sqm: number,
+): BudgetModel {
   const ok: BudgetEntry[] = [];
   const near: BudgetEntry[] = [];
   const no: BudgetEntry[] = [];
@@ -123,13 +146,20 @@ export function budgetModel(housing: Housing, period: Period, budget: number, sq
       missing.push(e);
       continue;
     }
-    const be: BudgetEntry = { ...e, status, size: affordableSize(budget, p), cost: estimatedCost(p, sqm) };
+    const be: BudgetEntry = {
+      ...e,
+      status,
+      size: affordableSize(budget, p),
+      cost: estimatedCost(p, sqm),
+    };
     (status === "ok" ? ok : status === "near" ? near : no).push(be);
   }
   // Dyrast du har råd med först: det är det område som ligger närmast det köparen letar efter.
   // Över budget gäller det omvända, så där står det billigaste (närmast budgeten) först.
-  const dearest = (a: BudgetEntry, b: BudgetEntry) => b.size === a.size ? collator.compare(a.name, b.name) : a.size - b.size;
-  const cheapest = (a: BudgetEntry, b: BudgetEntry) => b.size === a.size ? collator.compare(a.name, b.name) : b.size - a.size;
+  const dearest = (a: BudgetEntry, b: BudgetEntry) =>
+    b.size === a.size ? collator.compare(a.name, b.name) : a.size - b.size;
+  const cheapest = (a: BudgetEntry, b: BudgetEntry) =>
+    b.size === a.size ? collator.compare(a.name, b.name) : b.size - a.size;
   ok.sort(dearest);
   near.sort(cheapest);
   no.sort(cheapest);
@@ -204,7 +234,9 @@ export interface Paint {
 export const FILL_OPACITY = 0.88;
 
 /** Färg, höjd och ränder per område för kartans aktuella vy. */
-export function mapPaint(s: Pick<AppState, "view" | "housing" | "period" | "budget" | "sqm">): Paint {
+export function mapPaint(
+  s: Pick<AppState, "view" | "housing" | "period" | "budget" | "sqm">,
+): Paint {
   const color: Record<string, string> = {};
   const price: Record<string, number> = {};
   const thin: string[] = [];
@@ -214,7 +246,8 @@ export function mapPaint(s: Pick<AppState, "view" | "housing" | "period" | "budg
     color[a.slug] = areaColor(s.view, st, s.budget, s.sqm, s.period);
     const hasValue = s.view === "forandring" ? st?.change != null : st?.pricePerSqm != null;
     // Förändringen bygger alltid på de senaste tre månaderna, så osäkerheten gör det också.
-    const few = s.view === "forandring" ? isThin(shownStat(a, s.housing, "m3"), "m3") : isThin(st, s.period);
+    const few =
+      s.view === "forandring" ? isThin(shownStat(a, s.housing, "m3"), "m3") : isThin(st, s.period);
     const cityHouse = s.housing === "house" && a.houseScope === "city";
     if (!hasValue) nodata.push(a.slug);
     else if (few || cityHouse) thin.push(a.slug);
@@ -223,7 +256,13 @@ export function mapPaint(s: Pick<AppState, "view" | "housing" | "period" | "budg
   return { color, price, thin, nodata };
 }
 
-export function areaColor(view: View, st: Stat | null, budget: number, sqm: number, period: Period = "m3"): string {
+export function areaColor(
+  view: View,
+  st: Stat | null,
+  budget: number,
+  sqm: number,
+  period: Period = "m3",
+): string {
   if (!st) return NODATA_COLOR;
   if (view === "pris") return priceColor(st.pricePerSqm);
   if (view === "forandring") return changeStepColor(st.change, period);
@@ -234,7 +273,12 @@ export function areaColor(view: View, st: Stat | null, budget: number, sqm: numb
 /** Sammanslagen [väst, syd, öst, nord] för en mängd områden. */
 export function unionBbox(list: readonly Area[]): [number, number, number, number] {
   return list.reduce<[number, number, number, number]>(
-    (b, a) => [Math.min(b[0], a.bbox[0]), Math.min(b[1], a.bbox[1]), Math.max(b[2], a.bbox[2]), Math.max(b[3], a.bbox[3])],
+    (b, a) => [
+      Math.min(b[0], a.bbox[0]),
+      Math.min(b[1], a.bbox[1]),
+      Math.max(b[2], a.bbox[2]),
+      Math.max(b[3], a.bbox[3]),
+    ],
     [180, 90, -180, -90],
   );
 }

@@ -34,54 +34,56 @@ const skipped = (k: number) => {
     <div class="rank-axis">
       <span></span>
       <div class="rank-track">
-        <span class="rank-county-label" style={`left:${pct(county)}`}>Länets snitt {number(county)}</span>
+        <span class="rank-county-label" style={`left:${pct(county)}`}>
+          Länets snitt {number(county)}
+        </span>
       </div>
     </div>
-    {
-      shown.map((i, k) => {
-        if (i == null) {
-          return (
-            <div class="rank-row gap">
-              <span class="rank-name">… {skipped(k)} områden</span>
-              <div class="rank-track">
-                <span class="rank-county" style={`left:${pct(county)}`} />
-              </div>
-            </div>
-          );
-        }
-        const a = list[i];
-        if (!a) return null;
-        const me = a.slug === area.slug;
+    {shown.map((i, k) => {
+      if (i == null) {
         return (
-          <div class:list={["rank-row", { me }]}>
-            <span class="rank-name">
-              <span class="rank-no">{i + 1}</span>
-              <span class="rank-label">{a.name}</span>
-            </span>
+          <div class="rank-row gap">
+            <span class="rank-name">… {skipped(k)} områden</span>
             <div class="rank-track">
-              <div class="rank-bar" style={`width:${pct(price(a))}`} />
               <span class="rank-county" style={`left:${pct(county)}`} />
-              <span class="rank-val" style={`left:calc(${pct(price(a))} + 6px)`}>
-                {number(price(a))}
-                {me && <span class="rank-unit">&nbsp;kr/kvm</span>}
-              </span>
             </div>
           </div>
         );
-      })
-    }
+      }
+      const a = list[i];
+      if (!a) return null;
+      const me = a.slug === area.slug;
+      return (
+        <div class:list={["rank-row", { me }]}>
+          <span class="rank-name">
+            <span class="rank-no">{i + 1}</span>
+            <span class="rank-label">{a.name}</span>
+          </span>
+          <div class="rank-track">
+            <div class="rank-bar" style={`width:${pct(price(a))}`} />
+            <span class="rank-county" style={`left:${pct(county)}`} />
+            <span class="rank-val" style={`left:calc(${pct(price(a))} + 6px)`}>
+              {number(price(a))}
+              {me && <span class="rank-unit">&nbsp;kr/kvm</span>}
+            </span>
+          </div>
+        </div>
+      );
+    })}
   </div>
   <details class="rank-list">
     <summary>Visa alla {list.length} områden som lista</summary>
     <ol>
-      {
-        list.map((a) => (
-          <li class:list={{ me: a.slug === area.slug }}>
-            {a.slug === area.slug ? <strong>{a.name}</strong> : <a href={areaUrl(a.slug)}>{a.name}</a>}
-            <span>{sqm(price(a))}</span>
-          </li>
-        ))
-      }
+      {list.map((a) => (
+        <li class:list={{ me: a.slug === area.slug }}>
+          {a.slug === area.slug ? (
+            <strong>{a.name}</strong>
+          ) : (
+            <a href={areaUrl(a.slug)}>{a.name}</a>
+          )}
+          <span>{sqm(price(a))}</span>
+        </li>
+      ))}
     </ol>
   </details>
 </div>

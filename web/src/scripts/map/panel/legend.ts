@@ -2,8 +2,13 @@
  * Förklaringar för kartans hörn och panelen. Pris och förändring visas som samma
  * färgramp överallt på sidan: en rad färgrutor med gränserna under.
  */
-import { BUDGET_COLORS, PRICE_BREAKS, PRICE_COLORS, changeStepLegend } from "../../../lib/scales";
-import { NEAR_MARGIN } from "../../../lib/budget";
+import {
+  BUDGET_COLORS,
+  NEAR_MARGIN,
+  PRICE_BREAKS,
+  PRICE_COLORS,
+  changeStepLegend,
+} from "../../../lib/scales";
 import type { Housing, Period } from "../../../lib/types";
 import type { View } from "../../../lib/url";
 import { html, type Html } from "../../../lib/html";
@@ -15,7 +20,8 @@ export interface LegendState {
   period: Period;
 }
 
-const sw = (color: string) => html`<span class="swatch" style="${`--c:${color}`}" aria-hidden="true"></span>`;
+const sw = (color: string) =>
+  html`<span class="swatch" style="${`--c:${color}`}" aria-hidden="true"></span>`;
 
 /** "−0,5" med svenskt minustecken och decimalkomma. */
 function tick(v: number): string {
@@ -24,7 +30,12 @@ function tick(v: number): string {
 }
 
 /** Färgramp med gränser mellan rutorna. */
-function ramp(title: string, colors: readonly string[], ticks: readonly string[], label: string): Html {
+function ramp(
+  title: string,
+  colors: readonly string[],
+  ticks: readonly string[],
+  label: string,
+): Html {
   return html`<div class="ramp" role="img" aria-label="${label}">
     <p class="ml-title" aria-hidden="true">${title}</p>
     <div class="ml-scale" aria-hidden="true">${colors.map((c) => sw(c))}</div>
@@ -60,11 +71,15 @@ export function legend(s: LegendState): Html {
   if (s.view === "budget") {
     return html`<ul class="legend legend-budget" aria-label="Färgernas betydelse">
       <li>${sw(BUDGET_COLORS.ok)}<span>Räcker</span></li>
-      <li>${sw(BUDGET_COLORS.near)}<span>Nästan, högst ${Math.round(NEAR_MARGIN * 100)} % över</span></li>
+      <li>
+        ${sw(BUDGET_COLORS.near)}<span>Nästan, högst ${Math.round(NEAR_MARGIN * 100)} % över</span>
+      </li>
       <li>${sw(BUDGET_COLORS.no)}<span>Räcker inte</span></li>
     </ul>`;
   }
-  return html`<div class="legend legend-ramp">${s.view === "pris" ? priceRamp() : changeRamp(s.period)}</div>`;
+  return html`<div class="legend legend-ramp">
+    ${s.view === "pris" ? priceRamp() : changeRamp(s.period)}
+  </div>`;
 }
 
 /**

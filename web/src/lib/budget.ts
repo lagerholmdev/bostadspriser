@@ -28,7 +28,11 @@ export function estimatedCost(pricePerSqm: number, sqm: number): number {
   return Math.round((pricePerSqm * sqm) / 100_000) * 100_000;
 }
 
-export function budgetStatus(budget: number, sqm: number, pricePerSqm: number | null): BudgetStatus | null {
+export function budgetStatus(
+  budget: number,
+  sqm: number,
+  pricePerSqm: number | null,
+): BudgetStatus | null {
   if (pricePerSqm == null) return null;
   const max = affordablePricePerSqm(budget, sqm);
   if (pricePerSqm <= max) return "ok";

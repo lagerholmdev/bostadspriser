@@ -6,11 +6,24 @@ import { priceColor } from "./scales";
 
 const collection = JSON.parse(geo) as MinimapCollection;
 
-const square = (slug: string, x: number, y: number, s = 0.01): MinimapCollection["features"][number] => ({
+const square = (
+  slug: string,
+  x: number,
+  y: number,
+  s = 0.01,
+): MinimapCollection["features"][number] => ({
   properties: { slug },
   geometry: {
     type: "Polygon",
-    coordinates: [[[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]]],
+    coordinates: [
+      [
+        [x, y],
+        [x + s, y],
+        [x + s, y + s],
+        [x, y + s],
+        [x, y],
+      ],
+    ],
   },
 });
 
@@ -106,7 +119,8 @@ describe("buildMinimap focusReserveFont", () => {
     const m = buildMinimap({
       ...toyInput,
       name: (s: string) => (s === "a" ? "Ett mycket långt områdesnamn" : undefined),
-      labelPoint: (s: string): [number, number] | undefined => (s === "a" ? [18.0, 59.305] : undefined),
+      labelPoint: (s: string): [number, number] | undefined =>
+        s === "a" ? [18.0, 59.305] : undefined,
       focusReserveFont: 20,
       minSpan: 0.2,
     });

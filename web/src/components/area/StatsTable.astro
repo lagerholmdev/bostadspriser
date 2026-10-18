@@ -14,8 +14,10 @@ interface Props {
 const { stats, caption, noun } = Astro.props;
 const periods: Period[] = ["m3", "m12"];
 const head: Record<Period, string> = { m3: "3 mån", m12: "12 mån" };
-const miss = (p: Period, f: "sales" | "pricePerSqm" | "meanPrice" | "change"): MissingReason | undefined =>
-  stats[p].missing?.[f];
+const miss = (
+  p: Period,
+  f: "sales" | "pricePerSqm" | "meanPrice" | "change",
+): MissingReason | undefined => stats[p].missing?.[f];
 const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "saknas");
 ---
 
@@ -25,63 +27,64 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
     <thead>
       <tr>
         <td></td>
-        {
-          periods.map((p) => (
-            <th scope="col">
-              <span class="long">Senaste </span>{head[p]}
-              <span class="per">{dataset.periods[p]}</span>
-            </th>
-          ))
-        }
+        {periods.map((p) => (
+          <th scope="col">
+            <span class="long">Senaste </span>
+            {head[p]}
+            <span class="per">{dataset.periods[p]}</span>
+          </th>
+        ))}
       </tr>
     </thead>
     <tbody>
       <tr>
         <th scope="row">Pris per kvm</th>
-        {
-          periods.map((p) => (
-            <td class:list={{ "thin-value": isThin(stats[p], p) }}>
-              {stats[p].pricePerSqm == null ? (
-                <span class="chg-none">{missText(miss(p, "pricePerSqm"))}</span>
-              ) : (
-                <>
-                  {number(stats[p].pricePerSqm)} <span class="unit">kr/kvm</span>
-                </>
-              )}
-            </td>
-          ))
-        }
+        {periods.map((p) => (
+          <td class:list={{ "thin-value": isThin(stats[p], p) }}>
+            {stats[p].pricePerSqm == null ? (
+              <span class="chg-none">{missText(miss(p, "pricePerSqm"))}</span>
+            ) : (
+              <>
+                {number(stats[p].pricePerSqm)} <span class="unit">kr/kvm</span>
+              </>
+            )}
+          </td>
+        ))}
       </tr>
       <tr>
         <th scope="row">Medelpris</th>
-        {
-          periods.map((p) => (
-            <td class:list={{ "thin-value": isThin(stats[p], p) }}>
-              {stats[p].meanPrice == null ? <span class="chg-none">{missText(miss(p, "meanPrice"))}</span> : money(stats[p].meanPrice)}
-            </td>
-          ))
-        }
+        {periods.map((p) => (
+          <td class:list={{ "thin-value": isThin(stats[p], p) }}>
+            {stats[p].meanPrice == null ? (
+              <span class="chg-none">{missText(miss(p, "meanPrice"))}</span>
+            ) : (
+              money(stats[p].meanPrice)
+            )}
+          </td>
+        ))}
       </tr>
       <tr>
         <th scope="row">Sålda {noun}</th>
-        {
-          periods.map((p) => (
-            <td>
-              {stats[p].sales == null ? <span class="chg-none">{missText(miss(p, "sales"))}</span> : number(stats[p].sales)}
-              {isThin(stats[p], p) && stats[p].sales != null && <span class="thin-tag">få affärer</span>}
-            </td>
-          ))
-        }
+        {periods.map((p) => (
+          <td>
+            {stats[p].sales == null ? (
+              <span class="chg-none">{missText(miss(p, "sales"))}</span>
+            ) : (
+              number(stats[p].sales)
+            )}
+            {isThin(stats[p], p) && stats[p].sales != null && (
+              <span class="thin-tag">få affärer</span>
+            )}
+          </td>
+        ))}
       </tr>
       <tr>
         <th scope="row">Förändring</th>
-        {
-          periods.map((p) => (
-            <td>
-              <ChangeValue value={stats[p].change} missing={miss(p, "change")} />
-            </td>
-          ))
-        }
+        {periods.map((p) => (
+          <td>
+            <ChangeValue value={stats[p].change} missing={miss(p, "change")} />
+          </td>
+        ))}
       </tr>
     </tbody>
   </table>

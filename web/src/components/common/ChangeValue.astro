@@ -16,16 +16,14 @@ const { value, missing, word = false } = Astro.props;
 const dir = changeDirection(value);
 ---
 
-{
-  dir ? (
-    <span class:list={["chg", `chg-${dir}`]}>
-      {change(value)}
-      {word && <span class="chg-word">{changeWord(value)}</span>}
-    </span>
-  ) : (
-    <span class="chg chg-none">
-      <span aria-hidden="true">–</span>
-      <span class="miss">{missing ? MISSING_TEXT[missing] : "saknas"}</span>
-    </span>
-  )
-}
+{dir ? (
+  <span class:list={["chg", `chg-${dir}`]}>
+    {change(value)}
+    {word && <span class="chg-word">{changeWord(value)}</span>}
+  </span>
+) : (
+  <span class="chg chg-none">
+    <span aria-hidden="true">–</span>
+    <span class="miss">{missing ? MISSING_TEXT[missing] : "saknas"}</span>
+  </span>
+)}

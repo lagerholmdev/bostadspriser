@@ -28,21 +28,19 @@ const toc = [
     <header class="intro">
       <h1>Om datan och metoden</h1>
       <p class="lead">
-        Stockholms prislandskap visar vad bostäder har sålts för i {areas.length} delar av Stockholms län. Här står
-        varifrån siffrorna kommer, hur de ska läsas och vad de inte säger.
+        Stockholms prislandskap visar vad bostäder har sålts för i {areas.length} delar av
+        Stockholms län. Här står varifrån siffrorna kommer, hur de ska läsas och vad de inte säger.
       </p>
     </header>
 
     <nav class="toc" aria-labelledby="toc-title">
       <h2 id="toc-title">På den här sidan</h2>
       <ol>
-        {
-          toc.map((t) => (
-            <li>
-              <a href={`#${t.id}`}>{t.label}</a>
-            </li>
-          ))
-        }
+        {toc.map((t) => (
+          <li>
+            <a href={`#${t.id}`}>{t.label}</a>
+          </li>
+        ))}
       </ol>
     </nav>
 
@@ -50,95 +48,119 @@ const toc = [
       <section id="kalla">
         <h2>Varifrån siffrorna kommer</h2>
         <p>
-          Alla priser kommer från <a href="https://www.maklarstatistik.se/" rel="noopener">Svensk Mäklarstatistik</a>,
-          som samlar in uppgifter om bostäder som sålts via mäklare i hela Sverige. De publicerar ny statistik en gång i
-          månaden. Vi hämtar siffrorna för <a href={dataset.source.url} rel="noopener">Stockholms län</a> när de kommer
-          ut och uppdaterar sajten samma dag.
+          Alla priser kommer från{" "}
+          <a href="https://www.maklarstatistik.se/" rel="noopener">
+            Svensk Mäklarstatistik
+          </a>
+          , som samlar in uppgifter om bostäder som sålts via mäklare i hela Sverige. De publicerar
+          ny statistik en gång i månaden. Vi hämtar siffrorna för{" "}
+          <a href={dataset.source.url} rel="noopener">
+            Stockholms län
+          </a>{" "}
+          när de kommer ut och uppdaterar sajten samma dag.
         </p>
         <p>
-          De senaste siffrorna publicerades {date(dataset.updated)} och gäller {dataset.periods.m3} (3 månader) och
-          {" "}{dataset.periods.m12} (12 månader). Mäklarstatistik tillåter att statistiken citeras med källa.
+          De senaste siffrorna publicerades {date(dataset.updated)} och gäller {dataset.periods.m3}{" "}
+          (3 månader) och {dataset.periods.m12} (12 månader). Mäklarstatistik tillåter att
+          statistiken citeras med källa.
         </p>
       </section>
 
       <section id="matt">
         <h2>Pris per kvm och medelpris</h2>
         <p>
-          <strong>Pris per kvm</strong> är snittet av vad de sålda bostäderna kostade per kvadratmeter boarea. Det är
-          det bästa måttet för att jämföra områden, eftersom det inte beror på hur stora bostäderna är.
+          <strong>Pris per kvm</strong> är snittet av vad de sålda bostäderna kostade per
+          kvadratmeter boarea. Det är det bästa måttet för att jämföra områden, eftersom det inte
+          beror på hur stora bostäderna är.
         </p>
         <p>
-          <strong>Medelpris</strong> är vad en såld bostad kostade i snitt. Det säger mer om vad som faktiskt säljs i
-          området: där det finns många små lägenheter blir medelpriset lägre, även om priset per kvm är högt.
+          <strong>Medelpris</strong> är vad en såld bostad kostade i snitt. Det säger mer om vad som
+          faktiskt säljs i området: där det finns många små lägenheter blir medelpriset lägre, även
+          om priset per kvm är högt.
         </p>
         <p>
-          Båda är snitt för alla affärer i ett helt område. En enskild bostad kan kosta mycket mer eller mindre
-          beroende på läge, skick, våning och månadsavgift. Siffrorna är ingen värdering.
+          Båda är snitt för alla affärer i ett helt område. En enskild bostad kan kosta mycket mer
+          eller mindre beroende på läge, skick, våning och månadsavgift. Siffrorna är ingen
+          värdering.
         </p>
       </section>
 
       <section id="perioder">
         <h2>3 och 12 månader, och hur förändringen räknas</h2>
         <p>
-          <strong>Senaste 3 månaderna</strong> visar läget just nu. Det är ett rullande fönster: varje månad läggs den
-          nya månaden till och den äldsta faller bort. <strong>Senaste 12 månaderna</strong> bygger på fyra gånger så
-          många affärer och svänger mindre, men reagerar långsammare.
+          <strong>Senaste 3 månaderna</strong> visar läget just nu. Det är ett rullande fönster:
+          varje månad läggs den nya månaden till och den äldsta faller bort.{" "}
+          <strong>Senaste 12 månaderna</strong> bygger på fyra gånger så många affärer och svänger
+          mindre, men reagerar långsammare.
         </p>
         <p>
-          <strong>Förändring</strong> räknas som Mäklarstatistik gör: på de senaste tre månaderna ({dataset.periods.m3}).
-          "Förändring 3 mån" jämför dem med de tre månaderna innan. "Förändring 12 mån" jämför dem med samma tre
-          månader året innan, så att årstiderna inte påverkar. Ett plus betyder att priserna har gått upp, ett
-          minus att de har gått ner.
+          <strong>Förändring</strong> räknas som Mäklarstatistik gör: på de senaste tre månaderna (
+          {dataset.periods.m3}). "Förändring 3 mån" jämför dem med de tre månaderna innan.
+          "Förändring 12 mån" jämför dem med samma tre månader året innan, så att årstiderna inte
+          påverkar. Ett plus betyder att priserna har gått upp, ett minus att de har gått ner.
         </p>
         <p>
-          Kortare perioder påverkas mer av vilka bostäder som råkade säljas. Säljs det många nyproducerade lägenheter
-          ett kvartal kan snittet stiga, utan att någon bostad egentligen blivit dyrare.
+          Kortare perioder påverkas mer av vilka bostäder som råkade säljas. Säljs det många
+          nyproducerade lägenheter ett kvartal kan snittet stiga, utan att någon bostad egentligen
+          blivit dyrare.
         </p>
       </section>
 
       <section id="saknade-varden">
         <h2>Saknade och osäkra värden</h2>
-        <p>Ibland saknas en siffra. Mäklarstatistik anger då ett av tre skäl, och vi skriver ut det i klartext:</p>
+        <p>
+          Ibland saknas en siffra. Mäklarstatistik anger då ett av tre skäl, och vi skriver ut det i
+          klartext:
+        </p>
         <dl class="defs">
           <dt>För få affärer</dt>
-          <dd>Färre än 25 bostäder såldes under perioden. Mäklarstatistik visar då inget värde (markerat F).</dd>
+          <dd>
+            Färre än 25 bostäder såldes under perioden. Mäklarstatistik visar då inget värde
+            (markerat F).
+          </dd>
           <dt>Inte representativt</dt>
-          <dd>Affärerna är för få eller för speciella för att snittet ska säga något om området (markerat N).</dd>
+          <dd>
+            Affärerna är för få eller för speciella för att snittet ska säga något om området
+            (markerat N).
+          </dd>
           <dt>Inga affärer</dt>
           <dd>Inga bostäder av det slaget såldes alls under perioden.</dd>
         </dl>
         <p>
-          Värden som finns men bygger på få affärer märks med <span class="thin-tag">få affärer</span>, och
-          staplar och färger för dem visas blekare.
-          Gränsen är {THIN_SALES.m3} sålda bostäder på 3 månader och {THIN_SALES.m12} på 12 månader. Det är vår egen
-          gräns, satt för att visa när ett snitt kan svänga mycket mellan månaderna.
+          Värden som finns men bygger på få affärer märks med{" "}
+          <span class="thin-tag">få affärer</span>, och staplar och färger för dem visas blekare.
+          Gränsen är {THIN_SALES.m3} sålda bostäder på 3 månader och {THIN_SALES.m12} på 12 månader.
+          Det är vår egen gräns, satt för att visa när ett snitt kan svänga mycket mellan månaderna.
         </p>
       </section>
 
       <section id="omraden">
         <h2>Hur områdena är indelade</h2>
         <p>
-          Sajten har {areas.length} områden: {districts} stadsdelsområden i Stockholms stad och {municipalities}
-          {" "}kommuner i länet. Indelningen är grov eftersom Mäklarstatistik bara publicerar siffror för stadens
-          stadsdelsområden, inte för enskilda stadsdelar eller kvarter. Ett område som Hägersten-Liljeholmen rymmer
-          alltså både Liljeholmen och Fruängen, med samma snittpris.
+          Sajten har {areas.length} områden: {districts} stadsdelsområden i Stockholms stad och{" "}
+          {municipalities} kommuner i länet. Indelningen är grov eftersom Mäklarstatistik bara
+          publicerar siffror för stadens stadsdelsområden, inte för enskilda stadsdelar eller
+          kvarter. Ett område som Hägersten-Liljeholmen rymmer alltså både Liljeholmen och Fruängen,
+          med samma snittpris.
         </p>
         <p>
-          Mäklarstatistik definierar sina områden med egna distriktskoder. Vi har lagt ihop stadens 117 stadsdelar så
-          att de stämmer så nära som möjligt. Några gränsfall: Gamla stan, Riddarholmen och Skeppsholmen ligger under
-          Vasastan-Norrmalm, och Orhem ligger under Farsta-Vantör.
+          Mäklarstatistik definierar sina områden med egna distriktskoder. Vi har lagt ihop stadens
+          117 stadsdelar så att de stämmer så nära som möjligt. Några gränsfall: Gamla stan,
+          Riddarholmen och Skeppsholmen ligger under Vasastan-Norrmalm, och Orhem ligger under
+          Farsta-Vantör.
         </p>
         <p>
-          Kommunerna visas som hela kommuner. Siffran för Nacka gäller alltså både Saltsjöbaden och Sickla.
+          Kommunerna visas som hela kommuner. Siffran för Nacka gäller alltså både Saltsjöbaden och
+          Sickla.
         </p>
       </section>
 
       <section id="villor">
         <h2>Villor</h2>
         <p>
-          Mäklarstatistik redovisar villor och andra småhus bara per kommun. För kranskommunerna finns därför egna
-          villapriser, men stadsdelsområdena i Stockholms stad får alla samma värde: snittet för hela staden.
-          Områdessidorna säger när det är så.
+          Mäklarstatistik redovisar villor och andra småhus bara per kommun. För kranskommunerna
+          finns därför egna villapriser, men stadsdelsområdena i Stockholms stad får alla samma
+          värde: snittet för hela staden. Områdessidorna säger när det är så.
         </p>
       </section>
 
@@ -146,19 +168,37 @@ const toc = [
         <h2>Kartan och gränserna</h2>
         <ul>
           <li>
-            Bakgrundskartan kommer från <a href="https://openfreemap.org/" rel="noopener">OpenFreeMap</a> och bygger på
-            {" "}<a href="https://openmaptiles.org/" rel="noopener">OpenMapTiles</a> och data från
-            {" "}<a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMaps bidragsgivare</a>.
+            Bakgrundskartan kommer från{" "}
+            <a href="https://openfreemap.org/" rel="noopener">
+              OpenFreeMap
+            </a>{" "}
+            och bygger på{" "}
+            <a href="https://openmaptiles.org/" rel="noopener">
+              OpenMapTiles
+            </a>{" "}
+            och data från{" "}
+            <a href="https://www.openstreetmap.org/copyright" rel="noopener">
+              OpenStreetMaps bidragsgivare
+            </a>
+            .
           </li>
           <li>
-            Gränserna för stadsdelarna i Stockholms stad kommer från Stockholms stad via
-            {" "}<a href="https://github.com/krasch/stockholm-stadsdelar" rel="noopener">stockholm-stadsdelar</a> (fri
-            att använda, CC0).
+            Gränserna för stadsdelarna i Stockholms stad kommer från Stockholms stad via{" "}
+            <a href="https://github.com/krasch/stockholm-stadsdelar" rel="noopener">
+              stockholm-stadsdelar
+            </a>{" "}
+            (fri att använda, CC0).
           </li>
           <li>
-            Kommungränserna bygger på SCB:s
-            {" "}<a href="https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/deso---demografiska-statistikomraden/" rel="noopener">DeSO-områden</a>,
-            sammanslagna per kommun. Gränserna går ut i vattnet, så skärgårdskommuner ser större ut än sin landyta.
+            Kommungränserna bygger på SCB:s{" "}
+            <a
+              href="https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/deso---demografiska-statistikomraden/"
+              rel="noopener"
+            >
+              DeSO-områden
+            </a>
+            , sammanslagna per kommun. Gränserna går ut i vattnet, så skärgårdskommuner ser större
+            ut än sin landyta.
           </li>
         </ul>
       </section>
@@ -166,20 +206,27 @@ const toc = [
       <section id="projektet">
         <h2>Om projektet och integritet</h2>
         <p>
-          Stockholms prislandskap är ett fristående projekt utan kommersiellt syfte. Det har ingen koppling till
-          Svensk Mäklarstatistik, mäklare eller banker, och visar inga annonser.
+          Stockholms prislandskap är ett fristående projekt utan kommersiellt syfte. Det har ingen
+          koppling till Svensk Mäklarstatistik, mäklare eller banker, och visar inga annonser.
         </p>
         <p>
-          Sajten sätter inga kakor och sparar inget om dig. Vi kan räkna sidvisningar med
-          {" "}<a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>, som inte använder kakor och inte
-          följer dig mellan webbplatser. Det vi ser är hur många som besöker en sida, inte vem.
+          Sajten sätter inga kakor och sparar inget om dig. Vi kan räkna sidvisningar med{" "}
+          <a href="https://www.goatcounter.com/" rel="noopener">
+            GoatCounter
+          </a>
+          , som inte använder kakor och inte följer dig mellan webbplatser. Det vi ser är hur många
+          som besöker en sida, inte vem.
         </p>
       </section>
     </article>
 
     <aside class="next" aria-label="Gå vidare">
-      <a class="btn btn-primary" href={mapUrl()}>Till kartan</a>
-      <a class="btn" href={areasUrl()}>Alla områden</a>
+      <a class="btn btn-primary" href={mapUrl()}>
+        Till kartan
+      </a>
+      <a class="btn" href={areasUrl()}>
+        Alla områden
+      </a>
     </aside>
   </div>
 </Base>

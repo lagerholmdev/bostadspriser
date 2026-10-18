@@ -26,7 +26,12 @@ export function quick(slug: string, s: AppState): Quick | null {
   let value: string;
   if (s.view === "pris") {
     const why = st?.missing?.pricePerSqm;
-    value = st?.pricePerSqm == null ? (why ? `Pris saknas, ${MISSING_TEXT[why]}` : "Pris saknas") : fmtSqm(st.pricePerSqm);
+    value =
+      st?.pricePerSqm == null
+        ? why
+          ? `Pris saknas, ${MISSING_TEXT[why]}`
+          : "Pris saknas"
+        : fmtSqm(st.pricePerSqm);
   } else if (s.view === "budget") {
     const p = st?.pricePerSqm ?? null;
     const status = budgetStatus(s.budget, s.sqm, p);
@@ -39,7 +44,10 @@ export function quick(slug: string, s: AppState): Quick | null {
     const m3 = shownStat(a, s.housing, "m3");
     sales = m3?.sales ?? null;
     thin = isThin(m3, "m3");
-    value = st?.change == null ? "Förändring saknas" : `${change(st.change)} ${CHANGE_LABEL[s.period].replace("Förändring ", "")}`;
+    value =
+      st?.change == null
+        ? "Förändring saknas"
+        : `${change(st.change)} ${CHANGE_LABEL[s.period].replace("Förändring ", "")}`;
   }
   const meta = cityHouse ? `Hela staden, ${salesText(sales, thin)}` : salesText(sales, thin);
   return { name: a.name, value, meta };
@@ -48,7 +56,9 @@ export function quick(slug: string, s: AppState): Quick | null {
 export function tooltipHtml(slug: string, s: AppState): Html {
   const q = quick(slug, s);
   if (!q) return html``;
-  return html`<p class="tt-name">${q.name}</p><p class="tt-value">${q.value}</p><p class="tt-meta">${q.meta}</p>`;
+  return html`<p class="tt-name">${q.name}</p>
+    <p class="tt-value">${q.value}</p>
+    <p class="tt-meta">${q.meta}</p>`;
 }
 
 /** Remsan under kartan på mobilen när ett område är valt. */
@@ -59,5 +69,7 @@ export function peekHtml(slug: string, s: AppState): Html {
       <p class="peek-name">${q.name}</p>
       <p class="peek-value">${q.value} <span class="peek-meta">${q.meta}</span></p>
     </div>
-    <button type="button" class="btn peek-go" data-action="peek-go">Visa mer <span aria-hidden="true">↓</span></button>`;
+    <button type="button" class="btn peek-go" data-action="peek-go">
+      Visa mer <span aria-hidden="true">↓</span>
+    </button>`;
 }

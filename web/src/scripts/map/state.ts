@@ -78,7 +78,11 @@ export class Store {
     window.clearTimeout(this.pending);
     this.pending = undefined;
     try {
-      history.replaceState(history.state, "", appStateHref(this.current, location.pathname) + location.hash);
+      history.replaceState(
+        history.state,
+        "",
+        appStateHref(this.current, location.pathname) + location.hash,
+      );
     } catch {
       /* se ovan */
     }

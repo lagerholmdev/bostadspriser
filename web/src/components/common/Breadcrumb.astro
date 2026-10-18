@@ -12,17 +12,15 @@ const { items } = Astro.props;
 
 <nav class="crumbs" aria-label="Du är här">
   <ol>
-    {
-      items.map((it, i) => (
-        <li>
-          {it.href && i < items.length - 1 ? (
-            <a href={it.href}>{it.label}</a>
-          ) : (
-            <span aria-current="page">{it.label}</span>
-          )}
-        </li>
-      ))
-    }
+    {items.map((it, i) => (
+      <li>
+        {it.href && i < items.length - 1 ? (
+          <a href={it.href}>{it.label}</a>
+        ) : (
+          <span aria-current="page">{it.label}</span>
+        )}
+      </li>
+    ))}
   </ol>
 </nav>
 

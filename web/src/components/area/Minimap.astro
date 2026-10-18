@@ -24,7 +24,10 @@ const map = buildMinimap({
   fill: (slug) => priceColor(price(slug)),
   name: (slug) => bySlug.get(slug)?.name,
   labelPoint: (slug) => bySlug.get(slug)?.label,
-  neighbours: [...area.neighbours].sort((a, b) => (bySlug.get(a)?.kind === area.kind ? -1 : 0) - (bySlug.get(b)?.kind === area.kind ? -1 : 0)),
+  neighbours: [...area.neighbours].sort(
+    (a, b) =>
+      (bySlug.get(a)?.kind === area.kind ? -1 : 0) - (bySlug.get(b)?.kind === area.kind ? -1 : 0),
+  ),
   width: 520,
   height: 400,
   // På smala skärmar förstoras fokusetiketten till 20 enheter (se CSS nedan).
@@ -44,7 +47,9 @@ const svg = minimapSvg(map, { label });
   <div class="mm" set:html={svg} />
   <figcaption>
     <PriceLegend title="Pris per kvm, tusen kr" />
-    {shown.length > 0 && <p class="mm-note">{area.name} har grön kant. Grannområdena visas blekare.</p>}
+    {shown.length > 0 && (
+      <p class="mm-note">{area.name} har grön kant. Grannområdena visas blekare.</p>
+    )}
   </figcaption>
 </figure>
 

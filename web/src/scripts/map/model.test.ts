@@ -44,7 +44,10 @@ describe("sortEntries", () => {
     expect(names.indexOf("Täby")).toBeGreaterThan(names.indexOf("Södertälje"));
   });
   it("lägger områden utan pris sist", () => {
-    const fake = [...list.slice(0, 2), { ...list[2], stat: { ...list[2].stat, pricePerSqm: null } }];
+    const fake = [
+      ...list.slice(0, 2),
+      { ...list[2], stat: { ...list[2].stat, pricePerSqm: null } },
+    ];
     expect(sortEntries(fake, "desc")[2].stat.pricePerSqm).toBeNull();
     expect(sortEntries(fake, "asc")[2].stat.pricePerSqm).toBeNull();
   });
@@ -71,9 +74,13 @@ describe("budgetModel", () => {
     // Dyrast du har råd med först, närmast budgeten.
     expect(m.ok[0].slug).toBe("hagersten-liljeholmen");
     expect(Math.floor(m.ok[0].size)).toBe(62);
-    expect(m.ok[0].stat.pricePerSqm).toBeGreaterThanOrEqual(m.ok[m.ok.length - 1].stat.pricePerSqm!);
+    expect(m.ok[0].stat.pricePerSqm).toBeGreaterThanOrEqual(
+      m.ok[m.ok.length - 1].stat.pricePerSqm!,
+    );
     // Över budget: billigast (närmast budgeten) först.
-    expect(m.near.every((e, i, a) => i === 0 || e.stat.pricePerSqm! >= a[i - 1].stat.pricePerSqm!)).toBe(true);
+    expect(
+      m.near.every((e, i, a) => i === 0 || e.stat.pricePerSqm! >= a[i - 1].stat.pricePerSqm!),
+    ).toBe(true);
     expect(m.cheapest?.slug).toBe("sigtuna");
   });
   it("räknar Stockholms stad som ett område för villor", () => {
@@ -112,7 +119,10 @@ describe("changeModel", () => {
 
 describe("placeInCounty", () => {
   it("ger plats 1 till dyraste och delar stadens plats för villor", () => {
-    expect(placeInCounty(getArea("vasastan-norrmalm")!, "apartment", "m3")).toEqual({ rank: 1, total: areas.length });
+    expect(placeInCounty(getArea("vasastan-norrmalm")!, "apartment", "m3")).toEqual({
+      rank: 1,
+      total: areas.length,
+    });
     const a = placeInCounty(getArea("sodermalm")!, "house", "m3");
     const b = placeInCounty(getArea("spanga-kista")!, "house", "m3");
     expect(a).toEqual(b);

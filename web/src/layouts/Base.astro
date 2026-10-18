@@ -64,37 +64,37 @@ const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
     <meta name="theme-color" content="#f3f4f1" />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
     <link rel="sitemap" href={`${base}sitemap-index.xml`} />
-    {
-      goatcounter && (
-        <script
-          is:inline
-          async
-          data-goatcounter={`https://${goatcounter}.goatcounter.com/count`}
-          src="https://gc.zgo.at/count.js"
-        />
-      )
-    }
+    {goatcounter && (
+      <script
+        is:inline
+        async
+        data-goatcounter={`https://${goatcounter}.goatcounter.com/count`}
+        src="https://gc.zgo.at/count.js"
+      />
+    )}
     <slot name="head" />
   </head>
   <body class:list={{ "full-bleed": fullBleed }}>
-    <a class="skip" href="#main">Hoppa till innehållet</a>
+    <a class="skip" href="#main">
+      Hoppa till innehållet
+    </a>
     <header class="site-header">
       <div class="site-header-inner">
         <a class="brand" href={base} aria-label="Stockholms prislandskap, till kartan">
           <Logo class="brand-mark" />
-          <span class="brand-name"><span>Stockholms</span> <span>prislandskap</span></span>
+          <span class="brand-name">
+            <span>Stockholms</span> <span>prislandskap</span>
+          </span>
         </a>
         <nav aria-label="Huvudmeny">
           <ul>
-            {
-              nav.map((n) => (
-                <li class:list={{ "nav-home": n.home }}>
-                  <a href={n.href} aria-current={n.current ? "page" : undefined}>
-                    {n.label}
-                  </a>
-                </li>
-              ))
-            }
+            {nav.map((n) => (
+              <li class:list={{ "nav-home": n.home }}>
+                <a href={n.href} aria-current={n.current ? "page" : undefined}>
+                  {n.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>
@@ -102,25 +102,23 @@ const goatcounter = import.meta.env.PUBLIC_GOATCOUNTER as string | undefined;
     <main id="main">
       <slot />
     </main>
-    {
-      !fullBleed && (
-        <footer class="site-footer">
-          <div class="wrap">
-            <p>
-              Siffrorna kommer från{" "}
-              <a href={dataset.source.url} rel="noopener">
-                {dataset.source.name}
-              </a>{" "}
-              och uppdaterades {date(dataset.updated)}. De är snittpriser för sålda bostäder; en enskild
-              bostad kan kosta mer eller mindre.
-            </p>
-            <p>
-              <a href={aboutUrl()}>Om datan och metoden</a>
-            </p>
-          </div>
-        </footer>
-      )
-    }
+    {!fullBleed && (
+      <footer class="site-footer">
+        <div class="wrap">
+          <p>
+            Siffrorna kommer från{" "}
+            <a href={dataset.source.url} rel="noopener">
+              {dataset.source.name}
+            </a>{" "}
+            och uppdaterades {date(dataset.updated)}. De är snittpriser för sålda bostäder; en
+            enskild bostad kan kosta mer eller mindre.
+          </p>
+          <p>
+            <a href={aboutUrl()}>Om datan och metoden</a>
+          </p>
+        </div>
+      </footer>
+    )}
   </body>
 </html>
 

@@ -105,12 +105,17 @@ const intersects = (a: Box, b: Box) => a[0] <= b[2] && a[2] >= b[0] && a[1] <= b
 const r1 = (v: number) => Math.round(v * 10) / 10;
 
 /** Projicerar och förenklar en ring till en SVG-delstig. Tomt om ringen blir för liten. */
-function ringPath(ring: Ring, project: (p: Position) => [number, number], tolerance: number): string {
+function ringPath(
+  ring: Ring,
+  project: (p: Position) => [number, number],
+  tolerance: number,
+): string {
   const pts: [number, number][] = [];
   for (const p of ring) {
     const q = project(p);
     const last = pts[pts.length - 1];
-    if (!last || Math.abs(q[0] - last[0]) >= tolerance || Math.abs(q[1] - last[1]) >= tolerance) pts.push(q);
+    if (!last || Math.abs(q[0] - last[0]) >= tolerance || Math.abs(q[1] - last[1]) >= tolerance)
+      pts.push(q);
   }
   // Slutpunkten är samma som startpunkten i GeoJSON; Z stänger.
   if (pts.length > 1) {
@@ -165,7 +170,10 @@ export function buildMinimap(input: MinimapInput): Minimap {
   const scale = width / spanX;
   const x0 = cx - spanX / 2;
   const y0 = cy - spanY / 2;
-  const project = (p: Position): [number, number] => [(p[0] * k - x0) * scale, (-p[1] - y0) * scale];
+  const project = (p: Position): [number, number] => [
+    (p[0] * k - x0) * scale,
+    (-p[1] - y0) * scale,
+  ];
 
   // Ruta i lon/lat för att sortera bort det som ligger utanför, med lite marginal.
   const m = 0.05;
@@ -213,7 +221,8 @@ export function buildMinimap(input: MinimapInput): Minimap {
     // Skjut in etiketten om den sticker ut på sidorna, men bara en bit.
     if (lx - reserveW / 2 < inset) lx = inset + reserveW / 2;
     if (lx + reserveW / 2 > width - inset) lx = width - inset - reserveW / 2;
-    if (!isFocus && (Math.abs(lx - x) > w / 2 || y - h / 2 < inset || y + h / 2 > height - inset)) return false;
+    if (!isFocus && (Math.abs(lx - x) > w / 2 || y - h / 2 < inset || y + h / 2 > height - inset))
+      return false;
     const box: Box = [lx - w / 2 - 4, y - h / 2 - 2, lx + w / 2 + 4, y + h / 2 + 2];
     if (taken.some((t) => intersects(t, box))) return false;
     taken.push(box);

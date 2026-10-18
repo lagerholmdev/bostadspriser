@@ -63,7 +63,13 @@ const LOCALE = {
 };
 
 /** Lager som ritar ytorna platt; döljs i 3D. */
-const FLAT_LAYERS = [LAYER.fill, LAYER.hatchThin, LAYER.hatchNodata, LAYER.outline, LAYER.hover] as const;
+const FLAT_LAYERS = [
+  LAYER.fill,
+  LAYER.hatchThin,
+  LAYER.hatchNodata,
+  LAYER.outline,
+  LAYER.hover,
+] as const;
 
 export interface AreaMapOptions {
   wrap: HTMLElement;
@@ -108,12 +114,17 @@ export class AreaMap {
   static async create(opts: AreaMapOptions): Promise<AreaMap> {
     const base = await opts.baseStyle;
     const { style, basemap } = composeStyle(base, geojsonUrl, opts.paint);
-    const selectedArea = opts.selected ? ALL_AREAS.find((a) => a.slug === opts.selected) : undefined;
+    const selectedArea = opts.selected
+      ? ALL_AREAS.find((a) => a.slug === opts.selected)
+      : undefined;
     const map = new MlMap({
       container: opts.canvas,
       style,
       bounds: selectedArea ? selectedArea.bbox : isWide() ? INNER_BBOX : CITY_BBOX,
-      fitBoundsOptions: { padding: isWide() ? 48 : 16, maxZoom: isWide() ? AREA_MAX_ZOOM : AREA_MAX_ZOOM - 0.75 },
+      fitBoundsOptions: {
+        padding: isWide() ? 48 : 16,
+        maxZoom: isWide() ? AREA_MAX_ZOOM : AREA_MAX_ZOOM - 0.75,
+      },
       maxBounds: MAX_BOUNDS,
       minZoom: 7.5,
       maxZoom: 14,
@@ -130,7 +141,8 @@ export class AreaMap {
     const ratio = window.devicePixelRatio || 1;
     map.setMissingStyleImageResolver((id) => {
       const kind = (Object.keys(HATCH) as HatchKind[]).find((k) => HATCH[k].id === id);
-      if (kind && !map.hasImage(id)) map.addImage(id, hatchImage(kind, ratio), { pixelRatio: Math.max(1, Math.round(ratio)) });
+      if (kind && !map.hasImage(id))
+        map.addImage(id, hatchImage(kind, ratio), { pixelRatio: Math.max(1, Math.round(ratio)) });
     });
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
@@ -141,7 +153,9 @@ export class AreaMap {
       AreaMap.warned = true;
     });
     const instance = new AreaMap(map, opts, basemap);
-    await new Promise<void>((resolve) => (map.loaded() ? resolve() : map.once("load", () => resolve())));
+    await new Promise<void>((resolve) =>
+      map.loaded() ? resolve() : map.once("load", () => resolve()),
+    );
     instance.setSelected(opts.selected, false);
     return instance;
   }
@@ -178,7 +192,9 @@ export class AreaMap {
   private fit(bbox: Bbox, maxZoom: number): void {
     const wide = isWide();
     this.map.fitBounds(bbox, {
-      padding: wide ? { top: 72, bottom: 96, left: 72, right: 72 } : { top: 32, bottom: 48, left: 24, right: 24 },
+      padding: wide
+        ? { top: 72, bottom: 96, left: 72, right: 72 }
+        : { top: 32, bottom: 48, left: 24, right: 24 },
       maxZoom,
       bearing: this.map.getBearing(),
       pitch: this.map.getPitch(),
@@ -190,7 +206,10 @@ export class AreaMap {
   /* ---------- Kontroller ---------- */
 
   private addControls(): void {
-    this.map.addControl(new NavigationControl({ showCompass: false, visualizePitch: false }), "top-right");
+    this.map.addControl(
+      new NavigationControl({ showCompass: false, visualizePitch: false }),
+      "top-right",
+    );
     const self = this;
     const ctrl: IControl = {
       onAdd() {
@@ -234,7 +253,11 @@ export class AreaMap {
       m.touchPitch.disable();
       m.keyboard.disableRotation();
     }
-    m.easeTo({ pitch: on ? PITCH_3D : 0, bearing: on ? -12 : 0, duration: reducedMotion() ? 0 : 700 });
+    m.easeTo({
+      pitch: on ? PITCH_3D : 0,
+      bearing: on ? -12 : 0,
+      duration: reducedMotion() ? 0 : 700,
+    });
   }
 
   /* ---------- Mus och pek ---------- */

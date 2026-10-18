@@ -38,45 +38,62 @@ const controls = [
 ---
 
 <div class="controls">
-  {
-    controls.map((c) => (
-      <div class="control">
-        <div class="control-head">
-          <label for={`${c.id}-range`}>{c.label}</label>
-          <output id={`${c.id}-out`} for={`${c.id}-range`}>
-            {c.out}
-          </output>
-        </div>
-        <div class="control-row">
-          <button type="button" class="step" data-action="step" data-control={c.id} data-dir="-1" aria-label={c.less}>
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-              <path d="M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </button>
-          <input
-            type="range"
-            id={`${c.id}-range`}
-            min={c.min}
-            max={c.max}
-            step={c.step}
-            value={c.value}
-            aria-describedby={`${c.id}-hint`}
-            aria-valuetext={c.spoken}
-            style={`--p:${((c.value - c.min) / (c.max - c.min)) * 100}%`}
-          />
-          <button type="button" class="step" data-action="step" data-control={c.id} data-dir="1" aria-label={c.more}>
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-              <path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </button>
-        </div>
-        <p class="control-foot">
-          <span id={`${c.id}-hint`}>{c.hint}</span>
-          <span class="control-ends" aria-hidden="true">
-            {c.ends[0]}–{c.ends[1]}
-          </span>
-        </p>
+  {controls.map((c) => (
+    <div class="control">
+      <div class="control-head">
+        <label for={`${c.id}-range`}>{c.label}</label>
+        <output id={`${c.id}-out`} for={`${c.id}-range`}>
+          {c.out}
+        </output>
       </div>
-    ))
-  }
+      <div class="control-row">
+        <button
+          type="button"
+          class="step"
+          data-action="step"
+          data-control={c.id}
+          data-dir="-1"
+          aria-label={c.less}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path d="M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+        <input
+          type="range"
+          id={`${c.id}-range`}
+          min={c.min}
+          max={c.max}
+          step={c.step}
+          value={c.value}
+          aria-describedby={`${c.id}-hint`}
+          aria-valuetext={c.spoken}
+          style={`--p:${((c.value - c.min) / (c.max - c.min)) * 100}%`}
+        />
+        <button
+          type="button"
+          class="step"
+          data-action="step"
+          data-control={c.id}
+          data-dir="1"
+          aria-label={c.more}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path
+              d="M3 8h10M8 3v10"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="control-foot">
+        <span id={`${c.id}-hint`}>{c.hint}</span>
+        <span class="control-ends" aria-hidden="true">
+          {c.ends[0]}–{c.ends[1]}
+        </span>
+      </p>
+    </div>
+  ))}
 </div>

@@ -13,11 +13,19 @@ export const PRICE_COLORS = scales.price.colors as unknown as Six<string>;
 /** Klassgränser i kr/kvm. Fasta, så kartan och förklaringen inte flyttar sig mellan månader. */
 export const PRICE_BREAKS = scales.price.breaks as unknown as Five<number>;
 
-export const CHANGE_COLORS = { down: scales.change.down, flat: scales.change.flat, up: scales.change.up } as const;
+export const CHANGE_COLORS = {
+  down: scales.change.down,
+  flat: scales.change.flat,
+  up: scales.change.up,
+} as const;
 /** Förändring i procent där färgen når full styrka. */
 export const CHANGE_MAX: number = scales.change.max;
 
-export const BUDGET_COLORS = { ok: scales.budget.ok, near: scales.budget.near, no: scales.budget.no } as const;
+export const BUDGET_COLORS = {
+  ok: scales.budget.ok,
+  near: scales.budget.near,
+  no: scales.budget.no,
+} as const;
 /** Inom så här mycket över budget räknas området som "nästan". */
 export const NEAR_MARGIN: number = scales.budget.nearMargin;
 export const NODATA_COLOR: string = scales.nodata;
@@ -31,7 +39,16 @@ export function priceColor(v: number | null | undefined): string {
 function mix(a: string, b: string, t: number): string {
   const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
   const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
-  return "#" + pa.map((x, i) => Math.round(x + (pb[i] - x) * t).toString(16).padStart(2, "0")).join("");
+  return (
+    "#" +
+    pa
+      .map((x, i) =>
+        Math.round(x + (pb[i] - x) * t)
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")
+  );
 }
 
 export function changeColor(v: number | null | undefined): string {
@@ -45,7 +62,8 @@ export function priceLegend(): { color: string; label: string }[] {
   const k = (n: number) => `${n / 1000}`;
   return PRICE_COLORS.map((color, i) => {
     if (i === 0) return { color, label: `under ${k(PRICE_BREAKS[0])} 000` };
-    if (i === PRICE_COLORS.length - 1) return { color, label: `över ${k(PRICE_BREAKS[i - 1])} 000` };
+    if (i === PRICE_COLORS.length - 1)
+      return { color, label: `över ${k(PRICE_BREAKS[i - 1])} 000` };
     return { color, label: `${k(PRICE_BREAKS[i - 1])}–${k(PRICE_BREAKS[i])} 000` };
   });
 }
@@ -59,12 +77,18 @@ export type ChangeClass = -2 | -1 | 0 | 1 | 2;
  * Stegens gränser i procent per period: [i stort sett oförändrat under, tydlig förändring från].
  * Tre månader svänger mindre än ett år, så gränserna är hälften så stora.
  */
-export const CHANGE_STEPS: Record<"m3" | "m12", readonly [number, number]> = { m3: [0.5, 2], m12: [1, 4] };
+export const CHANGE_STEPS = scales.change.steps as unknown as Record<
+  "m3" | "m12",
+  readonly [number, number]
+>;
 /** Förändring där färgen når full styrka: ±5 % på tre månader, ±10 % på ett år. */
-export const CHANGE_FULL: Record<"m3" | "m12", number> = { m3: 5, m12: 10 };
+export const CHANGE_FULL: Record<"m3" | "m12", number> = scales.change.full;
 
 /** Vilket steg en förändring hamnar i, räknat på värdet som det visas (en decimal). */
-export function changeClass(v: number | null | undefined, period: "m3" | "m12"): ChangeClass | null {
+export function changeClass(
+  v: number | null | undefined,
+  period: "m3" | "m12",
+): ChangeClass | null {
   if (v == null) return null;
   const r = Math.round(v * 10) / 10;
   const [flat, strong] = CHANGE_STEPS[period];
@@ -93,5 +117,8 @@ export function changeStepColor(v: number | null | undefined, period: "m3" | "m1
 export function changeStepLegend(period: "m3" | "m12"): { colors: string[]; ticks: number[] } {
   const [flat, strong] = CHANGE_STEPS[period];
   const classes: ChangeClass[] = [-2, -1, 0, 1, 2];
-  return { colors: classes.map((c) => changeClassColor(c, period)), ticks: [-strong, -flat, flat, strong] };
+  return {
+    colors: classes.map((c) => changeClassColor(c, period)),
+    ticks: [-strong, -flat, flat, strong],
+  };
 }

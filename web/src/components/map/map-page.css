@@ -562,7 +562,7 @@
   width: var(--w);
   background: var(--c);
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.18);
+  box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.22);
 }
 .app .row-meta {
   grid-area: meta;
@@ -578,7 +578,11 @@
 .app .row.is-thin .row-bar > span,
 .app .row.is-thin .swatch {
   opacity: 0.6;
-  background-image: repeating-linear-gradient(135deg, rgb(26 31 28 / 0.35) 0 1px, transparent 1px 4px);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgb(26 31 28 / 0.35) 0 1px,
+    transparent 1px 4px
+  );
 }
 .app .row-value.is-missing {
   font-weight: 400;
@@ -649,6 +653,9 @@
 }
 .app .budget-best:empty {
   display: none;
+}
+.app .budget-best .nowrap {
+  white-space: nowrap;
 }
 .app .budget-best strong {
   color: var(--c-ink);
@@ -792,7 +799,11 @@
   margin: 0;
   background: transparent;
   cursor: pointer;
-  --track: linear-gradient(to right, var(--c-accent) var(--p, 30%), var(--c-line-strong) var(--p, 30%));
+  --track: linear-gradient(
+    to right,
+    var(--c-accent) var(--p, 30%),
+    var(--c-line-strong) var(--p, 30%)
+  );
 }
 .app input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
@@ -831,10 +842,14 @@
   outline: none;
 }
 .app input[type="range"]:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px var(--c-accent-soft), 0 0 0 6px var(--c-accent);
+  box-shadow:
+    0 0 0 4px var(--c-accent-soft),
+    0 0 0 6px var(--c-accent);
 }
 .app input[type="range"]:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 4px var(--c-accent-soft), 0 0 0 6px var(--c-accent);
+  box-shadow:
+    0 0 0 4px var(--c-accent-soft),
+    0 0 0 6px var(--c-accent);
 }
 .app .budget-max {
   margin-top: var(--sp-3);
@@ -1092,7 +1107,8 @@
   z-index: 10;
   background: var(--c-surface);
   border-top: 1px solid var(--c-line);
-  padding: var(--sp-3) var(--gutter-r) calc(var(--sp-3) + env(safe-area-inset-bottom, 0px)) var(--gutter);
+  padding: var(--sp-3) var(--gutter-r) calc(var(--sp-3) + env(safe-area-inset-bottom, 0px))
+    var(--gutter);
   box-shadow: 0 -4px 16px rgb(26 31 28 / 0.06);
 }
 @media (min-width: 960px) {
@@ -1263,12 +1279,17 @@
   width: 14px;
   height: 12px;
   border-radius: 3px;
-  background: var(--c-price-3) repeating-linear-gradient(135deg, rgb(26 31 28 / 0.45) 0 1px, transparent 1px 4px);
+  background: var(--c-price-3)
+    repeating-linear-gradient(135deg, rgb(26 31 28 / 0.45) 0 1px, transparent 1px 4px);
   box-shadow: inset 0 0 0 1px rgb(26 31 28 / 0.08);
 }
 .app .hatch-nodata {
   background-color: var(--c-nodata);
-  background-image: repeating-linear-gradient(135deg, rgb(95 103 98 / 0.6) 0 1px, transparent 1px 4px);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgb(95 103 98 / 0.6) 0 1px,
+    transparent 1px 4px
+  );
 }
 .app .ml-items {
   display: flex;
@@ -1330,7 +1351,9 @@
   padding: var(--sp-2) var(--sp-3);
   background: var(--c-surface);
   border-radius: var(--radius-sm);
-  box-shadow: var(--shadow), 0 0 0 1px rgb(26 31 28 / 0.06);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgb(26 31 28 / 0.06);
   pointer-events: none;
   font-size: var(--fs-sm);
   line-height: 1.35;
@@ -1381,7 +1404,9 @@
 /* MapLibres kontroller, i sajtens form. */
 .app .maplibregl-ctrl-group {
   border-radius: var(--radius);
-  box-shadow: var(--shadow), 0 0 0 1px rgb(26 31 28 / 0.06);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgb(26 31 28 / 0.06);
   overflow: hidden;
 }
 .app .maplibregl-ctrl-group button {

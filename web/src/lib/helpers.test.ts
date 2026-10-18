@@ -46,14 +46,19 @@ describe("data-tillägg", () => {
   });
 
   it("parseCompareParams läser nya och gamla adressformat", () => {
-    expect(parseCompareParams(new URLSearchParams("omraden=sodermalm,nacka"))).toEqual(["sodermalm", "nacka"]);
-    expect(parseCompareParams(new URLSearchParams("a=sodermalm&b=nacka&c=solna"))).toEqual(["sodermalm", "nacka", "solna"]);
-    expect(parseCompareParams(new URLSearchParams("jamfor=solna,solna,okänt"))).toEqual(["solna"]);
-    expect(parseCompareParams(new URLSearchParams("omraden=a1,sodermalm,nacka,solna,taby"))).toEqual([
+    expect(parseCompareParams(new URLSearchParams("omraden=sodermalm,nacka"))).toEqual([
+      "sodermalm",
+      "nacka",
+    ]);
+    expect(parseCompareParams(new URLSearchParams("a=sodermalm&b=nacka&c=solna"))).toEqual([
       "sodermalm",
       "nacka",
       "solna",
     ]);
+    expect(parseCompareParams(new URLSearchParams("jamfor=solna,solna,okänt"))).toEqual(["solna"]);
+    expect(
+      parseCompareParams(new URLSearchParams("omraden=a1,sodermalm,nacka,solna,taby")),
+    ).toEqual(["sodermalm", "nacka", "solna"]);
     expect(parseCompareParams(new URLSearchParams(""))).toEqual([]);
   });
 });
@@ -69,15 +74,31 @@ describe("budget-tillägg", () => {
 
 describe("text", () => {
   it("changeSentence knyter ihop år och kvartal", () => {
-    expect(changeSentence(6.6, -1.1)).toBe("Priserna har gått upp 6,6 % på ett år, men ner 1,1 % de senaste tre månaderna.");
-    expect(changeSentence(10.5, 2)).toBe("Priserna har gått upp 10,5 % på ett år och 2,0 % de senaste tre månaderna.");
-    expect(changeSentence(-6, -4.9)).toBe("Priserna har gått ner 6,0 % på ett år och 4,9 % de senaste tre månaderna.");
-    expect(changeSentence(-0.9, 3.7)).toBe("Priserna har gått ner 0,9 % på ett år, men upp 3,7 % de senaste tre månaderna.");
-    expect(changeSentence(0, 2)).toBe("Priserna är oförändrade på ett år, men har gått upp 2,0 % de senaste tre månaderna.");
-    expect(changeSentence(5.1, 0.04)).toBe("Priserna har gått upp 5,1 % på ett år, men stått still de senaste tre månaderna.");
-    expect(changeSentence(0, 0)).toBe("Priserna är oförändrade, både på ett år och de senaste tre månaderna.");
-    expect(changeSentence(null, -1.4)).toBe("Priserna har gått ner 1,4 % de senaste tre månaderna. Förändringen på ett år saknas.");
-    expect(changeSentence(2.1, undefined)).toBe("Priserna har gått upp 2,1 % på ett år.");
+    expect(changeSentence(6.6, -1.1)).toBe(
+      "Priserna har gått upp 6,6\u00a0% på ett år, men ner 1,1\u00a0% de senaste tre månaderna.",
+    );
+    expect(changeSentence(10.5, 2)).toBe(
+      "Priserna har gått upp 10,5\u00a0% på ett år och 2,0\u00a0% de senaste tre månaderna.",
+    );
+    expect(changeSentence(-6, -4.9)).toBe(
+      "Priserna har gått ner 6,0\u00a0% på ett år och 4,9\u00a0% de senaste tre månaderna.",
+    );
+    expect(changeSentence(-0.9, 3.7)).toBe(
+      "Priserna har gått ner 0,9\u00a0% på ett år, men upp 3,7\u00a0% de senaste tre månaderna.",
+    );
+    expect(changeSentence(0, 2)).toBe(
+      "Priserna är oförändrade på ett år, men har gått upp 2,0\u00a0% de senaste tre månaderna.",
+    );
+    expect(changeSentence(5.1, 0.04)).toBe(
+      "Priserna har gått upp 5,1\u00a0% på ett år, men stått still de senaste tre månaderna.",
+    );
+    expect(changeSentence(0, 0)).toBe(
+      "Priserna är oförändrade, både på ett år och de senaste tre månaderna.",
+    );
+    expect(changeSentence(null, -1.4)).toBe(
+      "Priserna har gått ner 1,4\u00a0% de senaste tre månaderna. Förändringen på ett år saknas.",
+    );
+    expect(changeSentence(2.1, undefined)).toBe("Priserna har gått upp 2,1\u00a0% på ett år.");
     expect(changeSentence(null, null)).toBeNull();
   });
 

@@ -14,7 +14,9 @@ const { label, note, muted = false } = Astro.props;
 
 <div class="stat">
   <dt>{label}</dt>
-  <dd class:list={["stat-value", { "thin-value": muted }]}><slot /></dd>
+  <dd class:list={["stat-value", { "thin-value": muted }]}>
+    <slot />
+  </dd>
   {note && <dd class="stat-note">{note}</dd>}
   <slot name="extra" />
 </div>

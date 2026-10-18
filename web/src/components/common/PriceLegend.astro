@@ -15,13 +15,19 @@ const n = PRICE_COLORS.length;
 <div class="ramp-legend">
   <p class="rl-title">{title}</p>
   <div class="rl-scale" aria-hidden="true">
-    {PRICE_COLORS.map((c) => <span style={`background:${c}`} />)}
+    {PRICE_COLORS.map((c) => (
+      <span style={`background:${c}`} />
+    ))}
   </div>
   <div class="rl-ticks" aria-hidden="true">
-    {PRICE_BREAKS.map((b, i) => <span style={`left:${(((i + 1) / n) * 100).toFixed(3)}%`}>{b / 1000}</span>)}
+    {PRICE_BREAKS.map((b, i) => (
+      <span style={`left:${(((i + 1) / n) * 100).toFixed(3)}%`}>{b / 1000}</span>
+    ))}
   </div>
   <ul class="visually-hidden">
-    {priceLegend().map((it) => <li>{it.label} kr per kvm</li>)}
+    {priceLegend().map((it) => (
+      <li>{it.label} kr per kvm</li>
+    ))}
   </ul>
 </div>
 

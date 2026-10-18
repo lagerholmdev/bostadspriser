@@ -1,7 +1,7 @@
 ---
 /**
  * Jämför upp till tre områden. Tabellen ritas i webbläsaren från det inbyggda
- * datasetet (scripts/compare.ts); utan JavaScript visas valen och tomt läge.
+ * datasetet (scripts/compare-page.ts); utan JavaScript visas valen och tomt läge.
  * Adress: ?omraden=a,b,c. Äldre ?a=&b=&c= och ?jamfor=a,b fungerar också.
  */
 import Base from "../../layouts/Base.astro";
@@ -22,7 +22,9 @@ const SUGGESTIONS: string[][] = [
   ["nacka", "solna", "sundbyberg"],
   ["hagersten-liljeholmen", "enskede-skarpnack", "bromma-vasterled"],
 ];
-const suggestions = SUGGESTIONS.map((s) => s.filter((x) => bySlug.has(x))).filter((s) => s.length >= 2);
+const suggestions = SUGGESTIONS.map((s) => s.filter((x) => bySlug.has(x))).filter(
+  (s) => s.length >= 2,
+);
 const names = (s: string[]) => joinNames(areasFor(s).map((a) => a.name));
 const slots = [1, 2, 3];
 ---
@@ -35,34 +37,42 @@ const slots = [1, 2, 3];
   <div class="wrap compare-page">
     <header class="intro">
       <h1>Jämför områden</h1>
-      <p class="lead">Välj upp till tre områden och se priserna sida vid sida. Länken går att dela.</p>
+      <p class="lead">
+        Välj upp till tre områden och se priserna sida vid sida. Länken går att dela.
+      </p>
     </header>
 
-    <form class="picker" id="compare-form" action="" method="get" aria-label="Välj områden att jämföra">
-      {
-        slots.map((n) => (
-          <div class="slot" data-slot={n - 1}>
-            <label for={`slot-${n}`}>Område {n}</label>
-            <div class="slot-row">
-              <select id={`slot-${n}`} name={["a", "b", "c"][n - 1]}>
-                <option value="">Välj område</option>
-                {optgroups.map((g) => (
-                  <optgroup label={g.label}>
-                    {g.list.map((a) => (
-                      <option value={a.slug}>{a.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <button type="button" class="remove" data-remove={n - 1} aria-label="Ta bort" hidden>
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
+    <form
+      class="picker"
+      id="compare-form"
+      action=""
+      method="get"
+      aria-label="Välj områden att jämföra"
+    >
+      {slots.map((n) => (
+        <div class="slot" data-slot={n - 1}>
+          <label for={`slot-${n}`}>Område {n}</label>
+          <div class="slot-row">
+            <select id={`slot-${n}`} name={["a", "b", "c"][n - 1]}>
+              <option value="">Välj område</option>
+              {optgroups.map((g) => (
+                <optgroup label={g.label}>
+                  {g.list.map((a) => (
+                    <option value={a.slug}>{a.name}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <button type="button" class="remove" data-remove={n - 1} aria-label="Ta bort" hidden>
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
-        ))
-      }
+        </div>
+      ))}
       <noscript>
-        <button class="btn btn-primary" type="submit">Jämför</button>
+        <button class="btn btn-primary" type="submit">
+          Jämför
+        </button>
       </noscript>
     </form>
 
@@ -78,38 +88,38 @@ const slots = [1, 2, 3];
     <section class="empty" id="compare-empty" aria-labelledby="empty-title">
       <h2 id="empty-title">Välj minst två områden</h2>
       <p>
-        Välj områden i rutorna ovan, eller börja med en av jämförelserna här. Du ser pris per kvm, hur priserna har
-        rört sig och vad 5 mkr räcker till.
+        Välj områden i rutorna ovan, eller börja med en av jämförelserna här. Du ser pris per kvm,
+        hur priserna har rört sig och vad 5 mkr räcker till.
       </p>
       <ul class="suggest" id="compare-suggest">
-        {
-          suggestions.map((s) => (
-            <li>
-              <a class="btn" href={compareUrl(s)} data-suggest={s.join(",")}>
-                {names(s)}
-              </a>
-            </li>
-          ))
-        }
+        {suggestions.map((s) => (
+          <li>
+            <a class="btn" href={compareUrl(s)} data-suggest={s.join(",")}>
+              {names(s)}
+            </a>
+          </li>
+        ))}
       </ul>
       <noscript>
         <p class="fineprint">
-          Jämförelsen behöver JavaScript. Utan det kan du läsa om varje område på <a href={areasUrl()}
-            >områdessidorna</a
-          >.
+          Jämförelsen behöver JavaScript. Utan det kan du läsa om varje område på{" "}
+          <a href={areasUrl()}>områdessidorna</a>.
         </p>
       </noscript>
     </section>
 
     <p class="source fineprint">
-      Källa: <a href={dataset.source.url} rel="noopener">{dataset.source.name}</a>, {dataset.periods.m3} (3 mån) och
-      {" "}{dataset.periods.m12} (12 mån).
+      Källa:{" "}
+      <a href={dataset.source.url} rel="noopener">
+        {dataset.source.name}
+      </a>
+      , {dataset.periods.m3} (3 mån) och {dataset.periods.m12} (12 mån).
     </p>
   </div>
 </Base>
 
 <script>
-  import "../../scripts/compare";
+  import "../../scripts/compare-page";
 </script>
 
 <style>
@@ -165,7 +175,8 @@ const slots = [1, 2, 3];
     appearance: none;
     /* Pil ritad med två gradienter, så att färgen följer texten. */
     background-image:
-      linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
     background-position:
       calc(100% - 18px) 50%,
       calc(100% - 13px) 50%;

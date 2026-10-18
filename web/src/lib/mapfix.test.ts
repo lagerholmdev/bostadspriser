@@ -1,19 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mkrSpoken, rankText } from "./format";
+import { mkrSpoken } from "./format";
 import { CHANGE_COLORS, changeClass, changeStepColor, changeStepLegend } from "./scales";
 import { DEFAULT_STATE, parseAppState, serializeAppState, withHousing, withView } from "./url";
 
 const known = (s: string) => ["sodermalm", "solna"].includes(s);
-
-describe("rankText", () => {
-  it("säger dyrast, billigast eller plats", () => {
-    expect(rankText(1, 37)).toBe("Dyrast av 37");
-    expect(rankText(37, 37)).toBe("Billigast av 37");
-    expect(rankText(3, 37)).toBe("3:e dyrast av 37");
-    expect(rankText(22, 37)).toBe("22:a dyrast av 37");
-    expect(rankText(1, 1)).toBe("Dyrast av 1");
-  });
-});
 
 describe("mkrSpoken", () => {
   it("skriver ut miljoner kronor för skärmläsare", () => {
@@ -56,29 +46,54 @@ describe("standardval per vy och bostadstyp", () => {
     expect(parseAppState("vy=forandring", known).state.period).toBe("m12");
     expect(parseAppState("vy=forandring&period=3", known).state.period).toBe("m3");
     expect(parseAppState("", known).state.period).toBe("m3");
-    expect(serializeAppState({ ...DEFAULT_STATE, view: "forandring", period: "m12" })).toBe("vy=forandring");
-    expect(serializeAppState({ ...DEFAULT_STATE, view: "forandring", period: "m3" })).toBe("vy=forandring&period=3");
+    expect(serializeAppState({ ...DEFAULT_STATE, view: "forandring", period: "m12" })).toBe(
+      "vy=forandring",
+    );
+    expect(serializeAppState({ ...DEFAULT_STATE, view: "forandring", period: "m3" })).toBe(
+      "vy=forandring&period=3",
+    );
     expect(serializeAppState({ ...DEFAULT_STATE, period: "m12" })).toBe("period=12");
   });
   it("räknar villor på 120 kvm om inget annat står", () => {
     expect(parseAppState("vy=budget&bostad=villa", known).state.sqm).toBe(120);
     expect(parseAppState("vy=budget&bostad=villa&kvm=60", known).state.sqm).toBe(60);
-    expect(serializeAppState({ ...DEFAULT_STATE, housing: "house", sqm: 120 })).toBe("bostad=villa");
-    expect(serializeAppState({ ...DEFAULT_STATE, housing: "house", sqm: 60 })).toBe("bostad=villa&kvm=60");
+    expect(serializeAppState({ ...DEFAULT_STATE, housing: "house", sqm: 120 })).toBe(
+      "bostad=villa",
+    );
+    expect(serializeAppState({ ...DEFAULT_STATE, housing: "house", sqm: 60 })).toBe(
+      "bostad=villa&kvm=60",
+    );
   });
   it("låter standardval följa med vid byte, men behåller det användaren valt", () => {
     expect(withView(DEFAULT_STATE, "forandring").period).toBe("m12");
     expect(withView({ ...DEFAULT_STATE, period: "m12" }, "forandring").period).toBe("m12");
-    expect(withView({ ...DEFAULT_STATE, view: "forandring", period: "m12" }, "pris").period).toBe("m3");
-    expect(withView({ ...DEFAULT_STATE, view: "forandring", period: "m3" }, "pris").period).toBe("m3");
+    expect(withView({ ...DEFAULT_STATE, view: "forandring", period: "m12" }, "pris").period).toBe(
+      "m3",
+    );
+    expect(withView({ ...DEFAULT_STATE, view: "forandring", period: "m3" }, "pris").period).toBe(
+      "m3",
+    );
     expect(withHousing(DEFAULT_STATE, "house").sqm).toBe(120);
     expect(withHousing({ ...DEFAULT_STATE, sqm: 75 }, "house").sqm).toBe(75);
     expect(withHousing({ ...DEFAULT_STATE, housing: "house", sqm: 120 }, "apartment").sqm).toBe(60);
   });
   it("går fram och tillbaka utan förlust", () => {
     for (const s of [
-      { ...DEFAULT_STATE, view: "forandring" as const, period: "m3" as const, housing: "house" as const, sqm: 60, area: "solna" },
-      { ...DEFAULT_STATE, view: "budget" as const, housing: "house" as const, sqm: 120, budget: 7_250_000 },
+      {
+        ...DEFAULT_STATE,
+        view: "forandring" as const,
+        period: "m3" as const,
+        housing: "house" as const,
+        sqm: 60,
+        area: "solna",
+      },
+      {
+        ...DEFAULT_STATE,
+        view: "budget" as const,
+        housing: "house" as const,
+        sqm: 120,
+        budget: 7_250_000,
+      },
     ]) {
       expect(parseAppState(serializeAppState(s), known).state).toEqual(s);
     }

@@ -2,7 +2,10 @@
 
 const NBSP = " ";
 const int = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
-const oneDec = new Intl.NumberFormat("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const oneDec = new Intl.NumberFormat("sv-SE", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 /** 116680 -> "116 680" */
 export function number(v: number | null | undefined): string {
@@ -97,14 +100,11 @@ export function searchKey(s: string): string {
 }
 
 /** Varför ett värde saknas, i klartext. Se MissingReason i types.ts. */
-export const MISSING_TEXT = { F: "för få affärer", N: "inte representativt", "0": "inga affärer" } as const;
-
-/** Plats i en prislista: "Dyrast av 37", "Billigast av 37", "3:e dyrast av 37". */
-export function rankText(rank: number, total: number): string {
-  if (rank === 1) return `Dyrast av ${total}`;
-  if (rank === total && total > 1) return `Billigast av ${total}`;
-  return `${ordinal(rank)} dyrast av ${total}`;
-}
+export const MISSING_TEXT = {
+  F: "för få affärer",
+  N: "inte representativt",
+  "0": "inga affärer",
+} as const;
 
 /** För skärmläsare: 5250000 -> "5,25 miljoner kronor", 1000000 -> "1 miljon kronor". */
 export function mkrSpoken(v: number): string {

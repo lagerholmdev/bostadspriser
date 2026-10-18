@@ -112,7 +112,9 @@ export class PanelController {
     this.root.addEventListener("change", (e) => {
       const t = e.target as HTMLInputElement;
       if (t.name === "bostad") {
-        this.store.replace(withHousing(this.store.state, t.value === "house" ? "house" : "apartment"));
+        this.store.replace(
+          withHousing(this.store.state, t.value === "house" ? "house" : "apartment"),
+        );
       } else if (t.name === "period") this.store.set({ period: t.value === "m12" ? "m12" : "m3" });
       else if (t.name === "sortering") {
         this.sort = t.value as SortOrder;
@@ -127,7 +129,9 @@ export class PanelController {
 
     const budget = this.q<HTMLInputElement>("#budget-range");
     const size = this.q<HTMLInputElement>("#size-range");
-    budget?.addEventListener("input", () => this.store.set({ budget: Math.round(Number(budget.value) * 1_000_000) }));
+    budget?.addEventListener("input", () =>
+      this.store.set({ budget: Math.round(Number(budget.value) * 1_000_000) }),
+    );
     size?.addEventListener("input", () => this.store.set({ sqm: Number(size.value) }));
 
     this.root.addEventListener("click", (e) => {
@@ -170,9 +174,11 @@ export class PanelController {
     const tabs = this.q<HTMLElement>(".tabs");
     if (!tabs) return;
     requestAnimationFrame(() => {
-      const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
+      const headerBottom =
+        document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
       const delta = tabs.getBoundingClientRect().top - headerBottom - 4;
-      if (Math.abs(delta) > 2) window.scrollBy({ top: delta, behavior: reduced() ? "auto" : "smooth" });
+      if (Math.abs(delta) > 2)
+        window.scrollBy({ top: delta, behavior: reduced() ? "auto" : "smooth" });
     });
   }
 
@@ -180,7 +186,10 @@ export class PanelController {
     if (btn.getAttribute("aria-disabled") === "true") return;
     const s = this.store.state;
     if (control === "budget") {
-      const v = Math.min(BUDGET_RANGE.max, Math.max(BUDGET_RANGE.min, s.budget + dir * BUDGET_RANGE.step));
+      const v = Math.min(
+        BUDGET_RANGE.max,
+        Math.max(BUDGET_RANGE.min, s.budget + dir * BUDGET_RANGE.step),
+      );
       if (v !== s.budget) this.store.set({ budget: v });
     } else if (control === "size") {
       const v = Math.min(SIZE_RANGE.max, Math.max(SIZE_RANGE.min, s.sqm + dir * SIZE_RANGE.step));
@@ -209,7 +218,8 @@ export class PanelController {
 
   private removeCompare(slug: string): void {
     const wasFocusedInTray = this.q("#tray")?.contains(document.activeElement);
-    const wasFocusedInDetail = (document.activeElement as HTMLElement | null)?.dataset.action === "compare";
+    const wasFocusedInDetail =
+      (document.activeElement as HTMLElement | null)?.dataset.action === "compare";
     this.compare = removeFrom(this.compare, slug);
     saveCompare(this.compare);
     this.renderTray(`${getArea(slug)?.name ?? slug} är borttagen ur jämförelsen.`);
@@ -227,7 +237,7 @@ export class PanelController {
     if (!el) return;
     el.hidden = this.compare.length === 0;
     const body = this.q("#tray-body");
-    if (body) body.innerHTML = tray(this.compare, this.opts.base).value;
+    if (body) body.innerHTML = tray(this.compare).value;
     const note = this.q("#tray-note");
     if (status && message) status.textContent = message;
     if (note) {
@@ -286,7 +296,9 @@ export class PanelController {
     if (ml) this.paintInto("map-legend", ml, mapLegend(s, mapPaint(s).nodata.length > 0));
 
     const area = s.area ? getArea(s.area) : null;
-    document.title = area ? `${area.name}: bostadspriser | ${SITE_TITLE}` : (VIEW_TITLE[s.view] ?? this.baseTitle);
+    document.title = area
+      ? `${area.name}: bostadspriser | ${SITE_TITLE}`
+      : (VIEW_TITLE[s.view] ?? this.baseTitle);
 
     if (!prev) return;
     const opened = !!s.area && prev.area !== s.area;
@@ -304,7 +316,10 @@ export class PanelController {
       s.view === "budget" &&
       !s.area &&
       prev.view === "budget" &&
-      (s.budget !== prev.budget || s.sqm !== prev.sqm || s.housing !== prev.housing || s.period !== prev.period)
+      (s.budget !== prev.budget ||
+        s.sqm !== prev.sqm ||
+        s.housing !== prev.housing ||
+        s.period !== prev.period)
     ) {
       this.scheduleAnnounce();
     }
@@ -333,7 +348,8 @@ export class PanelController {
     const bv = String(s.budget / 1_000_000);
     if (b && b.value !== bv) b.value = bv;
     if (z && z.value !== String(s.sqm)) z.value = String(s.sqm);
-    const pct = (v: number, r: { min: number; max: number }) => `${((v - r.min) / (r.max - r.min)) * 100}%`;
+    const pct = (v: number, r: { min: number; max: number }) =>
+      `${((v - r.min) / (r.max - r.min)) * 100}%`;
     b?.style.setProperty("--p", pct(s.budget, BUDGET_RANGE));
     z?.style.setProperty("--p", pct(s.sqm, SIZE_RANGE));
     b?.setAttribute("aria-valuetext", mkrSpoken(s.budget));
@@ -341,7 +357,10 @@ export class PanelController {
     this.text("#budget-out", mkr(s.budget));
     this.text("#size-out", `${s.sqm} kvm`);
     // Rumsantalet säger något om lägenheter, men inte om villor.
-    this.text("#size-hint", s.housing === "house" ? "Villans boarea" : `ungefär ${typicalRooms(s.sqm)}`);
+    this.text(
+      "#size-hint",
+      s.housing === "house" ? "Villans boarea" : `ungefär ${typicalRooms(s.sqm)}`,
+    );
     for (const btn of this.root.querySelectorAll<HTMLButtonElement>("[data-action=step]")) {
       const isBudget = btn.dataset.control === "budget";
       const v = isBudget ? s.budget : s.sqm;
@@ -427,14 +446,19 @@ export class PanelController {
           const box = sc.getBoundingClientRect();
           const top = wrap.getBoundingClientRect().top;
           if (top < box.top + 4 || top > box.top + box.height * 0.4) {
-            sc.scrollTo({ top: sc.scrollTop + top - box.top - 12, behavior: smooth ? "smooth" : "auto" });
+            sc.scrollTo({
+              top: sc.scrollTop + top - box.top - 12,
+              behavior: smooth ? "smooth" : "auto",
+            });
           }
         }
       } else {
-        const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
+        const headerBottom =
+          document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 0;
         const top = wrap.getBoundingClientRect().top;
         const visible = top >= headerBottom && top < window.innerHeight * 0.6;
-        if (!visible || o.force) wrap.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+        if (!visible || o.force)
+          wrap.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
       }
       if (o.focus) this.q<HTMLElement>("#detail-title")?.focus({ preventScroll: true });
     });
@@ -442,7 +466,9 @@ export class PanelController {
 
   private focusRow(slug: string): void {
     requestAnimationFrame(() => {
-      const row = this.root.querySelector<HTMLElement>(`#views [data-view-panel]:not([hidden]) .row[data-slug="${slug}"]`);
+      const row = this.root.querySelector<HTMLElement>(
+        `#views [data-view-panel]:not([hidden]) .row[data-slug="${slug}"]`,
+      );
       if (row) {
         const details = row.closest("details");
         if (details && !details.open) details.open = true;

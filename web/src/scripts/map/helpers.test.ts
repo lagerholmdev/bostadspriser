@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
 import { DEFAULT_STATE } from "../../lib/url";
-import { addTo, compareHref, removeFrom } from "./compare";
+import { addTo, removeFrom } from "./compare";
 import { attr, html, raw } from "../../lib/html";
-import { composeStyle, firstSymbolIndex, hatchImage, LAYER, matchBySlug, PLACE_LABEL_MINZOOM, waterIndex } from "./mapstyle";
+import {
+  composeStyle,
+  firstSymbolIndex,
+  hatchImage,
+  LAYER,
+  matchBySlug,
+  PLACE_LABEL_MINZOOM,
+  waterIndex,
+} from "./mapstyle";
 import { FILL_OPACITY, mapPaint } from "./model";
 import { search } from "./search-index";
 
@@ -35,7 +43,12 @@ describe("search", () => {
   });
   it("låter områdets eget namn gå före en stadsdel", () => {
     const hits = search("sol");
-    expect(hits.map((h) => h.area.slug).slice(0, 2).sort()).toEqual(["sollentuna", "solna"]);
+    expect(
+      hits
+        .map((h) => h.area.slug)
+        .slice(0, 2)
+        .sort(),
+    ).toEqual(["sollentuna", "solna"]);
     const firstAlias = hits.findIndex((h) => h.via);
     expect(firstAlias).toBeGreaterThan(1);
     expect(hits.slice(firstAlias).every((h) => h.via)).toBe(true);
@@ -58,13 +71,13 @@ describe("compare", () => {
     expect(addTo(["a", "b"], "a")).toEqual({ list: ["a", "b"], dropped: null });
     expect(addTo(["a", "b", "c"], "d")).toEqual({ list: ["b", "c", "d"], dropped: "a" });
     expect(removeFrom(["a", "b"], "a")).toEqual(["b"]);
-    expect(compareHref("/bostadspriser/", ["sodermalm", "solna"])).toBe("/bostadspriser/jamfor/?omraden=sodermalm,solna");
   });
 });
 
 describe("mapstyle", () => {
   const paint = mapPaint(DEFAULT_STATE);
-  const layer = (id: string, type: string, extra: object = {}) => ({ id, type, ...extra }) as unknown as LayerSpecification;
+  const layer = (id: string, type: string, extra: object = {}) =>
+    ({ id, type, ...extra }) as unknown as LayerSpecification;
   const base = {
     version: 8,
     sources: { openmaptiles: { type: "vector", url: "x" } },
@@ -108,7 +121,15 @@ describe("mapstyle", () => {
   });
 
   it("bygger match-uttryck per område", () => {
-    expect(matchBySlug({ a: "#fff", b: "#000" }, "#ccc")).toEqual(["match", ["get", "slug"], "a", "#fff", "b", "#000", "#ccc"]);
+    expect(matchBySlug({ a: "#fff", b: "#000" }, "#ccc")).toEqual([
+      "match",
+      ["get", "slug"],
+      "a",
+      "#fff",
+      "b",
+      "#000",
+      "#ccc",
+    ]);
   });
 });
 
@@ -119,8 +140,16 @@ describe("search, rangordning", () => {
     expect(hits[1].area.slug).toBe("sodertalje");
   });
   it("väljer exakta å/ä/ö och sedan flest affärer vid lika träff", () => {
-    expect(search("söd").map((h) => h.area.slug).slice(0, 2)).toEqual(["sodermalm", "sodertalje"]);
-    expect(search("sod").map((h) => h.area.slug).slice(0, 2)).toEqual(["sodermalm", "sodertalje"]);
+    expect(
+      search("söd")
+        .map((h) => h.area.slug)
+        .slice(0, 2),
+    ).toEqual(["sodermalm", "sodertalje"]);
+    expect(
+      search("sod")
+        .map((h) => h.area.slug)
+        .slice(0, 2),
+    ).toEqual(["sodermalm", "sodertalje"]);
     // "so" utan prickar: Solna (641 sålda) före Sollentuna (277) och Södermalm före Södertälje.
     const so = search("so").map((h) => h.area.slug);
     expect(so.indexOf("sodermalm")).toBeLessThan(so.indexOf("sodertalje"));
@@ -149,7 +178,9 @@ describe("hatchImage", () => {
     const { style } = composeStyle(null, "areas.geojson", paint);
     const ids = style.layers.map((l) => l.id);
     expect(ids.indexOf(LAYER.hatchThin)).toBe(ids.indexOf(LAYER.fill) + 1);
-    const fill = style.layers.find((l) => l.id === LAYER.fill) as { paint: Record<string, unknown> };
+    const fill = style.layers.find((l) => l.id === LAYER.fill) as {
+      paint: Record<string, unknown>;
+    };
     expect(fill.paint["fill-opacity"]).toBe(FILL_OPACITY);
   });
 });

@@ -15,27 +15,23 @@ const me = stat(area, "apartment", "m3")?.pricePerSqm ?? null;
 ---
 
 <ul class="similar">
-  {
-    similar.map((a) => {
-      const p = stat(a, "apartment", "m3")?.pricePerSqm ?? null;
-      const diff = p != null && me ? p / me - 1 : null;
-      return (
-        <li>
-          <a href={areaUrl(a.slug)}>
-            <span class="sim-kind">{KIND_SHORT[a.kind]}</span>
-            <span class="sim-name">{a.name}</span>
-          </a>
-          <span class="sim-price">
-            <span class="swatch" style={`background:${priceColor(p)}`} />
-            {sqm(p)}
-          </span>
-          <span class="sim-diff">
-            {diff == null ? "" : `${pricier(diff)} än ${area.name}`}
-          </span>
-        </li>
-      );
-    })
-  }
+  {similar.map((a) => {
+    const p = stat(a, "apartment", "m3")?.pricePerSqm ?? null;
+    const diff = p != null && me ? p / me - 1 : null;
+    return (
+      <li>
+        <a href={areaUrl(a.slug)}>
+          <span class="sim-kind">{KIND_SHORT[a.kind]}</span>
+          <span class="sim-name">{a.name}</span>
+        </a>
+        <span class="sim-price">
+          <span class="swatch" style={`background:${priceColor(p)}`} />
+          {sqm(p)}
+        </span>
+        <span class="sim-diff">{diff == null ? "" : `${pricier(diff)} än ${area.name}`}</span>
+      </li>
+    );
+  })}
 </ul>
 
 <style>

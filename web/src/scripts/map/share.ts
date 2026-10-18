@@ -59,10 +59,12 @@ export function initShare(el: ShareElements, beforeShare: () => void): Sharer {
     await copy(url, el.status);
   });
 
-  el.fallback.querySelector<HTMLButtonElement>("[data-action=close-share]")?.addEventListener("click", () => {
-    el.fallback.hidden = true;
-    el.button.focus();
-  });
+  el.fallback
+    .querySelector<HTMLButtonElement>("[data-action=close-share]")
+    ?.addEventListener("click", () => {
+      el.fallback.hidden = true;
+      el.button.focus();
+    });
 
   return {
     async copyLink(status) {

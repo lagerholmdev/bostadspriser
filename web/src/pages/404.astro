@@ -8,45 +8,67 @@ import "../components/common/common.css";
 
 const popular = ["sodermalm", "kungsholmen", "hagersten-liljeholmen", "nacka", "solna"];
 const known = new Set(rankByPrice("apartment", "m3").map((a) => a.slug));
-const list = rankByPrice("apartment", "m3").filter((a) => popular.includes(a.slug) && known.has(a.slug));
+const list = rankByPrice("apartment", "m3").filter(
+  (a) => popular.includes(a.slug) && known.has(a.slug),
+);
 ---
 
-<Base title="Sidan finns inte | Stockholms prislandskap" description="Sidan du letade efter finns inte." noindex>
+<Base
+  title="Sidan finns inte | Stockholms prislandskap"
+  description="Sidan du letade efter finns inte."
+  noindex
+>
   <div class="wrap nf">
     <p class="kicker">Fel 404</p>
     <h1>Sidan finns inte</h1>
     <p class="nf-suggest" data-suggest hidden>
-      <a class="btn btn-primary" href={areasUrl()} data-suggest-link><span>Menade du <span data-suggest-name></span>?</span> <span aria-hidden="true">→</span></a>
+      <a class="btn btn-primary" href={areasUrl()} data-suggest-link>
+        <span>
+          Menade du <span data-suggest-name></span>?
+        </span>{" "}
+        <span aria-hidden="true">→</span>
+      </a>
     </p>
     <p class="lead">
       Adressen kan vara felstavad, eller så har sidan flyttat. Områdessidorna ligger under{" "}
-      <code>/omrade/</code> och har namnet utan å, ä och ö, till exempel <a href={areaUrl("sodermalm")}>/omrade/sodermalm/</a>.
+      <code>/omrade/</code> och har namnet utan å, ä och ö, till exempel{" "}
+      <a href={areaUrl("sodermalm")}>/omrade/sodermalm/</a>.
     </p>
     <form class="nf-search" action={areasUrl()} method="get" role="search" data-nf-search>
       <label for="nf-q">Sök område</label>
       <div class="nf-row">
-        <input id="nf-q" name="q" type="search" placeholder="Till exempel Aspudden eller Nacka" autocomplete="off" />
-        <button class="btn btn-primary" type="submit">Sök</button>
+        <input
+          id="nf-q"
+          name="q"
+          type="search"
+          placeholder="Till exempel Aspudden eller Nacka"
+          autocomplete="off"
+        />
+        <button class="btn btn-primary" type="submit">
+          Sök
+        </button>
       </div>
     </form>
     <div class="nf-links">
-      <a class="btn" href={mapUrl()}>Till kartan</a>
-      <a class="btn" href={areasUrl()}>Alla {areas.length} områden</a>
+      <a class="btn" href={mapUrl()}>
+        Till kartan
+      </a>
+      <a class="btn" href={areasUrl()}>
+        Alla {areas.length} områden
+      </a>
     </div>
-    {
-      list.length > 0 && (
-        <section class="nf-pop" aria-labelledby="nf-pop-title">
-          <h2 id="nf-pop-title">Områden många tittar på</h2>
-          <ul>
-            {list.map((a) => (
-              <li>
-                <a href={areaUrl(a.slug)}>Bostadspriser {inArea(a.slug, a.name)}</a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {list.length > 0 && (
+      <section class="nf-pop" aria-labelledby="nf-pop-title">
+        <h2 id="nf-pop-title">Områden många tittar på</h2>
+        <ul>
+          {list.map((a) => (
+            <li>
+              <a href={areaUrl(a.slug)}>Bostadspriser {inArea(a.slug, a.name)}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </Base>
 

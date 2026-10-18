@@ -49,7 +49,8 @@ export class AreaLabels {
     map.on("resize", () => this.schedule());
     // Förklaringen byter storlek med vyn.
     const legend = layer.parentElement?.querySelector(".map-legend");
-    if (legend && typeof ResizeObserver === "function") new ResizeObserver(() => this.schedule()).observe(legend);
+    if (legend && typeof ResizeObserver === "function")
+      new ResizeObserver(() => this.schedule()).observe(legend);
     this.schedule();
   }
 
@@ -84,7 +85,12 @@ export class AreaLabels {
       if (!el || el.offsetParent === null) continue;
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) continue;
-      out.push([r.left - o.left - PAD, r.top - o.top - PAD, r.right - o.left + PAD, r.bottom - o.top + PAD]);
+      out.push([
+        r.left - o.left - PAD,
+        r.top - o.top - PAD,
+        r.right - o.left + PAD,
+        r.bottom - o.top + PAD,
+      ]);
     }
     return out;
   }

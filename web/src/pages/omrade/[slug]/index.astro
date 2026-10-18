@@ -26,11 +26,21 @@ import {
   priceRank,
   similarNeighbours,
 } from "../../../lib/data";
-import { change, date, inArea, money, number, relative, sqm, MISSING_TEXT } from "../../../lib/format";
+import {
+  change,
+  date,
+  inArea,
+  money,
+  number,
+  relative,
+  sqm,
+  MISSING_TEXT,
+} from "../../../lib/format";
 import { changeSentence, joinNames, rankPhrase } from "../../../lib/text";
 import type { Area, MissingReason, Stat } from "../../../lib/types";
 
-export const getStaticPaths = (() => areas.map((area) => ({ params: { slug: area.slug }, props: { area } }))) satisfies GetStaticPaths;
+export const getStaticPaths = (() =>
+  areas.map((area) => ({ params: { slug: area.slug }, props: { area } }))) satisfies GetStaticPaths;
 
 interface Props {
   area: Area;
@@ -59,7 +69,9 @@ const missingNote = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sa
 const relSentence = ratio == null ? null : relative(ratio);
 const trend = changeSentence(ap12?.change, ap3?.change);
 // Hårt mellanslag efter ordningstalet, så att "3:e dyrast" inte bryts isär.
-const rankText = rank ? rankPhrase(rank.rank, rank.total).replace(/^(\d+:[ae]) /, "$1\u00a0") : null;
+const rankText = rank
+  ? rankPhrase(rank.rank, rank.total).replace(/^(\d+:[ae]) /, "$1\u00a0")
+  : null;
 const imageAlt = `Karta över ${area.name} med pris per kvm i grannområdena`;
 
 // Titel och beskrivning med riktiga siffror, för sökresultatet.
@@ -94,13 +106,28 @@ const jsonLd = {
           box: `${area.bbox[1]} ${area.bbox[0]} ${area.bbox[3]} ${area.bbox[2]}`,
         },
       },
-      variableMeasured: ["Pris per kvadratmeter (kr)", "Medelpris (kr)", "Antal sålda bostäder", "Prisförändring (%)"],
+      variableMeasured: [
+        "Pris per kvadratmeter (kr)",
+        "Medelpris (kr)",
+        "Antal sålda bostäder",
+        "Prisförändring (%)",
+      ],
     },
     {
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Områden", item: new URL(areasUrl(), Astro.site).href },
-        { "@type": "ListItem", position: 2, name: area.name, item: new URL(areaUrl(area.slug), Astro.site).href },
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Områden",
+          item: new URL(areasUrl(), Astro.site).href,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: area.name,
+          item: new URL(areaUrl(area.slug), Astro.site).href,
+        },
       ],
     },
   ],
@@ -110,64 +137,61 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 
 <Base title={title} description={description} image={`og/${area.slug}.png`} imageAlt={imageAlt}>
   <script slot="head" is:inline type="application/ld+json" set:html={jsonLdText} />
-
   <div class="wrap area">
     <Breadcrumb items={[{ label: "Områden", href: areasUrl() }, { label: area.name }]} />
 
     <header class="hero">
       <div class="hero-text">
-        <p class="kicker">{KIND_LABEL[area.kind]} · uppdaterad {updated}</p>
+        <p class="kicker">
+          {KIND_LABEL[area.kind]} · uppdaterad {updated}
+        </p>
         <h1>Bostadspriser {where}</h1>
 
         <div class="figure">
           <p class="figure-label">Bostadsrätter, senaste 3 månaderna</p>
-          {
-            price != null ? (
-              <p class:list={["figure-value", { "thin-value": thin }]}>
-                {number(price)}
-                <span class="figure-unit">kr/kvm</span>
-              </p>
-            ) : (
-              <p class="figure-value figure-missing">
-                Saknas <span class="figure-unit">({missingNote(ap3?.missing?.pricePerSqm)})</span>
-              </p>
-            )
-          }
-          {
-            relSentence != null && (
-              <p class="figure-context">
-                {relSentence} länets snitt på {sqm(county.pricePerSqm)}
-                {rankText && `, ${rankText}`}.
-              </p>
-            )
-          }
+          {price != null ? (
+            <p class:list={["figure-value", { "thin-value": thin }]}>
+              {number(price)}
+              <span class="figure-unit">kr/kvm</span>
+            </p>
+          ) : (
+            <p class="figure-value figure-missing">
+              Saknas <span class="figure-unit">({missingNote(ap3?.missing?.pricePerSqm)})</span>
+            </p>
+          )}
+          {relSentence != null && (
+            <p class="figure-context">
+              {relSentence} länets snitt på {sqm(county.pricePerSqm)}
+              {rankText && `, ${rankText}`}.
+            </p>
+          )}
           {trend && <p class="figure-trend">{trend}</p>}
         </div>
 
-        {
-          thin && ap3 && (
-            <p class="thin-note" role="note">
-              <strong>Få affärer:</strong>{" "}
-              {ap3.sales != null
-                ? `Bara ${number(ap3.sales)} bostadsrätter såldes ${where} de senaste 3 månaderna.`
-                : "Antalet sålda bostadsrätter saknas."}{" "}
-              Med så litet underlag kan snittpriset svänga mycket från månad till månad. Titta gärna på
-              siffrorna för 12 månader längre ner.
-            </p>
-          )
-        }
+        {thin && ap3 && (
+          <p class="thin-note" role="note">
+            <strong>Få affärer:</strong>{" "}
+            {ap3.sales != null
+              ? `Bara ${number(ap3.sales)} bostadsrätter såldes ${where} de senaste 3 månaderna.`
+              : "Antalet sålda bostadsrätter saknas."}{" "}
+            Med så litet underlag kan snittpriset svänga mycket från månad till månad. Titta gärna
+            på siffrorna för 12 månader längre ner.
+          </p>
+        )}
 
         <div class="actions hero-actions">
-          <a class="btn btn-primary" href={mapUrl({ omrade: area.slug })}>Visa på kartan</a>
-          {
-            neighboursForCompare.length > 0 && (
-              <a class="btn" href={compareUrl([area.slug, ...neighboursForCompare])}>
-                Jämför med grannarna
-              </a>
-            )
-          }
+          <a class="btn btn-primary" href={mapUrl({ omrade: area.slug })}>
+            Visa på kartan
+          </a>
+          {neighboursForCompare.length > 0 && (
+            <a class="btn" href={compareUrl([area.slug, ...neighboursForCompare])}>
+              Jämför med grannarna
+            </a>
+          )}
           <CopyLink />
-          <a class="tertiary" href={mapUrl({ vy: "budget", omrade: area.slug })}>Har jag råd här?</a>
+          <a class="tertiary" href={mapUrl({ vy: "budget", omrade: area.slug })}>
+            Har jag råd här?
+          </a>
         </div>
       </div>
 
@@ -176,148 +200,150 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
       </div>
     </header>
 
-    {
-      ap3 && (
-        <section class="page-section" aria-labelledby="nyckeltal">
-          <h2 id="nyckeltal" class="visually-hidden">
-            Nyckeltal för bostadsrätter
-          </h2>
-          <dl class="stat-row">
-            <StatCard label="Medelpris" note="per såld bostadsrätt, 3 mån" muted={thin}>
-              {ap3.meanPrice != null ? money(ap3.meanPrice) : <span class="chg-none">{missingNote(ap3.missing?.meanPrice)}</span>}
-            </StatCard>
-            <StatCard
-              label="Sålda bostäder"
-              note={ap12?.sales != null ? `senaste 3 mån, ${number(ap12.sales)} på 12 mån` : "senaste 3 mån"}
-            >
-              {ap3.sales != null ? number(ap3.sales) : <span class="chg-none">{missingNote(ap3.missing?.sales)}</span>}
-            </StatCard>
-            <StatCard label="Förändring 3 mån" note="mot de tre månaderna före">
-              <ChangeValue value={ap3.change} missing={ap3.missing?.change} word />
-            </StatCard>
-            <StatCard label="Förändring 12 mån" note="mot samma månader året innan">
-              <ChangeValue value={ap12?.change} missing={ap12?.missing?.change} word />
-            </StatCard>
-          </dl>
-        </section>
-      )
-    }
+    {ap3 && (
+      <section class="page-section" aria-labelledby="nyckeltal">
+        <h2 id="nyckeltal" class="visually-hidden">
+          Nyckeltal för bostadsrätter
+        </h2>
+        <dl class="stat-row">
+          <StatCard label="Medelpris" note="per såld bostadsrätt, 3 mån" muted={thin}>
+            {ap3.meanPrice != null ? (
+              money(ap3.meanPrice)
+            ) : (
+              <span class="chg-none">{missingNote(ap3.missing?.meanPrice)}</span>
+            )}
+          </StatCard>
+          <StatCard
+            label="Sålda bostäder"
+            note={
+              ap12?.sales != null
+                ? `senaste 3 mån, ${number(ap12.sales)} på 12 mån`
+                : "senaste 3 mån"
+            }
+          >
+            {ap3.sales != null ? (
+              number(ap3.sales)
+            ) : (
+              <span class="chg-none">{missingNote(ap3.missing?.sales)}</span>
+            )}
+          </StatCard>
+          <StatCard label="Förändring 3 mån" note="mot de tre månaderna före">
+            <ChangeValue value={ap3.change} missing={ap3.missing?.change} word />
+          </StatCard>
+          <StatCard label="Förändring 12 mån" note="mot samma månader året innan">
+            <ChangeValue value={ap12?.change} missing={ap12?.missing?.change} word />
+          </StatCard>
+        </dl>
+      </section>
+    )}
 
-    {
-      price != null && (
-        <section class="page-section" aria-labelledby="budget">
-          <div class="section-head">
-            <h2 id="budget">Vad räcker pengarna till {where}?</h2>
-          </div>
-          <BudgetFit slug={area.slug} name={area.name} pricePerSqm={price} />
-        </section>
-      )
-    }
+    {price != null && (
+      <section class="page-section" aria-labelledby="budget">
+        <div class="section-head">
+          <h2 id="budget">Vad räcker pengarna till {where}?</h2>
+        </div>
+        <BudgetFit slug={area.slug} name={area.name} pricePerSqm={price} />
+      </section>
+    )}
 
-    {
-      area.apartment && (
-        <section class="page-section narrow" aria-labelledby="perioder">
-          <div class="section-head">
-            <h2 id="perioder">Senaste 3 och 12 månaderna</h2>
-            <p>
-              Tre månader visar läget just nu. Tolv månader bygger på fler affärer och svänger mindre.
-            </p>
-          </div>
-          <StatsTable
-            stats={area.apartment}
-            caption={`Bostadsrätter ${where}, senaste 3 och 12 månaderna`}
-            noun="bostadsrätter"
-          />
-        </section>
-      )
-    }
+    {area.apartment && (
+      <section class="page-section narrow" aria-labelledby="perioder">
+        <div class="section-head">
+          <h2 id="perioder">Senaste 3 och 12 månaderna</h2>
+          <p>
+            Tre månader visar läget just nu. Tolv månader bygger på fler affärer och svänger mindre.
+          </p>
+        </div>
+        <StatsTable
+          stats={area.apartment}
+          caption={`Bostadsrätter ${where}, senaste 3 och 12 månaderna`}
+          noun="bostadsrätter"
+        />
+      </section>
+    )}
 
     <section class="page-section narrow" aria-labelledby="villor">
       <div class="section-head">
         <h2 id="villor">Villor {where}</h2>
-        {
-          area.houseScope === "city" && house3 ? (
-            <p>
-              Villor redovisas för hela Stockholms stad: {sqm(house3.pricePerSqm)} de senaste 3 månaderna, med{" "}
-              {number(house3.sales)} sålda villor och ett medelpris på {money(house3.meanPrice)}. Svensk
-              Mäklarstatistik delar inte upp villapriserna på stadsdelsområden, så siffran gäller hela staden och inte
-              bara {area.name}.
-            </p>
-          ) : area.houseScope === "area" && area.house ? (
-            <p>
-              {house3?.pricePerSqm != null
-                ? `En villa ${where} kostade i snitt ${sqm(house3.pricePerSqm)} de senaste 3 månaderna, ${relative(countyRatio(house3.pricePerSqm, "house"))} länets snitt för villor.`
-                : `Snittpriset för villor ${where} saknas för de senaste 3 månaderna.`}
-            </p>
-          ) : (
-            <p>Det finns ingen villastatistik för {area.name}.</p>
-          )
-        }
+        {area.houseScope === "city" && house3 ? (
+          <p>
+            Villor redovisas för hela Stockholms stad: {sqm(house3.pricePerSqm)} de senaste 3
+            månaderna, med {number(house3.sales)} sålda villor och ett medelpris på{" "}
+            {money(house3.meanPrice)}. Svensk Mäklarstatistik delar inte upp villapriserna på
+            stadsdelsområden, så siffran gäller hela staden och inte bara {area.name}.
+          </p>
+        ) : area.houseScope === "area" && area.house ? (
+          <p>
+            {house3?.pricePerSqm != null
+              ? `En villa ${where} kostade i snitt ${sqm(house3.pricePerSqm)} de senaste 3 månaderna, ${relative(countyRatio(house3.pricePerSqm, "house"))} länets snitt för villor.`
+              : `Snittpriset för villor ${where} saknas för de senaste 3 månaderna.`}
+          </p>
+        ) : (
+          <p>Det finns ingen villastatistik för {area.name}.</p>
+        )}
       </div>
-      {
-        area.houseScope === "area" && area.house && (
-          <StatsTable stats={area.house} caption={`Villor ${where}, senaste 3 och 12 månaderna`} noun="villor" />
-        )
-      }
+      {area.houseScope === "area" && area.house && (
+        <StatsTable
+          stats={area.house}
+          caption={`Villor ${where}, senaste 3 och 12 månaderna`}
+          noun="villor"
+        />
+      )}
     </section>
 
-    {
-      rank && (
-        <section class="page-section" aria-labelledby="plats">
-          <div class="section-head">
-            <h2 id="plats">Plats i länet</h2>
-            <p>
-              {area.name} är {rankText} i Stockholms län, räknat på pris per kvm för bostadsrätter de senaste 3
-              månaderna.
-            </p>
-          </div>
-          <RankChart area={area} />
-        </section>
-      )
-    }
-
-    {
-      similar.length > 0 && (
-        <section class="page-section" aria-labelledby="grannar">
-          <div class="section-head">
-            <h2 id="grannar">Liknande grannområden</h2>
-            <p>Områden nära {area.name} med snittpris i samma nivå.</p>
-          </div>
-          <SimilarAreas area={area} similar={similar} />
-          <p class="more">
-            <a href={compareUrl([area.slug, ...neighboursForCompare])}>
-              Jämför {area.name} med {joinNames(similar.slice(0, 2).map((a) => a.name))}
-            </a>
+    {rank && (
+      <section class="page-section" aria-labelledby="plats">
+        <div class="section-head">
+          <h2 id="plats">Plats i länet</h2>
+          <p>
+            {area.name} är {rankText} i Stockholms län, räknat på pris per kvm för bostadsrätter de
+            senaste 3 månaderna.
           </p>
-        </section>
-      )
-    }
+        </div>
+        <RankChart area={area} />
+      </section>
+    )}
+
+    {similar.length > 0 && (
+      <section class="page-section" aria-labelledby="grannar">
+        <div class="section-head">
+          <h2 id="grannar">Liknande grannområden</h2>
+          <p>Områden nära {area.name} med snittpris i samma nivå.</p>
+        </div>
+        <SimilarAreas area={area} similar={similar} />
+        <p class="more">
+          <a href={compareUrl([area.slug, ...neighboursForCompare])}>
+            Jämför {area.name} med {joinNames(similar.slice(0, 2).map((a) => a.name))}
+          </a>
+        </p>
+      </section>
+    )}
 
     <section class="page-section narrow source" aria-labelledby="om-siffrorna">
       <h2 id="om-siffrorna">Om siffrorna</h2>
       <p>
-        Siffrorna kommer från <a href={dataset.source.url} rel="noopener">{dataset.source.name}</a> och gäller{" "}
-        {dataset.periods.m3} (3 månader) och {dataset.periods.m12} (12 månader). De bygger på bostäder som sålts via
-        mäklare. Pris per kvm är ett snitt för alla sålda bostäder i området, så en enskild bostad kan kosta mer eller
-        mindre beroende på läge, skick och storlek.
+        Siffrorna kommer från{" "}
+        <a href={dataset.source.url} rel="noopener">
+          {dataset.source.name}
+        </a>{" "}
+        och gäller {dataset.periods.m3} (3 månader) och {dataset.periods.m12} (12 månader). De
+        bygger på bostäder som sålts via mäklare. Pris per kvm är ett snitt för alla sålda bostäder
+        i området, så en enskild bostad kan kosta mer eller mindre beroende på läge, skick och
+        storlek.
       </p>
-      {
-        reasons.size > 0 && (
-          <p>
-            Några värden saknas.{" "}
-            {reasons.has("F") && "Mäklarstatistik visar inte värden som bygger på för få affärer. "}
-            {reasons.has("N") && "Värden som inte är representativa visas inte heller. "}
-            {reasons.has("0") && "Där inga affärer gjorts finns inget värde. "}
-            <a href={aboutUrl("#saknade-varden")}>Läs mer om saknade värden</a>
-          </p>
-        )
-      }
+      {reasons.size > 0 && (
+        <p>
+          Några värden saknas.{" "}
+          {reasons.has("F") && "Mäklarstatistik visar inte värden som bygger på för få affärer. "}
+          {reasons.has("N") && "Värden som inte är representativa visas inte heller. "}
+          {reasons.has("0") && "Där inga affärer gjorts finns inget värde. "}
+          <a href={aboutUrl("#saknade-varden")}>Läs mer om saknade värden</a>
+        </p>
+      )}
       <p>
-        {
-          isDistrict
-            ? `${area.name} är ett av Mäklarstatistiks tolv stadsdelsområden i Stockholms stad. Snittet gäller hela området, inte enskilda kvarter.`
-            : `Siffrorna gäller hela ${area.name} kommun, inte enskilda orter eller kvarter.`
-        }{" "}
+        {isDistrict
+          ? `${area.name} är ett av Mäklarstatistiks tolv stadsdelsområden i Stockholms stad. Snittet gäller hela området, inte enskilda kvarter.`
+          : `Siffrorna gäller hela ${area.name} kommun, inte enskilda orter eller kvarter.`}{" "}
         <a href={aboutUrl()}>Om datan och metoden</a>
       </p>
     </section>

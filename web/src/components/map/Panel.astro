@@ -6,9 +6,15 @@
 import { dataset } from "../../lib/data";
 import { date } from "../../lib/format";
 import { DEFAULT_STATE, defaultPeriod } from "../../lib/url";
-import { budgetModel, changeModel, priceModel, SORT_LABEL, type SortOrder } from "../../scripts/app/model";
-import { legend } from "../../scripts/app/panel/legend";
-import { CITY_HOUSE_NOTE } from "../../scripts/app/panel/text";
+import {
+  budgetModel,
+  changeModel,
+  priceModel,
+  SORT_LABEL,
+  type SortOrder,
+} from "../../scripts/map/model";
+import { legend } from "../../scripts/map/panel/legend";
+import { CITY_HOUSE_NOTE } from "../../scripts/map/panel/text";
 import {
   budgetBest,
   budgetHeadline,
@@ -18,7 +24,7 @@ import {
   changeSummary,
   priceList,
   priceSummary,
-} from "../../scripts/app/panel/views";
+} from "../../scripts/map/panel/views";
 import BudgetControls from "./BudgetControls.astro";
 import SearchBox from "./SearchBox.astro";
 import Segmented from "./Segmented.astro";
@@ -39,7 +45,10 @@ const tabs = [
   { view: "budget", label: "Var har jag råd?" },
   { view: "forandring", label: "Förändring" },
 ];
-const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({ value: k, label: SORT_LABEL[k] }));
+const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
+  value: k,
+  label: SORT_LABEL[k],
+}));
 ---
 
 <section class="panel" id="panel" aria-labelledby="panel-title">
@@ -55,7 +64,8 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({ value
             stroke="currentColor"
             stroke-width="1.7"
             stroke-linecap="round"
-            stroke-linejoin="round"></path>
+            stroke-linejoin="round"
+          ></path>
         </svg>
         Dela
       </button>
@@ -65,29 +75,29 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({ value
       <label for="share-url">Kopiera länken</label>
       <div class="share-fallback-row">
         <input id="share-url" type="text" readonly />
-        <button type="button" class="btn" data-action="close-share">Stäng</button>
+        <button type="button" class="btn" data-action="close-share">
+          Stäng
+        </button>
       </div>
     </div>
 
     <SearchBox />
 
     <div class="tabs" role="tablist" aria-label="Vad vill du veta?">
-      {
-        tabs.map((t) => (
-          <button
-            type="button"
-            role="tab"
-            class="tab"
-            id={`tab-${t.view}`}
-            data-view={t.view}
-            aria-controls={`panel-${t.view}`}
-            aria-selected={t.view === s.view ? "true" : "false"}
-            tabindex={t.view === s.view ? 0 : -1}
-          >
-            {t.label}
-          </button>
-        ))
-      }
+      {tabs.map((t) => (
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          id={`tab-${t.view}`}
+          data-view={t.view}
+          aria-controls={`panel-${t.view}`}
+          aria-selected={t.view === s.view ? "true" : "false"}
+          tabindex={t.view === s.view ? 0 : -1}
+        >
+          {t.label}
+        </button>
+      ))}
     </div>
 
     <div class="filters" id="filters">
@@ -105,49 +115,119 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({ value
         legend="Period"
         value="m3"
         options={[
-          { value: "m3", label: "Senaste 3 mån", short: "3 mån", changeLabel: "På tre månader", changeShort: "3 mån" },
-          { value: "m12", label: "Senaste 12 mån", short: "12 mån", changeLabel: "På ett år", changeShort: "1 år" },
+          {
+            value: "m3",
+            label: "Senaste 3 mån",
+            short: "3 mån",
+            changeLabel: "På tre månader",
+            changeShort: "3 mån",
+          },
+          {
+            value: "m12",
+            label: "Senaste 12 mån",
+            short: "12 mån",
+            changeLabel: "På ett år",
+            changeShort: "1 år",
+          },
         ]}
       />
-      <p class="filter-note" id="house-note" hidden>{CITY_HOUSE_NOTE}</p>
+      <p class="filter-note" id="house-note" hidden>
+        {CITY_HOUSE_NOTE}
+      </p>
     </div>
 
     <div class="views" id="views">
-      <section class="view" id="panel-pris" role="tabpanel" aria-labelledby="tab-pris" data-view-panel="pris">
+      <section
+        class="view"
+        id="panel-pris"
+        role="tabpanel"
+        aria-labelledby="tab-pris"
+        data-view-panel="pris"
+      >
         <div data-slot="price-summary" set:html={priceSummary(price, s.housing, s.period).value} />
         <Fragment set:html={legend({ view: "pris", housing: s.housing, period: s.period }).value} />
         <div class="list-head">
           <h2 class="list-title">Alla områden</h2>
-          <Segmented name="sortering" legend="Sortera" hideLegend value="desc" options={sortOptions} class="seg-small" />
+          <Segmented
+            name="sortering"
+            legend="Sortera"
+            hideLegend
+            value="desc"
+            options={sortOptions}
+            class="seg-small"
+          />
         </div>
         <div data-slot="price-list" set:html={priceList(price, s.housing, s.period).value} />
       </section>
 
-      <section class="view" id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" data-view-panel="budget">
+      <section
+        class="view"
+        id="panel-budget"
+        role="tabpanel"
+        aria-labelledby="tab-budget"
+        data-view-panel="budget"
+      >
         <BudgetControls />
         <p class="budget-max" data-slot="budget-max" set:html={budgetMax(budget).value} />
         <h2 class="headline" data-slot="budget-headline">
           {budgetHeadline(budget, s.budget, s.sqm)}
         </h2>
         <p class="budget-best" data-slot="budget-best" set:html={budgetBest(budget).value} />
-        <p class="visually-hidden" id="budget-status" role="status" aria-live="polite" aria-atomic="true"></p>
-        <Fragment set:html={legend({ view: "budget", housing: s.housing, period: s.period }).value} />
-        <div data-slot="budget-results" set:html={budgetResults(budget, s.budget, s.sqm, s.housing).value} />
+        <p
+          class="visually-hidden"
+          id="budget-status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        ></p>
+        <Fragment
+          set:html={legend({ view: "budget", housing: s.housing, period: s.period }).value}
+        />
+        <div
+          data-slot="budget-results"
+          set:html={budgetResults(budget, s.budget, s.sqm, s.housing).value}
+        />
       </section>
 
-      <section class="view" id="panel-forandring" role="tabpanel" aria-labelledby="tab-forandring" data-view-panel="forandring">
-        <div data-slot="change-summary" set:html={changeSummary(change, s.housing, changePeriod).value} />
-        <div data-slot="change-legend" set:html={legend({ view: "forandring", housing: s.housing, period: changePeriod }).value} />
-        <div data-slot="change-lists" set:html={changeLists(change, s.housing, changePeriod).value} />
+      <section
+        class="view"
+        id="panel-forandring"
+        role="tabpanel"
+        aria-labelledby="tab-forandring"
+        data-view-panel="forandring"
+      >
+        <div
+          data-slot="change-summary"
+          set:html={changeSummary(change, s.housing, changePeriod).value}
+        />
+        <div
+          data-slot="change-legend"
+          set:html={legend({ view: "forandring", housing: s.housing, period: changePeriod }).value}
+        />
+        <div
+          data-slot="change-lists"
+          set:html={changeLists(change, s.housing, changePeriod).value}
+        />
       </section>
-      <a class="to-filters" href="#filters" data-action="to-filters">Till filtren <span aria-hidden="true">↑</span></a>
+      <a class="to-filters" href="#filters" data-action="to-filters">
+        Till filtren <span aria-hidden="true">↑</span>
+      </a>
     </div>
 
-    <section class="detail-wrap" id="detail" data-slot="detail" aria-label="Valt område" hidden></section>
+    <section
+      class="detail-wrap"
+      id="detail"
+      data-slot="detail"
+      aria-label="Valt område"
+      hidden
+    ></section>
 
     <p class="panel-foot">
-      Källa: <a href={dataset.source.url} rel="noopener">{dataset.source.name}</a>, uppdaterad {date(dataset.updated)}.
-      <a href={`${base}om/`}>Om datan</a>
+      Källa:{" "}
+      <a href={dataset.source.url} rel="noopener">
+        {dataset.source.name}
+      </a>
+      , uppdaterad {date(dataset.updated)}.<a href={`${base}om/`}>Om datan</a>
     </p>
   </div>
 
