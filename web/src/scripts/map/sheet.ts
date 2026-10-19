@@ -237,7 +237,14 @@ export class BottomSheet {
     });
 
     const ro = new ResizeObserver(() => this.refresh());
-    for (const el of [app, panel.querySelector(".tray"), panel.querySelector(".peek")]) {
+    // Vyns svar (data-peek-end) byter höjd när vyn byts eller rubriken bryts om.
+    const watched = [
+      app,
+      panel.querySelector(".tray"),
+      panel.querySelector(".peek"),
+      ...panel.querySelectorAll("[data-peek-end]"),
+    ];
+    for (const el of watched) {
       if (el) ro.observe(el);
     }
     this.off.push(() => ro.disconnect());

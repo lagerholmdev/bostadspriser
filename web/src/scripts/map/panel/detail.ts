@@ -10,6 +10,7 @@ import {
 } from "../../../lib/data";
 import {
   MISSING_TEXT,
+  inArea,
   change,
   changeDirection,
   changeWord,
@@ -18,6 +19,7 @@ import {
   number,
   relative,
 } from "../../../lib/format";
+import { contextValues } from "../../../lib/context";
 import { areaUrl } from "../../../lib/links";
 import { changeSentence, rankPhrase } from "../../../lib/text";
 import type { Area, MissingReason, Period, Stat } from "../../../lib/types";
@@ -130,6 +132,13 @@ export function detail(area: Area, s: AppState, opts: DetailOptions): Html {
           cityHouse ? "för hela Stockholms stad" : undefined,
         )}
       </dl>
+      ${
+        contextValues(area).length
+          ? html`<p class="detail-more">
+              <a href="${`${href}#invanare`}">Vilka bor ${inArea(area.slug, area.name)}?</a>
+            </p>`
+          : ""
+      }
       <div class="actions">
         <a class="btn btn-primary" href="${href}">Läs mer om ${area.name}</a>
         <button

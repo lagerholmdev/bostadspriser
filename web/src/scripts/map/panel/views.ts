@@ -54,17 +54,31 @@ function strong(s: string): Html {
 
 /* ---------- Pris per kvm ---------- */
 
+/**
+ * Svaret överst i vyn: etikett, en stor siffra och en rad till. På mobilen är det vad kikläget
+ * visar, så det ska gå att läsa utan att dra upp panelen.
+ */
+function lead(label: string, value: Html, sub: Html | string): Html {
+  return html`<div class="lead">
+    <p class="lead-label">${label}</p>
+    <p class="lead-value">${value}</p>
+    <p class="lead-sub">${sub}</p>
+  </div>`;
+}
+
+const HOUSING_CAP: Record<Housing, string> = { apartment: "Bostadsrätter", house: "Villor" };
+
 export function priceSummary(m: PriceModel, housing: Housing, period: Period): Html {
   if (m.county == null || !m.dearest || !m.cheapest) {
     return html`<p class="summary">
       Det finns inga priser för ${HOUSING_MANY[housing]} ${PERIOD_PHRASE[period]}.
     </p>`;
   }
-  return html`<p class="summary">
-    ${housing === "house" ? "En villa" : "En bostadsrätt"} i Stockholms län kostade i snitt
-    ${strong(fmtSqm(m.county))} ${PERIOD_PHRASE[period]} (${months(period)}). Dyrast är
-    ${m.dearest.name}, billigast ${m.cheapest.name}.
-  </p>`;
+  return lead(
+    `${HOUSING_CAP[housing]} i länet, ${months(period)}`,
+    html`${strong(number(m.county))} <span class="lead-unit">kr/kvm i snitt</span>`,
+    html`Dyrast är ${m.dearest.name}, billigast ${m.cheapest.name}.`,
+  );
 }
 
 export function priceList(m: PriceModel, housing: Housing, period: Period): Html {
@@ -214,15 +228,13 @@ export function changeSummary(m: ChangeModel, housing: Housing, period: Period):
     return html`<p class="summary">Förändringen ${span} saknas för länet.</p>`;
   }
   const dir = changeWord(m.county);
-  const what = HOUSING_MANY[housing];
-  const pct = `${Math.abs(m.county).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}\u00a0%`;
-  const lead =
-    dir === "oförändrat"
-      ? html`Priset på ${what} i länet är i stort sett ${strong("oförändrat")} ${span}`
-      : html`Priset på ${what} i länet har gått ${dir} ${strong(pct)} ${span}`;
-  return html`<p class="summary">
-    ${lead} (${changeBasis(period)}). ${m.countUp} områden har gått upp och ${m.countDown} ner.
-  </p>`;
+  const cls = dir === "upp" ? "is-up" : dir === "ner" ? "is-down" : "is-flat";
+  return lead(
+    `${HOUSING_CAP[housing]} i länet ${span}`,
+    html`<strong class="${cls}">${change(m.county)}</strong>
+      <span class="lead-unit">${dir === "oförändrat" ? "i stort sett oförändrat" : dir}</span>`,
+    `${m.countUp} områden har gått upp och ${m.countDown} ner, ${changeBasis(period)}.`,
+  );
 }
 
 /** "3 platser upp sedan förra månaden", eller tomt om raden inte flyttat märkbart. */
