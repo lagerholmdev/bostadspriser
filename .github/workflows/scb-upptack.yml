@@ -1,0 +1,16 @@
+name: SCB-upptäckt (tillfällig)
+on:
+  push:
+    branches: [scb-upptack]
+permissions:
+  contents: read
+jobs:
+  upptack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python .github/upptack/discover.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: upptack
+          path: out/
