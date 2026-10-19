@@ -1,0 +1,19 @@
+Laddar ner DeSO 2025 för Stockholms län från SCB
+Laddar ner https://raw.githubusercontent.com/krasch/stockholm-stadsdelar/master/geojson/simplified/stadsdelar_utan_vatten.geo.json
+Skrev data/scb/deso.csv: 1362 DeSO, varav 569 i Stockholms stad (2 under 90 % i ett område)
+Hämtar metadata för TAB6568
+Hämtar TAB6568
+Hushåll med barn 2025: länet 0.3118
+Hämtar metadata för TAB6679
+Hämtar TAB6679
+Rikets översta inkomstfjärdedel 2024: länet 0.34
+Hämtar metadata för TAB6534
+Hämtar TAB6534
+Eftergymnasial utbildning 3 år+ 2025: länet 0.398
+Hämtar metadata för TAB6574
+Hämtar TAB6574
+25–44 år 2025: länet 0.2931
+Hämtar metadata för TAB6638
+Hämtar TAB6638
+Bostadsrätter 2025: länet 494577
+Skrev data/scb/kontext.json
