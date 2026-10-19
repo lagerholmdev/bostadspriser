@@ -47,6 +47,9 @@ def _repo_root() -> Path:
 ROOT = _repo_root()
 SNAPSHOT_DIR = ROOT / "data" / "snapshots"
 GEO_FILE = ROOT / "data" / "geo" / "areas.geojson"
+SCB_DIR = ROOT / "data" / "scb"
+DESO_FILE = SCB_DIR / "deso.csv"
+CONTEXT_FILE = SCB_DIR / "kontext.json"
 GENERATED_DIR = ROOT / "web" / "src" / "generated"
 OG_DIR = ROOT / "web" / "public" / "og"
 CACHE_DIR = ROOT / ".cache"

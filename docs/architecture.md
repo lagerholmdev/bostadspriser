@@ -12,6 +12,7 @@ på GitHub Pages.
 │   └── requirements.lock     låsta versioner för Actions (pip-compile)
 ├── data/
 │   ├── snapshots/            en JSON per månad från Mäklarstatistik (källan, checkas in)
+│   ├── scb/                  SCB:s områdesstatistik och DeSO-mappningen (årsvis, checkas in)
 │   └── geo/areas.geojson     områdesgeometri (byggs sällan, checkas in)
 ├── web/                      Astro + TypeScript
 │   ├── src/pages/            kartan, områdessidor, jämförelse, om
@@ -34,6 +35,7 @@ på GitHub Pages.
 Mäklarstatistik ──scrape──▶ data/snapshots/ÅÅÅÅ-MM.json
                                      │
 data/geo/areas.geojson ──────────────┤
+SCB ──deso, scb (årsvis)──▶ data/scb/ ┤
                                      ▼
                         export ──▶ web/src/generated/areas.json      (Dataset, se docs/data.md)
                                    web/src/generated/areas.geojson   (geometri)
@@ -57,6 +59,7 @@ pip install -c requirements.lock -e ".[dev]"   # ".[dev,geo]" för att bygga om 
 python -m prislandskap scrape      # hämta ny månad
 python -m prislandskap export      # skriv web/src/generated/
 python -m prislandskap og          # skriv web/public/og/
+python -m prislandskap deso && python -m prislandskap scb  # SCB, årsvis i scb.yml
 ruff check . && ruff format --check . && pytest
 
 # Webb
@@ -95,6 +98,10 @@ format, typkontroll, tester och bygge med den nya datan → checka in ögonblick
 gick igenom) → ladda upp och publicera på Pages. Ett fel i den nya datan stoppar alltså publiceringen
 utan att något checkas in, och sajten ligger kvar på förra månaden.
 
+`scb.yml` körs den 4 maj och manuellt. Den bygger DeSO-mappningen, hämtar SCB-statistiken, kör
+samma kontroller som månadsjobbet och checkar in `data/scb/` om något ändrats. Sedan startar den
+`deploy.yml`, eftersom en push från Actions inte startar andra arbetsflöden av sig själv.
+
 ## Beslut
 
 - **Astro**: statiska sidor per område för sök och delning, och lite klientkod bara där den behövs
@@ -105,5 +112,7 @@ utan att något checkas in, och sajten ligger kvar på förra månaden.
   en enkel reservstil.
 - **Python för data**: skrapan, geometrin och delningsbilderna. Pillow ritar bilderna; inga
   webbläsare i bygget.
+- **SCB i ett eget årsjobb**: SCB:s tabeller uppdateras en gång om året. Att hålla dem utanför
+  månadsjobbet gör att ett fel hos SCB aldrig stoppar en prisuppdatering.
 - **Data i git**: varje månads ögonblicksbild checkas in. Det ger historik gratis och gör varje
   bygge reproducerbart.

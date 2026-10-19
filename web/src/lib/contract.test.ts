@@ -86,10 +86,44 @@ function checkStatsByPeriod(p: Problems, where: string, v: unknown): void {
   for (const period of PERIODS) checkStat(p, `${where}.${period}`, v[period]);
 }
 
+const CONTEXT_FIELDS = [
+  "families",
+  "highIncome",
+  "higherEducation",
+  "age25to44",
+  "condos",
+] as const;
+
+function checkContext(p: Problems, where: string, c: unknown): void {
+  if (!isObj(c)) return p.check(false, `${where}: ska vara ett objekt`);
+  checkKeys(p, where, c, [...CONTEXT_FIELDS]);
+  for (const f of CONTEXT_FIELDS) {
+    const v = c[f];
+    if (v === null) continue;
+    if (!isNum(v)) {
+      p.check(false, `${where}.${f}: ska vara tal eller null`);
+    } else if (f === "condos") {
+      p.check(Number.isInteger(v) && v >= 0, `${where}.condos: ska vara ett heltal ≥ 0`);
+    } else p.check(v >= 0 && v <= 1, `${where}.${f}: ska vara en andel 0–1, är ${v}`);
+  }
+}
+
 function validateDataset(data: unknown): string[] {
   const p = new Problems();
   if (!isObj(data)) return ["Dataset: ska vara ett objekt"];
-  checkKeys(p, "Dataset", data, ["updated", "periods", "source", "county", "areas"]);
+  checkKeys(p, "Dataset", data, ["updated", "periods", "source", "county", "context", "areas"]);
+  const context = data.context;
+  if (context !== null) {
+    if (isObj(context)) {
+      checkKeys(p, "context", context, ["source", "years", "county"]);
+      const years = context.years;
+      p.check(
+        isObj(years) && CONTEXT_FIELDS.every((k) => typeof years[k] === "string"),
+        "context.years: ska ha ett år per mått",
+      );
+      checkContext(p, "context.county", context.county);
+    } else p.check(false, "Dataset.context: ska vara ett objekt eller null");
+  }
   p.check(
     typeof data.updated === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.updated),
     `Dataset.updated: ska vara YYYY-MM-DD, är ${JSON.stringify(data.updated)}`,
@@ -136,6 +170,7 @@ function validateDataset(data: unknown): string[] {
       "apartment",
       "house",
       "houseScope",
+      "context",
     ]);
     p.check(
       typeof a.slug === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(a.slug),
@@ -177,6 +212,11 @@ function validateDataset(data: unknown): string[] {
       p.check(a.houseScope === "city", `${w}: stadsdelsområden har houseScope "city"`);
     if (a.kind === "municipality" && a.house !== null)
       p.check(a.houseScope === "area", `${w}: kommuner har houseScope "area"`);
+    p.check(
+      (a.context === null) === (data.context === null),
+      `${w}.context: ska finnas om och endast om Dataset.context finns`,
+    );
+    if (a.context !== null && a.context !== undefined) checkContext(p, `${w}.context`, a.context);
   }
   const count = (kind: string) => areas.filter((a) => isObj(a) && a.kind === kind).length;
   p.check(
@@ -243,6 +283,7 @@ describe("kontraktsvalideringen själv", () => {
       periods: { m3: "jul–sep 2026" },
       source: { name: "x", url: "http://x" },
       county: { name: "Län", apartment: {}, house: {} },
+      context: null,
       areas: [
         {
           slug: "a",
@@ -263,6 +304,13 @@ describe("kontraktsvalideringen själv", () => {
           },
           house: null,
           houseScope: "city",
+          context: {
+            families: 1.5,
+            highIncome: null,
+            higherEducation: 0.2,
+            age25to44: 0.3,
+            condos: 10,
+          },
         },
       ],
     };
@@ -279,6 +327,8 @@ describe("kontraktsvalideringen själv", () => {
       "houseScope ska vara null",
       "väntade 12",
       "väntade 25",
+      "families: ska vara en andel",
+      "context: ska finnas om och endast om",
     ]) {
       expect(problems).toContain(needle);
     }

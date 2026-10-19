@@ -1,4 +1,4 @@
-"""Kommandorad: python -m prislandskap scrape|export|og|geometry|all"""
+"""Kommandorad: python -m prislandskap scrape|export|og|geometry|deso|scb|all"""
 
 import argparse
 import logging
@@ -33,6 +33,18 @@ def _geometry() -> None:
     geometry.run()
 
 
+def _deso() -> None:
+    from prislandskap import deso
+
+    deso.run()
+
+
+def _scb() -> None:
+    from prislandskap import scb
+
+    scb.run()
+
+
 def _all() -> None:
     _export()
     _og()
@@ -43,6 +55,8 @@ COMMANDS: dict[str, tuple[Callable[[], None], str]] = {
     "export": (_export, "skriv web/src/generated/ från senaste ögonblicksbilden och geometrin"),
     "og": (_og, "rita delningsbilder till web/public/og/"),
     "geometry": (_geometry, "bygg om data/geo/areas.geojson från källorna (kräver [geo])"),
+    "deso": (_deso, "bygg data/scb/deso.csv: DeSO 2025 till område (nätverk, kräver [geo])"),
+    "scb": (_scb, "hämta SCB:s områdesstatistik till data/scb/kontext.json (nätverk, årsvis)"),
     "all": (_all, "export + og"),
 }
 

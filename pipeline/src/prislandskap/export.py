@@ -9,16 +9,43 @@ from pathlib import Path
 from typing import Any
 
 from prislandskap import snapshot as snapshots
-from prislandskap.config import CITY_SLUG, GENERATED_DIR, GEO_FILE, display
+from prislandskap.config import CITY_SLUG, CONTEXT_FILE, GENERATED_DIR, GEO_FILE, display
 from prislandskap.errors import PipelineError
 from prislandskap.geojson import Feature, bbox, load_features, round_coords
-from prislandskap.models import Area, Dataset, Snapshot, SnapshotArea
+from prislandskap.models import Area, AreaContext, Dataset, DatasetContext, Snapshot, SnapshotArea
 from prislandskap.text import period_labels, swedish_sort_key
 
 log = logging.getLogger(__name__)
 
 
-def build_area(feature: Feature, record: SnapshotArea, city: SnapshotArea) -> Area:
+CONTEXT_KEYS = ("families", "highIncome", "higherEducation", "age25to44", "condos")
+
+
+def load_context(path: Path = CONTEXT_FILE) -> dict | None:
+    """SCB-kontexten, eller None om den inte har hämtats (då visar webben inget SCB-block)."""
+    if not path.exists():
+        log.info("Ingen SCB-kontext (%s), områdena exporteras utan", display(path))
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def area_context(values: dict | None) -> AreaContext | None:
+    if values is None:
+        return None
+    return AreaContext(**{key: values.get(key) for key in CONTEXT_KEYS})  # type: ignore[typeddict-item]
+
+
+def dataset_context(context: dict | None) -> DatasetContext | None:
+    if context is None:
+        return None
+    county = area_context(context["county"])
+    assert county is not None
+    return DatasetContext(source=context["source"], years=context["years"], county=county)
+
+
+def build_area(
+    feature: Feature, record: SnapshotArea, city: SnapshotArea, context: AreaContext | None = None
+) -> Area:
     """Ett område i kontraktet. Stadsdelsområdena får Stockholms stads villastatistik (houseScope 'city')."""
     props = feature["properties"]
     if record["kind"] == "district":
@@ -35,6 +62,7 @@ def build_area(feature: Feature, record: SnapshotArea, city: SnapshotArea) -> Ar
         apartment=record["apartment"],
         house=house,
         houseScope=scope,
+        context=context,
     )
 
 
@@ -52,16 +80,28 @@ def _check_coverage(features: list[Feature], records: dict[str, SnapshotArea]) -
             raise PipelineError(f"{props['slug']}: områdestypen skiljer mellan geometri och statistik")
 
 
-def build_dataset(snap: Snapshot, features: list[Feature]) -> Dataset:
+def build_dataset(snap: Snapshot, features: list[Feature], context: dict | None = None) -> Dataset:
     records = snapshots.area_by_slug(snap)
     _check_coverage(features, records)
-    areas = [build_area(f, records[f["properties"]["slug"]], records[CITY_SLUG]) for f in features]
+    by_slug = (context or {}).get("areas", {})
+    if context is not None and (missing := {f["properties"]["slug"] for f in features} - by_slug.keys()):
+        raise PipelineError(f"SCB-kontexten saknar {', '.join(sorted(missing))}")
+    areas = [
+        build_area(
+            f,
+            records[f["properties"]["slug"]],
+            records[CITY_SLUG],
+            area_context(by_slug.get(f["properties"]["slug"])) if context else None,
+        )
+        for f in features
+    ]
     areas.sort(key=lambda a: swedish_sort_key(a["name"]))
     return Dataset(
         updated=snap["updated"],
         periods=period_labels(snap["updated"]),
         source=snap["source"],
         county=snap["county"],
+        context=dataset_context(context),
         areas=areas,
     )
 
@@ -96,7 +136,9 @@ def run(out_dir: Path = GENERATED_DIR, geo_file: Path = GEO_FILE) -> list[Path]:
     snap = snapshots.load_latest()
     features = load_features(geo_file)
     outputs = {
-        out_dir / "areas.json": json.dumps(build_dataset(snap, features), ensure_ascii=False, indent=1)
+        out_dir / "areas.json": json.dumps(
+            build_dataset(snap, features, load_context()), ensure_ascii=False, indent=1
+        )
         + "\n",
         out_dir / "areas.geojson": json.dumps(
             build_geometry(features), ensure_ascii=False, separators=(",", ":")
