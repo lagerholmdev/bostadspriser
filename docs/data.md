@@ -137,7 +137,7 @@ exakt till totalen.
   "fetched": "2026-10-19",
   "source": { "name": "SCB", "url": "https://www.statistikdatabasen.scb.se/" },
   "years": { "families": "2025", "highIncome": "2024", "higherEducation": "2025", "age25to44": "2025", "condos": "2025" },
-  "county": { "families": 0.3118, "highIncome": 0.34, "higherEducation": 0.398, "age25to44": 0.2931, "condos": … },
+  "county": { "families": 0.3118, "highIncome": 0.34, "higherEducation": 0.398, "age25to44": 0.2931, "condos": 494577 },
   "areas": { "sodermalm": { … }, … }   // 37 områden
 }
 ```

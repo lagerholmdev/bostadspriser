@@ -39,7 +39,26 @@
    }
   }
  },
- "context": null,
+ "context": {
+  "source": {
+   "name": "SCB",
+   "url": "https://www.statistikdatabasen.scb.se/"
+  },
+  "years": {
+   "families": "2025",
+   "highIncome": "2024",
+   "higherEducation": "2025",
+   "age25to44": "2025",
+   "condos": "2025"
+  },
+  "county": {
+   "families": 0.3118,
+   "highIncome": 0.34,
+   "higherEducation": 0.398,
+   "age25to44": 0.2931,
+   "condos": 494577
+  }
+ },
  "areas": [
   {
    "slug": "botkyrka",
@@ -93,7 +112,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3605,
+    "highIncome": 0.21,
+    "higherEducation": 0.2306,
+    "age25to44": 0.2759,
+    "condos": 9741
+   }
   },
   {
    "slug": "bromma-vasterled",
@@ -148,7 +173,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.3166,
+    "highIncome": 0.4591,
+    "higherEducation": 0.5356,
+    "age25to44": 0.3025,
+    "condos": 17559
+   }
   },
   {
    "slug": "brannkyrka-skarholmen",
@@ -201,7 +232,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.3517,
+    "highIncome": 0.2698,
+    "higherEducation": 0.357,
+    "age25to44": 0.2946,
+    "condos": 8394
+   }
   },
   {
    "slug": "danderyd",
@@ -255,7 +292,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3709,
+    "highIncome": 0.5,
+    "higherEducation": 0.6138,
+    "age25to44": 0.195,
+    "condos": 5115
+   }
   },
   {
    "slug": "ekero",
@@ -312,7 +355,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.4224,
+    "highIncome": 0.41,
+    "higherEducation": 0.3608,
+    "age25to44": 0.198,
+    "condos": 1545
+   }
   },
   {
    "slug": "enskede-skarpnack",
@@ -365,7 +414,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2887,
+    "highIncome": 0.3427,
+    "higherEducation": 0.4927,
+    "age25to44": 0.3346,
+    "condos": 26715
+   }
   },
   {
    "slug": "essingen",
@@ -416,7 +471,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2125,
+    "highIncome": 0.4742,
+    "higherEducation": 0.5373,
+    "age25to44": 0.3496,
+    "condos": 3591
+   }
   },
   {
    "slug": "farsta-vantor",
@@ -468,7 +529,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.3026,
+    "highIncome": 0.262,
+    "higherEducation": 0.3674,
+    "age25to44": 0.3288,
+    "condos": 20601
+   }
   },
   {
    "slug": "haninge",
@@ -520,7 +587,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3481,
+    "highIncome": 0.25,
+    "higherEducation": 0.2211,
+    "age25to44": 0.2972,
+    "condos": 14758
+   }
   },
   {
    "slug": "huddinge",
@@ -575,7 +648,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3706,
+    "highIncome": 0.32,
+    "higherEducation": 0.3441,
+    "age25to44": 0.2743,
+    "condos": 14757
+   }
   },
   {
    "slug": "hagersten-liljeholmen",
@@ -630,7 +709,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2801,
+    "highIncome": 0.3946,
+    "higherEducation": 0.5189,
+    "age25to44": 0.3661,
+    "condos": 28545
+   }
   },
   {
    "slug": "hasselby-vallingby",
@@ -681,7 +766,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.3251,
+    "highIncome": 0.2689,
+    "higherEducation": 0.3403,
+    "age25to44": 0.2992,
+    "condos": 10363
+   }
   },
   {
    "slug": "jarfalla",
@@ -734,7 +825,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3273,
+    "highIncome": 0.28,
+    "higherEducation": 0.3242,
+    "age25to44": 0.3076,
+    "condos": 16757
+   }
   },
   {
    "slug": "kungsholmen",
@@ -787,7 +884,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.199,
+    "highIncome": 0.49,
+    "higherEducation": 0.5947,
+    "age25to44": 0.364,
+    "condos": 27427
+   }
   },
   {
    "slug": "lidingo",
@@ -840,7 +943,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.348,
+    "highIncome": 0.44,
+    "higherEducation": 0.5127,
+    "age25to44": 0.2158,
+    "condos": 8752
+   }
   },
   {
    "slug": "nacka",
@@ -895,7 +1004,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3783,
+    "highIncome": 0.43,
+    "higherEducation": 0.454,
+    "age25to44": 0.2527,
+    "condos": 24695
+   }
   },
   {
    "slug": "norrtalje",
@@ -946,7 +1061,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.2419,
+    "highIncome": 0.21,
+    "higherEducation": 0.1987,
+    "age25to44": 0.223,
+    "condos": 8974
+   }
   },
   {
    "slug": "nykvarn",
@@ -1000,7 +1121,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3877,
+    "highIncome": 0.36,
+    "higherEducation": 0.2644,
+    "age25to44": 0.2511,
+    "condos": 768
+   }
   },
   {
    "slug": "nynashamn",
@@ -1050,7 +1177,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.2918,
+    "highIncome": 0.24,
+    "higherEducation": 0.1919,
+    "age25to44": 0.2427,
+    "condos": 3121
+   }
   },
   {
    "slug": "salem",
@@ -1100,7 +1233,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.4126,
+    "highIncome": 0.33,
+    "higherEducation": 0.3245,
+    "age25to44": 0.2417,
+    "condos": 2278
+   }
   },
   {
    "slug": "sigtuna",
@@ -1151,7 +1290,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3516,
+    "highIncome": 0.23,
+    "higherEducation": 0.2303,
+    "age25to44": 0.2804,
+    "condos": 6353
+   }
   },
   {
    "slug": "sollentuna",
@@ -1205,7 +1350,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3731,
+    "highIncome": 0.39,
+    "higherEducation": 0.4536,
+    "age25to44": 0.2614,
+    "condos": 12795
+   }
   },
   {
    "slug": "solna",
@@ -1266,7 +1417,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.2501,
+    "highIncome": 0.4,
+    "higherEducation": 0.5285,
+    "age25to44": 0.3869,
+    "condos": 29233
+   }
   },
   {
    "slug": "spanga-kista",
@@ -1319,7 +1476,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.3167,
+    "highIncome": 0.1796,
+    "higherEducation": 0.2645,
+    "age25to44": 0.313,
+    "condos": 11612
+   }
   },
   {
    "slug": "sundbyberg",
@@ -1376,7 +1539,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.2711,
+    "highIncome": 0.35,
+    "higherEducation": 0.4196,
+    "age25to44": 0.3893,
+    "condos": 13622
+   }
   },
   {
    "slug": "sodermalm",
@@ -1430,7 +1599,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2307,
+    "highIncome": 0.4249,
+    "higherEducation": 0.5375,
+    "age25to44": 0.3009,
+    "condos": 42916
+   }
   },
   {
    "slug": "sodertalje",
@@ -1482,7 +1657,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3248,
+    "highIncome": 0.22,
+    "higherEducation": 0.2427,
+    "age25to44": 0.2819,
+    "condos": 10226
+   }
   },
   {
    "slug": "tyreso",
@@ -1534,7 +1715,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3718,
+    "highIncome": 0.35,
+    "higherEducation": 0.3117,
+    "age25to44": 0.236,
+    "condos": 6465
+   }
   },
   {
    "slug": "taby",
@@ -1588,7 +1775,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3634,
+    "highIncome": 0.45,
+    "higherEducation": 0.5001,
+    "age25to44": 0.2365,
+    "condos": 16643
+   }
   },
   {
    "slug": "upplands-vasby",
@@ -1641,7 +1834,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3484,
+    "highIncome": 0.27,
+    "higherEducation": 0.2849,
+    "age25to44": 0.2823,
+    "condos": 7954
+   }
   },
   {
    "slug": "upplands-bro",
@@ -1692,7 +1891,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3592,
+    "highIncome": 0.26,
+    "higherEducation": 0.2468,
+    "age25to44": 0.287,
+    "condos": 4162
+   }
   },
   {
    "slug": "vallentuna",
@@ -1744,7 +1949,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3933,
+    "highIncome": 0.36,
+    "higherEducation": 0.337,
+    "age25to44": 0.2392,
+    "condos": 4917
+   }
   },
   {
    "slug": "vasastan-norrmalm",
@@ -1795,7 +2006,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2287,
+    "highIncome": 0.5006,
+    "higherEducation": 0.5835,
+    "age25to44": 0.3587,
+    "condos": 29996
+   }
   },
   {
    "slug": "vaxholm",
@@ -1851,7 +2068,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3459,
+    "highIncome": 0.41,
+    "higherEducation": 0.4099,
+    "age25to44": 0.1653,
+    "condos": 2084
+   }
   },
   {
    "slug": "varmdo",
@@ -1904,7 +2127,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3704,
+    "highIncome": 0.36,
+    "higherEducation": 0.3144,
+    "age25to44": 0.2211,
+    "condos": 5157
+   }
   },
   {
    "slug": "ostermalm",
@@ -1957,7 +2186,13 @@
     }
    },
    "houseScope": "city",
-   "context": null
+   "context": {
+    "families": 0.2061,
+    "highIncome": 0.438,
+    "higherEducation": 0.586,
+    "age25to44": 0.3282,
+    "condos": 31479
+   }
   },
   {
    "slug": "osteraker",
@@ -2011,7 +2246,13 @@
     }
    },
    "houseScope": "area",
-   "context": null
+   "context": {
+    "families": 0.3817,
+    "highIncome": 0.35,
+    "higherEducation": 0.3184,
+    "age25to44": 0.2336,
+    "condos": 4507
+   }
   }
  ]
 }
