@@ -117,10 +117,14 @@
   font-weight: 600;
   line-height: 1.3;
 }
-.app .peek-meta {
+.app .peek-county {
   font-weight: 400;
   color: var(--c-ink-2);
-  white-space: nowrap;
+}
+.app .peek-meta {
+  font-size: var(--fs-xs);
+  color: var(--c-ink-3);
+  line-height: 1.3;
 }
 .app .peek-go {
   flex: none;
@@ -427,6 +431,38 @@
   .app .detail-wrap {
     scroll-margin-top: var(--sp-4);
   }
+}
+/* Vyns svar överst: etikett, stor siffra, en rad till. Kikläget på mobilen slutar här. */
+.app .lead {
+  display: grid;
+  gap: 2px;
+}
+.app .lead-label {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-2);
+}
+.app .lead-value {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.app .lead-value strong.is-up {
+  color: var(--c-up);
+}
+.app .lead-value strong.is-down {
+  color: var(--c-down);
+}
+.app .lead-unit {
+  font-size: var(--fs-md);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--c-ink-2);
+}
+.app .lead-sub {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-2);
+  max-width: 60ch;
 }
 .app .summary {
   color: var(--c-ink-2);
@@ -1034,6 +1070,13 @@
   color: var(--c-ink-3);
   line-height: 1.35;
   margin-top: 2px;
+}
+.app .detail-more {
+  margin-top: var(--sp-4);
+  font-weight: 600;
+}
+.app .detail-more a::after {
+  content: " →";
 }
 .app .actions {
   display: flex;
@@ -1654,7 +1697,10 @@
 
   /* Sök och vyer flyter över kartan. */
   .app.has-sheet .topbar {
-    display: block;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--sp-2);
+    align-items: center;
     position: absolute;
     top: 0;
     left: 0;
@@ -1668,6 +1714,44 @@
   }
   .app.has-sheet .topbar .search {
     margin: 0;
+  }
+  .app.has-sheet .topbar .tabs,
+  .app.has-sheet .topbar .share-status {
+    grid-column: 1 / -1;
+  }
+  .app.has-sheet .topbar .share-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--c-surface);
+    color: var(--c-ink);
+    box-shadow:
+      0 1px 3px rgb(26 31 28 / 0.12),
+      0 4px 16px rgb(26 31 28 / 0.1);
+  }
+  .app.has-sheet .topbar .share-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  .app.has-sheet .topbar .share-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .app.has-sheet .topbar .share-status {
+    justify-self: end;
+    margin: 0 0 var(--sp-2);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: 999px;
+    background: var(--c-surface);
+    box-shadow: 0 1px 3px rgb(26 31 28 / 0.12);
   }
   .app.has-sheet .topbar .search-label {
     position: absolute;
@@ -1859,7 +1943,32 @@
     font-size: var(--fs-md);
   }
   .app.has-sheet .filters {
-    margin-top: var(--sp-3);
+    margin-top: var(--sp-1);
+  }
+  /* Rubriken finns kvar för skärmläsare och sökmotorer men tar ingen plats i kikläget;
+     vyknapparna säger redan vad man tittar på, och Dela ligger bredvid sökfältet. */
+  .app.has-sheet .panel-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .app.has-sheet [data-slot="price-summary"],
+  .app.has-sheet [data-slot="change-summary"] {
+    margin-top: var(--sp-4);
+  }
+  /* Kartans förklaring flyter redan ovanför panelen; panelen behåller bara anteckningarna. */
+  .app.has-sheet .views .legend {
+    display: none;
+  }
+  .app.has-sheet .views .legend-notes {
+    margin-top: var(--sp-5);
+  }
+  /* 3D är svårt att styra med tummen. */
+  .app.has-sheet .map-ctrl-3d {
+    display: none;
   }
   .app.has-sheet .tray {
     flex: none;

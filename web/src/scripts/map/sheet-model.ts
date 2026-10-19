@@ -9,8 +9,11 @@ export type SheetState = (typeof SHEET_STATES)[number];
 /** Synlig höjd i px för varje läge. */
 export type SheetHeights = Record<SheetState, number>;
 
-/** Kikläget får aldrig ta mer än så här av ytan, så att kartan alltid syns. */
-const PEEK_MAX_SHARE = 0.45;
+/**
+ * Kikläget får aldrig ta mer än så här av ytan, så att kartan alltid syns. Budgetvyns reglage
+ * behöver det mesta av det på en låg skärm; de andra vyernas kikläge är mycket lägre.
+ */
+const PEEK_MAX_SHARE = 0.6;
 const PEEK_MIN = 72;
 /** Halvläget ligger minst så här högt över kikläget, annars går de inte att skilja åt. */
 const HALF_GAP = 120;

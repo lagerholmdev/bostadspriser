@@ -11,17 +11,35 @@ import type { Store } from "./state";
 export const MOBILE_QUERY = "(max-width: 959px)";
 
 /**
- * Sök och flikar: i toppremsan över kartan på mobilen, annars överst i panelen före filtren.
- * Samma flytt görs redan i sidan (index.astro) innan något ritas, så att det inte hoppar.
+ * Sök, Dela och flikar: i toppremsan över kartan på mobilen, annars i panelen. Samma flytt görs
+ * redan i sidan (index.astro) innan något ritas, så att det inte hoppar.
  */
 export function placeTopbar(mobile: boolean): void {
   const topbar = document.getElementById("topbar");
   const filters = document.getElementById("filters");
+  const head = document.querySelector<HTMLElement>(".app .panel-head");
   const search = document.querySelector<HTMLElement>(".app .search");
   const tabs = document.querySelector<HTMLElement>(".app .tabs");
-  if (!topbar || !filters || !search || !tabs) return;
-  if (mobile && search.parentElement !== topbar) topbar.append(search, tabs);
-  else if (!mobile && search.parentElement === topbar) filters.before(search, tabs);
+  const share = document.getElementById("share");
+  const status = document.getElementById("share-status");
+  if (!topbar || !filters || !head || !search || !tabs || !share || !status) return;
+  if (mobile && search.parentElement !== topbar) topbar.append(search, share, tabs, status);
+  else if (!mobile && search.parentElement === topbar) {
+    head.append(share);
+    head.after(status);
+    filters.before(search, tabs);
+  }
+}
+
+/**
+ * Höjden kikläget behöver, mätt från panelens överkant: allt fram till och med elementet med
+ * data-peek-end i vyn som syns (vyns svar), annars filtren.
+ */
+function peekEnd(scroller: HTMLElement, fallback: HTMLElement): number {
+  const ends = [...scroller.querySelectorAll<HTMLElement>("[data-peek-end]")];
+  const el = ends.find((e) => e.getClientRects().length > 0) ?? fallback;
+  const top = scroller.getBoundingClientRect().top - scroller.scrollTop;
+  return scroller.offsetTop + el.getBoundingClientRect().bottom - top + 12;
 }
 
 export interface Insets {
@@ -98,7 +116,7 @@ export class MobileLayout {
       topbar,
       // Kikläget visar remsan med det valda området, annars rubriken och filtren.
       peekContent: () => {
-        if (peek.hidden) return scroller.offsetTop + filters.offsetTop + filters.offsetHeight + 12;
+        if (peek.hidden) return peekEnd(scroller, filters);
         // Remsan är dold när panelen är utfälld; visa den ett ögonblick för att mäta.
         this.panelEl.classList.add("is-measuring");
         const h = scroller.offsetTop;
@@ -142,7 +160,8 @@ export class MobileLayout {
         sheet.set(this.beforeArea === "full" ? "full" : "half");
       }
     } else if (s.view !== prev.view) {
-      sheet.set(sheet.state === "full" ? "full" : "half");
+      // Kikläget visar vyns svar, så panelen stannar där den är och mäts om.
+      sheet.set(sheet.state);
       this.panelEl.querySelector("#panel-scroll")?.scrollTo({ top: 0 });
     }
   }

@@ -6,8 +6,6 @@
 import type { GetStaticPaths } from "astro";
 import Base from "../../../layouts/Base.astro";
 import Breadcrumb from "../../../components/common/Breadcrumb.astro";
-import ChangeValue from "../../../components/common/ChangeValue.astro";
-import StatCard from "../../../components/common/StatCard.astro";
 import CopyLink from "../../../components/common/CopyLink.astro";
 import Minimap from "../../../components/area/Minimap.astro";
 import StatsTable from "../../../components/area/StatsTable.astro";
@@ -223,40 +221,13 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
       </div>
     </header>
 
-    {ap3 && (
-      <section class="page-section" aria-labelledby="nyckeltal">
-        <h2 id="nyckeltal" class="visually-hidden">
-          Nyckeltal för bostadsrätter
-        </h2>
-        <dl class="stat-row">
-          <StatCard label="Medelpris" note="per såld bostadsrätt, 3 mån" muted={thin}>
-            {ap3.meanPrice != null ? (
-              money(ap3.meanPrice)
-            ) : (
-              <span class="chg-none">{missingNote(ap3.missing?.meanPrice)}</span>
-            )}
-          </StatCard>
-          <StatCard
-            label="Sålda bostäder"
-            note={
-              ap12?.sales != null
-                ? `senaste 3 mån, ${number(ap12.sales)} på 12 mån`
-                : "senaste 3 mån"
-            }
-          >
-            {ap3.sales != null ? (
-              number(ap3.sales)
-            ) : (
-              <span class="chg-none">{missingNote(ap3.missing?.sales)}</span>
-            )}
-          </StatCard>
-          <StatCard label="Förändring 3 mån" note="mot de tre månaderna före">
-            <ChangeValue value={ap3.change} missing={ap3.missing?.change} word />
-          </StatCard>
-          <StatCard label="Förändring 12 mån" note="mot samma månader året innan">
-            <ChangeValue value={ap12?.change} missing={ap12?.missing?.change} word />
-          </StatCard>
-        </dl>
+    {hasContext && (
+      <section class="page-section narrow" aria-labelledby="invanare">
+        <div class="section-head">
+          <h2 id="invanare">Vilka bor {where}?</h2>
+          <p>Punkten är {area.name}, strecket snittet för hela Stockholms län.</p>
+        </div>
+        <AreaContext area={area} />
       </section>
     )}
 
@@ -295,51 +266,47 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
       </section>
     )}
 
-    <section class="page-section narrow" aria-labelledby="villor">
-      <div class="section-head">
-        <h2 id="villor">Villor {where}</h2>
-        {area.houseScope === "city" && house3 ? (
-          <p>
-            Villor redovisas för hela Stockholms stad: {sqm(house3.pricePerSqm)} de senaste 3
-            månaderna, med {number(house3.sales)} sålda villor och ett medelpris på{" "}
-            {money(house3.meanPrice)}. Svensk Mäklarstatistik delar inte upp villapriserna på
-            stadsdelsområden, så siffran gäller hela staden och inte bara {area.name}.
-          </p>
-        ) : houseOnlyYear && house12 ? (
-          <>
+    {area.houseScope !== "city" && (
+      <section class="page-section narrow" aria-labelledby="villor">
+        <div class="section-head">
+          <h2 id="villor">Villor {where}</h2>
+          {houseOnlyYear && house12 ? (
+            <>
+              <p>
+                En villa {where} kostade i snitt {sqm(house12.pricePerSqm)} de senaste 12 månaderna,{" "}
+                {relative(countyRatio(house12.pricePerSqm, "house", "m12"))} länets snitt för
+                villor.
+              </p>
+              <p class="house-note" role="note">
+                För få villaaffärer de senaste 3 månaderna
+                {house3?.sales != null && ` (${number(house3.sales)} sålda)`} för ett pålitligt
+                snitt. Se siffrorna för 12 månader i tabellen.
+              </p>
+            </>
+          ) : area.houseScope === "area" && area.house ? (
             <p>
-              En villa {where} kostade i snitt {sqm(house12.pricePerSqm)} de senaste 12 månaderna,{" "}
-              {relative(countyRatio(house12.pricePerSqm, "house", "m12"))} länets snitt för villor.
+              {house3?.pricePerSqm != null
+                ? `En villa ${where} kostade i snitt ${sqm(house3.pricePerSqm)} de senaste 3 månaderna, ${relative(countyRatio(house3.pricePerSqm, "house"))} länets snitt för villor.`
+                : `Snittpriset för villor ${where} saknas för de senaste 3 månaderna.`}
             </p>
-            <p class="house-note" role="note">
-              För få villaaffärer de senaste 3 månaderna
-              {house3?.sales != null && ` (${number(house3.sales)} sålda)`} för ett pålitligt snitt.
-              Se siffrorna för 12 månader i tabellen.
-            </p>
-          </>
-        ) : area.houseScope === "area" && area.house ? (
-          <p>
-            {house3?.pricePerSqm != null
-              ? `En villa ${where} kostade i snitt ${sqm(house3.pricePerSqm)} de senaste 3 månaderna, ${relative(countyRatio(house3.pricePerSqm, "house"))} länets snitt för villor.`
-              : `Snittpriset för villor ${where} saknas för de senaste 3 månaderna.`}
-          </p>
-        ) : (
-          <p>Det finns ingen villastatistik för {area.name}.</p>
+          ) : (
+            <p>Det finns ingen villastatistik för {area.name}.</p>
+          )}
+        </div>
+        {area.houseScope === "area" && houseStats && (
+          <StatsTable
+            stats={houseStats}
+            periods={houseOnlyYear ? ["m12"] : undefined}
+            caption={
+              houseOnlyYear
+                ? `Villor ${where}, senaste 12 månaderna`
+                : `Villor ${where}, senaste 3 och 12 månaderna`
+            }
+            noun="villor"
+          />
         )}
-      </div>
-      {area.houseScope === "area" && houseStats && (
-        <StatsTable
-          stats={houseStats}
-          periods={houseOnlyYear ? ["m12"] : undefined}
-          caption={
-            houseOnlyYear
-              ? `Villor ${where}, senaste 12 månaderna`
-              : `Villor ${where}, senaste 3 och 12 månaderna`
-          }
-          noun="villor"
-        />
-      )}
-    </section>
+      </section>
+    )}
 
     {rank && (
       <section class="page-section" aria-labelledby="plats">
@@ -351,16 +318,6 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
           </p>
         </div>
         <RankChart area={area} />
-      </section>
-    )}
-
-    {hasContext && (
-      <section class="page-section narrow" aria-labelledby="invanare">
-        <div class="section-head">
-          <h2 id="invanare">Vilka bor {where}?</h2>
-          <p>Punkten är {area.name}, strecket snittet för hela Stockholms län.</p>
-        </div>
-        <AreaContext area={area} />
       </section>
     )}
 
@@ -391,6 +348,13 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
         i området, så en enskild bostad kan kosta mer eller mindre beroende på läge, skick och
         storlek.
       </p>
+      {area.houseScope === "city" && house3?.pricePerSqm != null && (
+        <p>
+          Villor redovisas bara för hela Stockholms stad: {sqm(house3.pricePerSqm)} de senaste 3
+          månaderna, med {number(house3.sales)} sålda villor. Svensk Mäklarstatistik delar inte upp
+          villapriserna på stadsdelsområden.
+        </p>
+      )}
       {reasons.size > 0 && (
         <p>
           Några värden saknas.{" "}

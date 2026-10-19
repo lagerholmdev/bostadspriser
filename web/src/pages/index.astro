@@ -41,7 +41,7 @@ const description = `Vad kostar en bostad i Stockholm? Pris per kvm, var din bud
     <div class="topbar" id="topbar"></div>
     <Panel base={base} />
     <script is:inline>
-      // Mobilen: sök och flikar flyter över kartan och panelen dras upp nerifrån (scripts/map/mobile.ts).
+      // Mobilen: sök, Dela och flikar flyter över kartan och panelen dras upp nerifrån (scripts/map/mobile.ts).
       // Görs här, innan något ritas, så att sidan inte hoppar när skriptet laddat.
       (function (app) {
         try {
@@ -49,9 +49,11 @@ const description = `Vad kostar en bostad i Stockholm? Pris per kvm, var din bud
           var bar = document.getElementById("topbar");
           var search = app.querySelector(".search");
           var tabs = app.querySelector(".tabs");
+          var share = document.getElementById("share");
+          var status = document.getElementById("share-status");
           var panel = document.getElementById("panel");
-          if (!bar || !search || !tabs || !panel) return;
-          bar.append(search, tabs);
+          if (!bar || !search || !tabs || !share || !status || !panel) return;
+          bar.append(search, share, tabs, status);
           app.classList.add("has-sheet");
           panel.setAttribute("data-sheet", app.hasAttribute("data-pending") ? "half" : "peek");
         } catch (e) {

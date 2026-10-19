@@ -8,8 +8,8 @@ describe("sheetHeights", () => {
     expect(sheetHeights(660, 160)).toEqual(H);
   });
 
-  it("låter aldrig kikläget ta mer än 45 % av ytan", () => {
-    expect(sheetHeights(400, 300).peek).toBe(180);
+  it("låter aldrig kikläget ta mer än 60 % av ytan", () => {
+    expect(sheetHeights(400, 300).peek).toBe(240);
   });
 
   it("håller halvläget tydligt över kikläget på en låg skärm", () => {

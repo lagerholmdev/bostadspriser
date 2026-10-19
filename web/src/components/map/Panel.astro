@@ -52,7 +52,8 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
 ---
 
 <section class="panel" id="panel" aria-labelledby="panel-title">
-  <!-- Mobilen: handtaget på den dragbara panelen (scripts/map/sheet.ts). -->
+  <!-- Mobilen: handtaget på den dragbara panelen (scripts/map/sheet.ts). Kikläget visar allt
+       fram till elementet med data-peek-end i aktiv vy. -->
   <button
     type="button"
     class="sheet-handle"
@@ -79,7 +80,7 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
             stroke-linejoin="round"
           ></path>
         </svg>
-        Dela
+        <span class="share-label">Dela</span>
       </button>
     </div>
     <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
@@ -156,7 +157,11 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
         aria-labelledby="tab-pris"
         data-view-panel="pris"
       >
-        <div data-slot="price-summary" set:html={priceSummary(price, s.housing, s.period).value} />
+        <div
+          data-slot="price-summary"
+          data-peek-end
+          set:html={priceSummary(price, s.housing, s.period).value}
+        />
         <div
           data-slot="price-legend"
           set:html={legend({ view: "pris", housing: s.housing, period: s.period }).value}
@@ -183,11 +188,11 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
         data-view-panel="budget"
       >
         <BudgetControls />
-        <p class="budget-max" data-slot="budget-max" set:html={budgetMax(budget).value} />
-        <h2 class="headline" data-slot="budget-headline">
+        <h2 class="headline" data-slot="budget-headline" data-peek-end>
           {budgetHeadline(budget, s.budget, s.sqm)}
         </h2>
         <p class="budget-best" data-slot="budget-best" set:html={budgetBest(budget).value} />
+        <p class="budget-max" data-slot="budget-max" set:html={budgetMax(budget).value} />
         <p
           class="visually-hidden"
           id="budget-status"
@@ -214,6 +219,7 @@ const sortOptions = (Object.keys(SORT_LABEL) as SortOrder[]).map((k) => ({
       >
         <div
           data-slot="change-summary"
+          data-peek-end
           set:html={changeSummary(change, s.housing, changePeriod).value}
         />
         <div

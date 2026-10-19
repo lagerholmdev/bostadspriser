@@ -272,6 +272,7 @@ export class AreaMap {
         county.addEventListener("click", () => self.showCounty());
         const t3 = document.createElement("button");
         t3.type = "button";
+        t3.className = "map-ctrl-3d";
         t3.textContent = "Visa i 3D";
         t3.setAttribute("aria-pressed", "false");
         t3.title = "Visa priset per kvm som höjd";

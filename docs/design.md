@@ -30,8 +30,21 @@ dela, och läget ska ligga i adressen.
    kartan fyller skärmen och flyttas med ett finger, sökfältet och vyerna flyter överst och panelen
    dras upp nerifrån i tre lägen (kik, halv, hel). Kameran centrerar i den del av kartan som syns.
    Utan JavaScript ligger kartan överst och innehållet under, i vanligt sidflöde.
-6. **Platt som standard.** Kartan är 2D. 3D är ett val, inte startläget, eftersom vridbara kartor är
-   svåra att navigera för de flesta.
+6. **Kikläget svarar på frågan.** Det man ser utan att dra är vyns svar, inte en rubrik: länets snitt
+   och dyrast/billigast, båda budgetreglagen och hur många områden som räcker, länets förändring och
+   antal upp och ner. Ett valt område visar namn, pris och läget mot länet. Halvläget börjar listan.
+   Vyknapparna säger redan vad man tittar på, så panelens rubrik syns bara på skrivbordet, och Dela
+   ligger bredvid sökfältet.
+7. **Platt som standard.** Kartan är 2D. 3D är ett val, inte startläget, eftersom vridbara kartor är
+   svåra att navigera för de flesta. På mobilen finns det inte alls; det går inte att styra med tummen.
+
+## Områdessidan
+
+Ordningen följer köparens frågor: pris och läge mot länet (hero med minikarta), vilka som bor där
+(SCB), vad pengarna räcker till, perioderna i tabell, plats i länet, liknande grannar. Varje siffra
+står en gång; tabellen bär medelpris, antal och förändring. Villor får ett eget block bara där
+Mäklarstatistik har villapriser för området. För stadsdelsområdena, där siffran gäller hela staden,
+står den som en rad under "Om siffrorna".
 
 ## Visuellt språk
 

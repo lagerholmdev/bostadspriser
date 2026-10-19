@@ -4,8 +4,8 @@
  */
 import { affordableSize, budgetStatus } from "../../../lib/budget";
 import { MISSING_TEXT } from "../../../lib/format";
-import { getArea, isThin, shownStat } from "../../../lib/data";
-import { change, sqm as fmtSqm } from "../../../lib/format";
+import { countyRatio, getArea, isThin, shownStat } from "../../../lib/data";
+import { change, relative, sqm as fmtSqm } from "../../../lib/format";
 import type { AppState } from "../../../lib/url";
 import { html, type Html } from "../../../lib/html";
 import { CHANGE_LABEL, salesText } from "./copy";
@@ -14,6 +14,8 @@ export interface Quick {
   name: string;
   value: string;
   meta: string;
+  /** "65 % över länet" i prisvyn, annars tomt. */
+  county: string;
 }
 
 export function quick(slug: string, s: AppState): Quick | null {
@@ -24,7 +26,10 @@ export function quick(slug: string, s: AppState): Quick | null {
   let thin = isThin(st, s.period);
   let sales = st?.sales ?? null;
   let value: string;
+  let county = "";
   if (s.view === "pris") {
+    const r = countyRatio(st?.pricePerSqm, s.housing, s.period);
+    if (r != null && !cityHouse) county = `${relative(r)} länet`;
     const why = st?.missing?.pricePerSqm;
     value =
       st?.pricePerSqm == null
@@ -50,7 +55,7 @@ export function quick(slug: string, s: AppState): Quick | null {
         : `${change(st.change)} ${CHANGE_LABEL[s.period].replace("Förändring ", "")}`;
   }
   const meta = cityHouse ? `Hela staden, ${salesText(sales, thin)}` : salesText(sales, thin);
-  return { name: a.name, value, meta };
+  return { name: a.name, value, meta, county };
 }
 
 export function tooltipHtml(slug: string, s: AppState): Html {
@@ -67,7 +72,10 @@ export function peekHtml(slug: string, s: AppState): Html {
   if (!q) return html``;
   return html`<div class="peek-text">
       <p class="peek-name">${q.name}</p>
-      <p class="peek-value">${q.value} <span class="peek-meta">${q.meta}</span></p>
+      <p class="peek-value">
+        ${q.value}${q.county ? html` <span class="peek-county">${q.county}</span>` : ""}
+      </p>
+      <p class="peek-meta">${q.meta}</p>
     </div>
     <button type="button" class="btn peek-go" data-action="peek-go">
       Visa mer <span aria-hidden="true">↑</span>
