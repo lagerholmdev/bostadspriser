@@ -285,8 +285,6 @@ export class PanelController {
       const t = (s.view === "forandring" ? span.dataset.changeLabel : span.dataset.label) ?? "";
       if (t && span.textContent !== t) span.textContent = t;
     }
-    const houseNote = this.q("#house-note");
-    if (houseNote) houseNote.hidden = s.housing !== "house";
 
     this.syncControls(s);
 

@@ -34,9 +34,11 @@ dela, och läget ska ligga i adressen.
    och dyrast/billigast, båda budgetreglagen och hur många områden som räcker, länets förändring och
    antal upp och ner. Ett valt område visar namn, pris och läget mot länet. Halvläget börjar listan.
    Vyknapparna säger redan vad man tittar på, så panelens rubrik syns bara på skrivbordet, och Dela
-   ligger bredvid sökfältet.
+   ligger bredvid sökfältet. Kikläget har fast höjd inom en vy: inget dyker upp ovanför svaret när
+   ett filter ändras, och budgetrubriken har två rader reserverade så att reglagen inte hoppar.
 7. **Platt som standard.** Kartan är 2D. 3D är ett val, inte startläget, eftersom vridbara kartor är
    svåra att navigera för de flesta. På mobilen finns det inte alls; det går inte att styra med tummen.
+   Kartan har inga egna knappar på mobilen, och ingen "Hela länet" någonstans: startvyn är länet.
 
 ## Områdessidan
 
