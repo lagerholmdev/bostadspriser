@@ -16,6 +16,7 @@ import { html, type Html } from "../../../lib/html";
 import {
   type BudgetEntry,
   type BudgetModel,
+  rowKey,
   type ChangeModel,
   type Entry,
   type PriceModel,
@@ -224,7 +225,14 @@ export function changeSummary(m: ChangeModel, housing: Housing, period: Period):
   </p>`;
 }
 
-function changeRow(e: Entry, period: Period): Html {
+/** "3 platser upp sedan förra månaden", eller tomt om raden inte flyttat märkbart. */
+export function shiftText(shift: number | undefined): string {
+  if (!shift) return "";
+  const n = Math.abs(shift);
+  return `${n} ${n === 1 ? "plats" : "platser"} ${shift > 0 ? "upp" : "ner"} sedan förra månaden`;
+}
+
+function changeRow(e: Entry, period: Period, shift?: number): Html {
   const v = e.stat.change;
   const dir = changeWord(v);
   return row(
@@ -241,14 +249,16 @@ function changeRow(e: Entry, period: Period): Html {
         >${change(v)}</span
       >
       <span class="row-meta"
-        >${e.slug ? salesText(e.stat.sales, e.thin) : `Hela staden, ${salesText(e.stat.sales, e.thin)}`}</span
+        >${e.slug ? salesText(e.stat.sales, e.thin) : `Hela staden, ${salesText(e.stat.sales, e.thin)}`}${
+          shift ? ` · ${shiftText(shift)}` : ""
+        }</span
       >`,
     "row-change",
   );
 }
 
 export function changeLists(m: ChangeModel, housing: Housing, period: Period): Html {
-  const r = (e: Entry) => changeRow(e, period);
+  const r = (e: Entry) => changeRow(e, period, m.shift.get(rowKey(e)));
   return html` <h2 class="visually-hidden">Förändring per område</h2>
     <section class="group" aria-labelledby="g-up">
       <h3 class="group-title" id="g-up">Ökat mest</h3>
@@ -287,6 +297,14 @@ export function changeLists(m: ChangeModel, housing: Housing, period: Period): H
         : ""
     }
     ${housing === "house" ? html`<p class="note">${CITY_HOUSE_NOTE}</p>` : ""}
+    ${
+      m.shift.size
+        ? html`<p class="note">
+            "Platser upp" och "ner" jämför placeringen i listan med förra månadens siffror. Flyttar
+            på en plats visas inte, eftersom två av tre månader är desamma mellan två publiceringar.
+          </p>`
+        : ""
+    }
     <p class="note">
       Små områden svänger mer av en slump, eftersom några få affärer kan flytta snittet. Antalet
       affärer gäller de senaste tre månaderna, som förändringen bygger på. ${thinExplainer("m3")}

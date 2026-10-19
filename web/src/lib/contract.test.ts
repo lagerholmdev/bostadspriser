@@ -111,7 +111,37 @@ function checkContext(p: Problems, where: string, c: unknown): void {
 function validateDataset(data: unknown): string[] {
   const p = new Problems();
   if (!isObj(data)) return ["Dataset: ska vara ett objekt"];
-  checkKeys(p, "Dataset", data, ["updated", "periods", "source", "county", "context", "areas"]);
+  checkKeys(p, "Dataset", data, [
+    "updated",
+    "periods",
+    "source",
+    "county",
+    "context",
+    "previous",
+    "areas",
+  ]);
+  const previous = data.previous;
+  if (previous !== null) {
+    if (isObj(previous) && isObj(previous.areas)) {
+      checkKeys(p, "previous", previous, ["updated", "areas"]);
+      p.check(
+        typeof previous.updated === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(previous.updated) &&
+          previous.updated < String(data.updated),
+        "previous.updated: ska vara ett datum före Dataset.updated",
+      );
+      for (const [slug, pa] of Object.entries(previous.areas)) {
+        if (!isObj(pa)) {
+          p.check(false, `previous.areas.${slug}: ska vara ett objekt`);
+          continue;
+        }
+        checkKeys(p, `previous.areas.${slug}`, pa, ["apartment", "house"]);
+        if (pa.apartment !== null)
+          checkStatsByPeriod(p, `previous.${slug}.apartment`, pa.apartment);
+        if (pa.house !== null) checkStatsByPeriod(p, `previous.${slug}.house`, pa.house);
+      }
+    } else p.check(false, "Dataset.previous: ska vara { updated, areas } eller null");
+  }
   const context = data.context;
   if (context !== null) {
     if (isObj(context)) {
@@ -284,6 +314,7 @@ describe("kontraktsvalideringen själv", () => {
       source: { name: "x", url: "http://x" },
       county: { name: "Län", apartment: {}, house: {} },
       context: null,
+      previous: { updated: "nästa månad", areas: {} },
       areas: [
         {
           slug: "a",
@@ -329,6 +360,7 @@ describe("kontraktsvalideringen själv", () => {
       "väntade 25",
       "families: ska vara en andel",
       "context: ska finnas om och endast om",
+      "previous.updated",
     ]) {
       expect(problems).toContain(needle);
     }

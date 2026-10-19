@@ -76,6 +76,12 @@ export interface Area {
   context: AreaContext | null;
 }
 
+/** Förra månadens siffror per område (samma villaregel som Area). */
+export interface PreviousArea {
+  apartment: StatsByPeriod | null;
+  house: StatsByPeriod | null;
+}
+
 export interface Dataset {
   /** Datum då Mäklarstatistik publicerade siffrorna, YYYY-MM-DD. */
   updated: string;
@@ -89,5 +95,7 @@ export interface Dataset {
     years: Record<ContextKey, string>;
     county: AreaContext;
   } | null;
+  /** Förra ögonblicksbilden, för placeringsflytten i Förändring. null när bara en månad finns. */
+  previous: { updated: string; areas: Record<string, PreviousArea> } | null;
   areas: Area[];
 }

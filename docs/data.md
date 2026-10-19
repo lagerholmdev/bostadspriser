@@ -175,6 +175,7 @@ interface Dataset {
   source: { name: string; url: string };
   county: { name: string; apartment: StatsByPeriod; house: StatsByPeriod };
   context: { source: { name: string; url: string }; years: Record<ContextKey, string>; county: AreaContext } | null;
+  previous: { updated: string; areas: Record<string, { apartment: StatsByPeriod | null; house: StatsByPeriod | null }> } | null;
   areas: Area[];                            // 37 st, sorterade på namn i svensk ordning (Å, Ä, Ö sist)
 }
 
@@ -209,6 +210,10 @@ interface Stat {
   missing?: Partial<Record<"sales" | "pricePerSqm" | "meanPrice" | "change", "F" | "N" | "0">>;
 }
 ```
+
+`previous` är ögonblicksbilden närmast före den senaste, med samma villaregel som nedan. Den finns
+från november 2026, när två månader har samlats. Förändring-vyn rankar då båda månaderna på samma
+sätt och visar placeringsflytten på rader som flyttat minst två platser.
 
 Regler för villastatistiken:
 

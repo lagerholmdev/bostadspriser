@@ -9,9 +9,9 @@ import {
   estimatedCost,
   type BudgetStatus,
 } from "../../lib/budget";
-import { areas as ALL_AREAS, countyStat, isThin, shownStat } from "../../lib/data";
+import { areas as ALL_AREAS, countyStat, dataset, isThin, shownStat } from "../../lib/data";
 import { BUDGET_COLORS, NODATA_COLOR, changeStepColor, priceColor } from "../../lib/scales";
-import type { Area, Housing, Period, Stat } from "../../lib/types";
+import type { Area, Dataset, Housing, Period, Stat } from "../../lib/types";
 import type { AppState, View } from "../../lib/url";
 
 /**
@@ -187,22 +187,73 @@ export interface ChangeModel {
   countDown: number;
   countFlat: number;
   missing: Entry[];
+  /** Placeringsflytt sedan förra månaden per rad (rowKey), bara flyttar på minst SHIFT_MIN platser. */
+  shift: Map<string, number>;
+}
+
+/** Mindre flyttar än så visas inte: två av tre månader är desamma mellan två publiceringar. */
+export const SHIFT_MIN = 2;
+
+/** Nyckel för en rad: områdets slug, eller "stockholm" för den sammanslagna villaraden. */
+export function rowKey(e: Entry): string {
+  return e.slug ?? "stockholm";
+}
+
+function rankByChange(list: Entry[]): Entry[] {
+  const changeOf = (e: Entry) => e.stat.change ?? 0;
+  return list
+    .filter((e) => e.stat.change != null)
+    .sort((a, b) => changeOf(b) - changeOf(a) || collator.compare(a.name, b.name));
+}
+
+/** Områdena med förra månadens statistik, i samma form som datasetet. null utan förra månad. */
+export function previousAreas(
+  ds: Dataset = dataset,
+  list: readonly Area[] = ALL_AREAS,
+): Area[] | null {
+  const prev = ds.previous;
+  if (!prev) return null;
+  return list
+    .filter((a) => a.slug in prev.areas)
+    .map((a) => ({
+      ...a,
+      apartment: prev.areas[a.slug].apartment,
+      house: prev.areas[a.slug].house,
+    }));
+}
+
+/**
+ * Hur många platser varje rad har flyttat i förändringslistan sedan förra månaden: positivt =
+ * uppåt (större ökning relativt de andra). Bara rader som finns båda månaderna och flyttat minst
+ * SHIFT_MIN platser.
+ */
+export function rankShifts(current: Entry[], previous: Entry[]): Map<string, number> {
+  const before = new Map(rankByChange(previous).map((e, i) => [rowKey(e), i]));
+  const out = new Map<string, number>();
+  rankByChange(current).forEach((e, i) => {
+    const was = before.get(rowKey(e));
+    if (was != null && Math.abs(was - i) >= SHIFT_MIN) out.set(rowKey(e), was - i);
+  });
+  return out;
 }
 
 /**
  * Båda förändringarna räknas av Mäklarstatistik på de senaste tre månaderna (m12 = mot samma
  * månader året innan). Antal affärer och osäkerhet tas därför alltid från tremånadersperioden.
  */
-export function changeModel(housing: Housing, period: Period, top = 5): ChangeModel {
+export function changeModel(
+  housing: Housing,
+  period: Period,
+  top = 5,
+  previous: Area[] | null = previousAreas(),
+): ChangeModel {
   const base = new Map(entries(housing, "m3").map((e) => [e.slug, e]));
   const list = entries(housing, period).map((e) => {
     const b = base.get(e.slug);
     return b ? { ...e, stat: { ...e.stat, sales: b.stat.sales }, thin: b.thin } : e;
   });
   const changeOf = (e: Entry) => e.stat.change ?? 0;
-  const all = list
-    .filter((e) => e.stat.change != null)
-    .sort((a, b) => changeOf(b) - changeOf(a) || collator.compare(a.name, b.name));
+  const all = rankByChange(list);
   const rounded = (e: Entry) => Math.round(changeOf(e) * 10) / 10;
   const ups = all.filter((e) => rounded(e) > 0);
   const downs = all.filter((e) => rounded(e) < 0).reverse();
@@ -215,6 +266,7 @@ export function changeModel(housing: Housing, period: Period, top = 5): ChangeMo
     countDown: downs.length,
     countFlat: all.length - ups.length - downs.length,
     missing: list.filter((e) => e.stat.change == null),
+    shift: previous ? rankShifts(all, entries(housing, period, previous)) : new Map(),
   };
 }
 
