@@ -1,25 +1,10 @@
-OK 200 561 https://statistikdatabasen.scb.se/api/v2/config
-OK 200 553 https://api.scb.se/OV0104/v2beta/api/v2/config
-BASE https://statistikdatabasen.scb.se/api/v2
-OK 200 3636 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO%20%C3%A5lder%20k%C3%B6n
-OK 200 1330 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO%20hush%C3%A5llstyp
-OK 200 2544 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO%20utbildningsniv%C3%A5
-OK 200 2503 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO%20inkomstklass
-OK 200 2463 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO%20uppl%C3%A5telseform%20l%C3%A4genheter
-OK 200 1396 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=Tab1InkDesoRegso
-OK 200 1330 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=FolkmDesoAldKon
-OK 200 1327 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=HushallDesoTyp
-OK 200 1384 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=UtbSUNBefDesoRegsoN
-OK 200 1342 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=BO0104T01N2
-OK 200 32152 https://statistikdatabasen.scb.se/api/v2/tables?lang=sv&pageSize=100&query=DeSO
-OK 200 1118138 https://statistikdatabasen.scb.se/api/v2/tables/TAB6680/metadata?lang=sv&outputFormat=json-stat2
-OK 200 447950 https://statistikdatabasen.scb.se/api/v2/tables/TAB5551/metadata?lang=sv&outputFormat=json-stat2
-OK 200 663692 https://statistikdatabasen.scb.se/api/v2/tables/TAB6638/metadata?lang=sv&outputFormat=json-stat2
-OK 200 448248 https://statistikdatabasen.scb.se/api/v2/tables/TAB6258/metadata?lang=sv&outputFormat=json-stat2
-OK 200 1117205 https://statistikdatabasen.scb.se/api/v2/tables/TAB6682/metadata?lang=sv&outputFormat=json-stat2
-OK 200 447664 https://statistikdatabasen.scb.se/api/v2/tables/TAB5199/metadata?lang=sv&outputFormat=json-stat2
-OK 200 447075 https://statistikdatabasen.scb.se/api/v2/tables/TAB4573/metadata?lang=sv&outputFormat=json-stat2
-OK 200 1117794 https://statistikdatabasen.scb.se/api/v2/tables/TAB6681/metadata?lang=sv&outputFormat=json-stat2
-OK 200 1977 https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=2.0.0&request=DescribeFeatureType&typeNames=stat:DeSO_2025
-OK 200 14214 https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=stat:DeSO_2025&count=3&outputFormat=application/json
-OK 200 41848832 https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat:DeSO_2025&outputFormat=geopackage
+OK 1130351 https://statistikdatabasen.scb.se/api/v2/tables/TAB6574/metadata?lang=sv&outputFormat=json-stat2
+OK 23533 https://statistikdatabasen.scb.se/api/v2/tables/TAB6574/data?lang=sv&outputFormat=json-stat2&valuecodes[Region]=0180&valuecodes[Region]=0180C1010&valuecodes[Region]=01&valuecodes[Region]=0114&valuecodes[Alder]=*&valuecodes[Kon]=*&valuecodes[ContentsCode]=*&valuecodes[Tid]=*
+OK 1130946 https://statistikdatabasen.scb.se/api/v2/tables/TAB6568/metadata?lang=sv&outputFormat=json-stat2
+OK 8377 https://statistikdatabasen.scb.se/api/v2/tables/TAB6568/data?lang=sv&outputFormat=json-stat2&valuecodes[Region]=0180&valuecodes[Region]=0180C1010&valuecodes[Region]=01&valuecodes[Region]=0114&valuecodes[Hushallstyp]=*&valuecodes[ContentsCode]=*&valuecodes[Tid]=*
+OK 676729 https://statistikdatabasen.scb.se/api/v2/tables/TAB6534/metadata?lang=sv&outputFormat=json-stat2
+OK 6330 https://statistikdatabasen.scb.se/api/v2/tables/TAB6534/data?lang=sv&outputFormat=json-stat2&valuecodes[Region]=0180&valuecodes[Region]=0180C1010_DeSO2025&valuecodes[Region]=01&valuecodes[Region]=0114&valuecodes[UtbildningsNiva]=*&valuecodes[ContentsCode]=*&valuecodes[Tid]=*
+OK 1131996 https://statistikdatabasen.scb.se/api/v2/tables/TAB6679/metadata?lang=sv&outputFormat=json-stat2
+OK 18023 https://statistikdatabasen.scb.se/api/v2/tables/TAB6679/data?lang=sv&outputFormat=json-stat2&valuecodes[Region]=0180&valuecodes[Region]=0180C1010&valuecodes[Region]=01&valuecodes[Region]=0114&valuecodes[InkomstTyp]=*&valuecodes[Kon]=*&valuecodes[ContentsCode]=*&valuecodes[Tid]=*
+OK 663692 https://statistikdatabasen.scb.se/api/v2/tables/TAB6638/metadata?lang=sv&outputFormat=json-stat2
+OK 4561 https://statistikdatabasen.scb.se/api/v2/tables/TAB6638/data?lang=sv&outputFormat=json-stat2&valuecodes[Region]=0180C1010_DeSO2025&valuecodes[Region]=0180C1020_DeSO2025&valuecodes[Upplatelseform]=*&valuecodes[ContentsCode]=*&valuecodes[Tid]=*
