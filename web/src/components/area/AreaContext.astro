@@ -1,0 +1,113 @@
+---
+/**
+ * "Vilka bor här?": fyra andelar från SCB, var och en mot länet. Punkten är området, strecket länet.
+ * Skalan per mått är densamma på alla områdessidor (scaleMax), så staplar går att jämföra mellan sidor.
+ */
+import { contextValues, contextYears, share } from "../../lib/context";
+import type { Area } from "../../lib/types";
+
+interface Props {
+  area: Area;
+}
+const { area } = Astro.props;
+const rows = contextValues(area);
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+---
+
+{rows.length > 0 && (
+  <>
+    <ul class="ctx">
+      {rows.map((r) => (
+        <li class="ctx-row">
+          <div class="ctx-text">
+            <span class="ctx-label">{r.label}</span>
+            <span class="ctx-note">{r.note}</span>
+          </div>
+          <span class="ctx-value">{share(r.value)}</span>
+          <div class="ctx-bar" aria-hidden="true">
+            {r.countyAt != null && <span class="ctx-county" style={`left:${pct(r.countyAt)}`} />}
+            <span class="ctx-dot" style={`left:${pct(r.at)}`} />
+          </div>
+          {r.county != null && <span class="ctx-county-text">Länet {share(r.county)}</span>}
+        </li>
+      ))}
+    </ul>
+    <p class="ctx-source">
+      {contextYears()}. Summerat från SCB:s minsta statistikområden (DeSO) till{" "}
+      {area.kind === "district" ? "stadsdelsområdet" : "kommunen"}.
+    </p>
+  </>
+)}
+
+<style>
+  .ctx {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+  .ctx-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--sp-4);
+    row-gap: var(--sp-2);
+    padding: var(--sp-4) 0;
+    border-top: 1px solid var(--c-line);
+  }
+  .ctx-row:last-child {
+    border-bottom: 1px solid var(--c-line);
+  }
+  .ctx-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .ctx-label {
+    font-weight: 600;
+  }
+  .ctx-note,
+  .ctx-county-text,
+  .ctx-source {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-3);
+  }
+  .ctx-value {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    align-self: start;
+  }
+  .ctx-bar {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--c-sunken);
+    margin: var(--sp-2) 6px 0;
+  }
+  .ctx-dot {
+    position: absolute;
+    top: -4px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    border-radius: 50%;
+    background: var(--c-ink);
+    border: 2px solid var(--c-surface);
+  }
+  .ctx-county {
+    position: absolute;
+    top: -5px;
+    width: 2px;
+    height: 16px;
+    margin-left: -1px;
+    background: var(--c-ink-3);
+  }
+  .ctx-county-text {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    align-self: center;
+  }
+  .ctx-source {
+    margin-top: var(--sp-3);
+  }
+</style>
