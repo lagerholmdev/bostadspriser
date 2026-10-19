@@ -5,6 +5,7 @@ import { areasUrl, mapUrl } from "../../lib/links";
 import "../../components/common/common.css";
 import { areas, dataset, THIN_SALES } from "../../lib/data";
 import { date } from "../../lib/format";
+import { contextYears } from "../../lib/context";
 
 const districts = areas.filter((a) => a.kind === "district").length;
 const municipalities = areas.filter((a) => a.kind === "municipality").length;
@@ -15,6 +16,7 @@ const toc = [
   { id: "saknade-varden", label: "Saknade och osäkra värden" },
   { id: "omraden", label: "Hur områdena är indelade" },
   { id: "villor", label: "Villor" },
+  ...(dataset.context ? [{ id: "invanare", label: "Vilka bor här: SCB" }] : []),
   { id: "karta", label: "Kartan och gränserna" },
   { id: "projektet", label: "Om projektet och integritet" },
 ];
@@ -163,6 +165,33 @@ const toc = [
           värde: snittet för hela staden. Områdessidorna säger när det är så.
         </p>
       </section>
+
+      {dataset.context && (
+        <section id="invanare">
+          <h2>Vilka bor här: SCB</h2>
+          <p>
+            Varje områdessida visar fyra andelar från{" "}
+            <a href={dataset.context.source.url} rel="noopener">
+              SCB:s statistikdatabas
+            </a>{" "}
+            ({contextYears()}): hushåll med barn, vuxna i rikets översta inkomstfjärdedel,
+            25–65-åringar med minst tre års högskoleutbildning och andelen 25–44-åringar. Siffrorna
+            gäller alla som bor i området, inte bara de som köpt bostad nyligen.
+          </p>
+          <p>
+            SCB redovisar dem för små statistikområden (DeSO) med 700–2 700 invånare. Vi summerar
+            antalen till kommuner och stadsdelsområden. Varje DeSO i Stockholms stad räknas till det
+            stadsdelsområde där den har mest yta. Det ger exakta summor, men därför finns ingen
+            medianinkomst: medianer går inte att lägga ihop.
+          </p>
+          <p>
+            Andelen av bostadsrätterna som sålts jämför Mäklarstatistiks antal sålda med SCB:s antal
+            bostadsrätter. Mäklarstatistik och SCB drar stadsdelsområdenas gränser lite olika, så
+            för stadsdelsområdena är den andelen ungefärlig. Datan är öppen (CC0) och uppdateras en
+            gång om året.
+          </p>
+        </section>
+      )}
 
       <section id="karta">
         <h2>Kartan och gränserna</h2>

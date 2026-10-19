@@ -4,6 +4,7 @@
  * med replaceState, så att länken alltid går att dela.
  */
 import { affordableSize } from "../lib/budget";
+import { areaTurnover, CONTEXT_ROWS, contextYears, share, shareOneDecimal } from "../lib/context";
 import {
   areasFor,
   bySlug,
@@ -65,6 +66,8 @@ const names = (list: readonly Area[]) => joinNames(list.map((a) => a.name));
 interface Row {
   label: string;
   cell: (a: Area, i: number) => Html;
+  /** Mellanrubrik som visas ovanför raden. */
+  group?: string;
 }
 
 function rows(list: readonly Area[]): Row[] {
@@ -142,7 +145,28 @@ function rows(list: readonly Area[]): Row[] {
           : html`ca ${number(Math.round(affordableSize(BUDGET, p)))}&nbsp;kvm`;
       },
     },
+    {
+      label: "Andel av bostadsrätterna som sålts, 12 mån",
+      cell: (a) => {
+        const t = areaTurnover(a, "m12");
+        return t == null ? missing(undefined) : html`${shareOneDecimal(t)}`;
+      },
+    },
+    ...contextRows(list),
   ];
+}
+
+/** "Vilka bor här": SCB:s andelar, under en egen mellanrubrik. Inga rader om kontexten saknas. */
+function contextRows(list: readonly Area[]): Row[] {
+  if (!dataset.context || !list.some((a) => a.context)) return [];
+  return CONTEXT_ROWS.map((r, i) => ({
+    label: r.label,
+    group: i === 0 ? `Vilka bor här (${contextYears()})` : undefined,
+    cell: (a: Area) => {
+      const v = a.context?.[r.key];
+      return v == null ? missing(undefined) : html`${share(v)}`;
+    },
+  }));
 }
 
 function tableHtml(list: readonly Area[]): Html {
@@ -166,10 +190,16 @@ function tableHtml(list: readonly Area[]): Html {
       <tbody>
         ${rows(list).map(
           (r) =>
-            html`<tr>
-              <th scope="row">${r.label}</th>
-              ${list.map((a, i) => html`<td>${r.cell(a, i)}</td>`)}
-            </tr>`,
+            html`${
+                r.group &&
+                html`<tr class="group-row">
+                  <th scope="colgroup" colspan="${list.length + 1}">${r.group}</th>
+                </tr>`
+              }
+              <tr>
+                <th scope="row">${r.label}</th>
+                ${list.map((a, i) => html`<td>${r.cell(a, i)}</td>`)}
+              </tr>`,
         )}
       </tbody>
     </table>
@@ -237,6 +267,10 @@ function init(): void {
         parts.push("Villor redovisas bara för hela Stockholms stad, inte per stadsdelsområde.");
       if (list.some((a) => isThin(stat(a, "apartment", "m3"), "m3")))
         parts.push("Värden med få affärer är märkta, eftersom snittet där kan svänga mycket.");
+      if (dataset.context)
+        parts.push(
+          "Andelen sålda räknas mot SCB:s antal bostadsrätter. Befolkningssiffrorna kommer från SCB.",
+        );
       notes.textContent = parts.join(" ");
     } else {
       table.innerHTML = "";

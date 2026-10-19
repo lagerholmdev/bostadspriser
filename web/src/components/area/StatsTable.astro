@@ -4,6 +4,7 @@ import { dataset, isThin } from "../../lib/data";
 import { money, number, MISSING_TEXT } from "../../lib/format";
 import type { MissingReason, Period, StatsByPeriod } from "../../lib/types";
 import ChangeValue from "../common/ChangeValue.astro";
+import { shareOneDecimal } from "../../lib/context";
 
 interface Props {
   stats: StatsByPeriod;
@@ -12,8 +13,11 @@ interface Props {
   noun: string;
   /** Kolumner att visa (standard båda). */
   periods?: Period[];
+  /** Andel av beståndet som sålts per period (omsättningen), om den finns. */
+  turnover?: Partial<Record<Period, number | null>>;
 }
-const { stats, caption, noun, periods = ["m3", "m12"] } = Astro.props;
+const { stats, caption, noun, periods = ["m3", "m12"], turnover } = Astro.props;
+const showTurnover = turnover != null && periods.some((p) => turnover[p] != null);
 const head: Record<Period, string> = { m3: "3 mån", m12: "12 mån" };
 const miss = (
   p: Period,
@@ -87,6 +91,14 @@ const missText = (r: MissingReason | undefined) => (r ? MISSING_TEXT[r] : "sakna
           </td>
         ))}
       </tr>
+      {showTurnover && (
+        <tr>
+          <th scope="row">Andel av {noun} som sålts</th>
+          {periods.map((p) => (
+            <td>{shareOneDecimal(turnover?.[p])}</td>
+          ))}
+        </tr>
+      )}
     </tbody>
   </table>
 </div>
