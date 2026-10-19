@@ -13,23 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install geopandas pyarrow
+      - run: echo steg2
       - run: python .github/upptack/discover.py 2>&1 | tee upptack.log
       - run: |
-          python - <<'PY'
-          import geopandas as g, pathlib
-          p = pathlib.Path("out/deso2025.gpkg")
-          if p.exists():
-              d = g.read_file(p)
-              print(d.columns.tolist(), len(d), d.crs)
-              col = next(c for c in d.columns if "lan" in c.lower() or "län" in c.lower())
-              s = d[d[col].astype(str).str.startswith("01")]
-              s.to_crs(4326).to_parquet("out/deso2025_ab.parquet")
-              print("Stockholms län:", len(s))
-          PY
-          rm -f out/deso2025.gpkg
-      - run: |
-          mkdir -p upptack && mv out upptack/out && mv upptack.log upptack/
+          rm -rf upptack && mkdir -p upptack && mv out upptack/out && mv upptack.log upptack/
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add upptack && git commit -m "Upptäcktsresultat" && git push

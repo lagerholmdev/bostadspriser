@@ -1,42 +1,26 @@
-"""Engångsskript: kartlägg SCB:s API v2 och DeSO 2025-geometrin. Skriver allt till out/."""
-import json, urllib.parse, urllib.request, pathlib, time
-
+"""Engångsskript, steg 2: metadata och ett litet dataprov för de fem tabellerna."""
+import json, urllib.request, pathlib, time
 OUT = pathlib.Path("out"); OUT.mkdir(exist_ok=True)
-BASES = ["https://statistikdatabasen.scb.se/api/v2", "https://api.scb.se/OV0104/v2beta/api/v2"]
+BASE = "https://statistikdatabasen.scb.se/api/v2"
 UA = {"User-Agent": "prislandskap-upptack/1"}
-
 def get(url, name):
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120) as r:
             body = r.read()
-        (OUT / name).write_bytes(body)
-        print("OK", r.status, len(body), url)
-        return body
+        (OUT / name).write_bytes(body); print("OK", len(body), url); return body
     except Exception as e:
         print("FEL", url, e)
-        (OUT / (name + ".err")).write_text(f"{url}\n{e}")
     finally:
-        time.sleep(0.5)
-
-base = None
-for b in BASES:
-    if get(b + "/config", f"config_{len(base or '')}_{BASES.index(b)}.json"):
-        base = base or b
-print("BASE", base)
-terms = ["DeSO ålder kön", "DeSO hushållstyp", "DeSO utbildningsnivå", "DeSO inkomstklass",
-         "DeSO upplåtelseform lägenheter", "Tab1InkDesoRegso", "FolkmDesoAldKon", "HushallDesoTyp",
-         "UtbSUNBefDesoRegsoN", "BO0104T01N2", "DeSO"]
-ids = {}
-for i, t in enumerate(terms):
-    body = get(f"{base}/tables?lang=sv&pageSize=100&query={urllib.parse.quote(t)}", f"search_{i}.json")
-    if body:
-        for tab in json.loads(body).get("tables", []):
-            ids[tab["id"]] = tab.get("label")
-(OUT / "ids.json").write_text(json.dumps(ids, ensure_ascii=False, indent=1))
-for tid, label in ids.items():
-    if "DeSO" in (label or "") or "RegSO" in (label or ""):
-        get(f"{base}/tables/{tid}/metadata?lang=sv&outputFormat=json-stat2", f"meta_{tid}.json")
-wfs = "https://geodata.scb.se/geoserver/stat/wfs"
-get(wfs + "?service=WFS&version=2.0.0&request=DescribeFeatureType&typeNames=stat:DeSO_2025", "deso2025_describe.xml")
-get(wfs + "?service=WFS&version=2.0.0&request=GetFeature&typeNames=stat:DeSO_2025&count=3&outputFormat=application/json", "deso2025_sample.json")
-get(wfs + "?service=WFS&version=1.1.0&request=GetFeature&typeName=stat:DeSO_2025&outputFormat=geopackage", "deso2025.gpkg")
+        time.sleep(0.6)
+for t in ["TAB6574", "TAB6568", "TAB6534", "TAB6679", "TAB6638"]:
+    body = get(f"{BASE}/tables/{t}/metadata?lang=sv&outputFormat=json-stat2", f"meta_{t}.json")
+    if not body:
+        continue
+    m = json.loads(body)
+    reg = m["dimension"]["Region"]["category"]["index"]
+    codes = [c for c in reg if c.startswith("0180")][:2] + [c for c in reg if c.startswith("01") and len(c) <= 4][:2]
+    q = "&".join(f"valuecodes[Region]={c}" for c in codes)
+    for d in m["id"]:
+        if d != "Region":
+            q += f"&valuecodes[{d}]=*"
+    get(f"{BASE}/tables/{t}/data?lang=sv&outputFormat=json-stat2&{q}", f"data_{t}.json")
