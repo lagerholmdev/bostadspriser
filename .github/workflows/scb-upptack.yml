@@ -2,15 +2,34 @@ name: SCB-upptäckt (tillfällig)
 on:
   push:
     branches: [scb-upptack]
+    paths: [".github/upptack/**", ".github/workflows/scb-upptack.yml"]
 permissions:
-  contents: read
+  contents: write
 jobs:
   upptack:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python .github/upptack/discover.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-python@v5
         with:
-          name: upptack
-          path: out/
+          python-version: "3.12"
+      - run: pip install geopandas pyarrow
+      - run: python .github/upptack/discover.py 2>&1 | tee upptack.log
+      - run: |
+          python - <<'PY'
+          import geopandas as g, pathlib
+          p = pathlib.Path("out/deso2025.gpkg")
+          if p.exists():
+              d = g.read_file(p)
+              print(d.columns.tolist(), len(d), d.crs)
+              col = next(c for c in d.columns if "lan" in c.lower() or "län" in c.lower())
+              s = d[d[col].astype(str).str.startswith("01")]
+              s.to_crs(4326).to_parquet("out/deso2025_ab.parquet")
+              print("Stockholms län:", len(s))
+          PY
+          rm -f out/deso2025.gpkg
+      - run: |
+          mkdir -p upptack && mv out upptack/out && mv upptack.log upptack/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add upptack && git commit -m "Upptäcktsresultat" && git push
