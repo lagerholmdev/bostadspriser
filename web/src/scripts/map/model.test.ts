@@ -6,6 +6,7 @@ import {
   CITY_NAME,
   budgetModel,
   changeModel,
+  rowKey,
   entries,
   mapPaint,
   priceModel,
@@ -110,6 +111,28 @@ describe("changeModel", () => {
     const m = changeModel("apartment", "m12");
     const solna = m.all.find((e) => e.slug === "solna")!;
     expect(solna.stat.sales).toBe(getArea("solna")!.apartment!.m3.sales);
+  });
+  it("visar ingen placeringsflytt när bara en månad finns", () => {
+    expect(changeModel("apartment", "m12").shift.size).toBe(0);
+  });
+  it("räknar placeringsflytt mot förra månaden, bara för flyttar på minst två platser", () => {
+    // Förra månaden: Sigtuna (störst nedgång nu) hade i stället den största ökningen.
+    const prev = areas.map((a) =>
+      a.slug === "sigtuna" && a.apartment
+        ? { ...a, apartment: { ...a.apartment, m12: { ...a.apartment.m12, change: 50 } } }
+        : a,
+    );
+    const m = changeModel("apartment", "m12", 5, prev);
+    const last = m.all.length - 1;
+    expect(m.all[last].slug).toBe("sigtuna");
+    expect(m.shift.get("sigtuna")).toBe(-last);
+    // De som låg under Sigtuna förra månaden har flyttat upp en plats: för lite för att visas.
+    expect([...m.shift.keys()]).toEqual(["sigtuna"]);
+  });
+  it("matchar villornas stadsrad mot förra månadens stadsrad", () => {
+    const m = changeModel("house", "m12", 5, areas);
+    expect(m.shift.size).toBe(0);
+    expect(m.all.some((e) => rowKey(e) === "stockholm")).toBe(true);
   });
   it("listar områden där förändringen saknas", () => {
     const m = changeModel("apartment", "m12");

@@ -77,6 +77,18 @@ class DatasetContext(TypedDict):
     county: AreaContext
 
 
+class PreviousArea(TypedDict):
+    apartment: StatsByPeriod | None
+    house: StatsByPeriod | None
+
+
+class Previous(TypedDict):
+    """Förra månadens siffror per område, för att visa hur placeringen i Förändring har flyttat sig."""
+
+    updated: str
+    areas: dict[str, PreviousArea]
+
+
 class Area(TypedDict):
     slug: str
     name: str
@@ -96,4 +108,5 @@ class Dataset(TypedDict):
     source: Source
     county: County
     context: DatasetContext | None
+    previous: Previous | None
     areas: list[Area]

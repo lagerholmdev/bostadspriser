@@ -12,7 +12,16 @@ from prislandskap import snapshot as snapshots
 from prislandskap.config import CITY_SLUG, CONTEXT_FILE, GENERATED_DIR, GEO_FILE, display
 from prislandskap.errors import PipelineError
 from prislandskap.geojson import Feature, bbox, load_features, round_coords
-from prislandskap.models import Area, AreaContext, Dataset, DatasetContext, Snapshot, SnapshotArea
+from prislandskap.models import (
+    Area,
+    AreaContext,
+    Dataset,
+    DatasetContext,
+    Previous,
+    PreviousArea,
+    Snapshot,
+    SnapshotArea,
+)
 from prislandskap.text import period_labels, swedish_sort_key
 
 log = logging.getLogger(__name__)
@@ -80,7 +89,25 @@ def _check_coverage(features: list[Feature], records: dict[str, SnapshotArea]) -
             raise PipelineError(f"{props['slug']}: områdestypen skiljer mellan geometri och statistik")
 
 
-def build_dataset(snap: Snapshot, features: list[Feature], context: dict | None = None) -> Dataset:
+def build_previous(prev: Snapshot | None, slugs: list[str]) -> Previous | None:
+    """Förra ögonblicksbildens statistik per område, med samma villaregel som build_area."""
+    if prev is None:
+        return None
+    records = snapshots.area_by_slug(prev)
+    city = records.get(CITY_SLUG)
+    out: dict[str, PreviousArea] = {}
+    for slug in slugs:
+        record = records.get(slug)
+        if record is None:
+            continue
+        house = (city["house"] if city else None) if record["kind"] == "district" else record["house"]
+        out[slug] = PreviousArea(apartment=record["apartment"], house=house)
+    return Previous(updated=prev["updated"], areas=out)
+
+
+def build_dataset(
+    snap: Snapshot, features: list[Feature], context: dict | None = None, previous: Snapshot | None = None
+) -> Dataset:
     records = snapshots.area_by_slug(snap)
     _check_coverage(features, records)
     by_slug = (context or {}).get("areas", {})
@@ -102,6 +129,7 @@ def build_dataset(snap: Snapshot, features: list[Feature], context: dict | None 
         source=snap["source"],
         county=snap["county"],
         context=dataset_context(context),
+        previous=build_previous(previous, [a["slug"] for a in areas]),
         areas=areas,
     )
 
@@ -132,12 +160,18 @@ def _write_if_changed(path: Path, text: str) -> bool:
     return True
 
 
+def load_previous(snap: Snapshot) -> Snapshot | None:
+    """Ögonblicksbilden närmast före den senaste, eller None om det bara finns en."""
+    older = [p for p in snapshots.list_snapshots() if p.stem < snap["updated"][:7]]
+    return snapshots.load(older[-1]) if older else None
+
+
 def run(out_dir: Path = GENERATED_DIR, geo_file: Path = GEO_FILE) -> list[Path]:
     snap = snapshots.load_latest()
     features = load_features(geo_file)
     outputs = {
         out_dir / "areas.json": json.dumps(
-            build_dataset(snap, features, load_context()), ensure_ascii=False, indent=1
+            build_dataset(snap, features, load_context(), load_previous(snap)), ensure_ascii=False, indent=1
         )
         + "\n",
         out_dir / "areas.geojson": json.dumps(

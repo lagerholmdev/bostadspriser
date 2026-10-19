@@ -48,7 +48,8 @@ def dataset(snapshot, features):
 
 
 def test_dataset_top_level(dataset):
-    assert set(dataset) == {"updated", "periods", "source", "county", "context", "areas"}
+    assert set(dataset) == {"updated", "periods", "source", "county", "context", "previous", "areas"}
+    assert dataset["previous"] is None
     assert dataset["context"] is None  # utan data/scb/kontext.json
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", dataset["updated"])
     assert dataset["periods"] == {"m3": "jul–sep 2026", "m12": "okt 2025–sep 2026"}
@@ -140,6 +141,31 @@ def test_context_missing_an_area_is_an_error(snapshot, features):
         export.build_dataset(snapshot, features, context)
 
 
+def test_previous_month_per_area(snapshot, features):
+    import copy
+
+    prev = copy.deepcopy(snapshot)
+    prev["updated"] = "2026-09-08"
+    prev["areas"] = [a for a in prev["areas"] if a["slug"] != "essingen"]
+    dataset = json.loads(json.dumps(export.build_dataset(snapshot, features, None, prev)))
+    previous = dataset["previous"]
+    assert previous["updated"] == "2026-09-08"
+    assert "essingen" not in previous["areas"] and len(previous["areas"]) == 36
+    assert set(previous["areas"]["sodermalm"]) == {"apartment", "house"}
+    city = next(a for a in snapshot["areas"] if a["slug"] == "stockholm")
+    assert previous["areas"]["sodermalm"]["house"] == city["house"]
+    assert_stats_by_period(previous["areas"]["solna"]["apartment"])
+
+
+def test_load_previous_picks_the_month_before(tmp_path, monkeypatch, snapshot):
+    for month in ("2026-08", "2026-09", "2026-10"):
+        s = dict(snapshot, updated=f"{month}-08")
+        (tmp_path / f"{month}.json").write_text(json.dumps(s), encoding="utf-8")
+    monkeypatch.setattr(export.snapshots, "list_snapshots", lambda: sorted(tmp_path.glob("*.json")))
+    assert export.load_previous(dict(snapshot, updated="2026-10-08"))["updated"] == "2026-09-08"
+    assert export.load_previous(dict(snapshot, updated="2026-08-08")) is None
+
+
 def test_geometry_carries_only_slug(features):
     geo = export.build_geometry(features)
     assert geo["type"] == "FeatureCollection"
@@ -157,6 +183,7 @@ def test_coverage_mismatch_is_an_error(snapshot, features):
 def test_run_writes_files_idempotently(tmp_path, monkeypatch, snapshot):
     monkeypatch.setattr(export.snapshots, "load_latest", lambda: snapshot)
     monkeypatch.setattr(export, "load_context", lambda: None)
+    monkeypatch.setattr(export, "load_previous", lambda snap: None)
     paths = export.run(out_dir=tmp_path)
     assert sorted(p.name for p in paths) == ["areas.geojson", "areas.json"]
     before = {p: p.stat().st_mtime_ns for p in paths}
