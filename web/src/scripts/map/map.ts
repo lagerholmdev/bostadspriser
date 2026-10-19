@@ -50,7 +50,6 @@ const MAX_BOUNDS: [[number, number], [number, number]] = [
   [17.2, 58.6],
   [19.6, 60.3],
 ];
-const COUNTY_BBOX = unionBbox(ALL_AREAS);
 const CITY_BBOX = unionBbox(ALL_AREAS.filter((a) => a.kind === "district"));
 /** Staden och närförorterna (Solna, Sundbyberg, Nacka, Lidingö i kanten). */
 const INNER_BBOX: Bbox = [17.79, 59.24, 18.22, 59.41];
@@ -224,11 +223,6 @@ export class AreaMap {
     if (area) this.fit(area.bbox, isWide() ? AREA_MAX_ZOOM : AREA_MAX_ZOOM - 0.75);
   }
 
-  /** Hela länet. */
-  showCounty(): void {
-    this.fit(COUNTY_BBOX, 14);
-  }
-
   /** Mobilen går mellan helskärm (ett finger flyttar) och kartan ovanför listan (två fingrar). */
   setOneFingerPan(on: boolean): void {
     if (isTouch() && !on) this.map.cooperativeGestures.enable();
@@ -266,10 +260,6 @@ export class AreaMap {
       onAdd() {
         const box = document.createElement("div");
         box.className = "maplibregl-ctrl maplibregl-ctrl-group map-ctrl-text";
-        const county = document.createElement("button");
-        county.type = "button";
-        county.textContent = "Hela länet";
-        county.addEventListener("click", () => self.showCounty());
         const t3 = document.createElement("button");
         t3.type = "button";
         t3.className = "map-ctrl-3d";
@@ -278,7 +268,7 @@ export class AreaMap {
         t3.title = "Visa priset per kvm som höjd";
         t3.addEventListener("click", () => self.set3d(!self.is3d));
         self.toggle3d = t3;
-        box.append(county, t3);
+        box.append(t3);
         return box;
       },
       onRemove() {},

@@ -412,11 +412,6 @@
   outline: 2px solid var(--c-accent);
   outline-offset: 3px;
 }
-.app .filter-note {
-  font-size: var(--fs-sm);
-  color: var(--c-ink-2);
-  padding-left: calc(56px + var(--sp-3));
-}
 
 /* ---------- Vyer: sammanfattning, förklaring, listor ---------- */
 
@@ -1571,10 +1566,6 @@
   font: 600 0.8125rem / 1 var(--f-sans);
   color: var(--c-ink);
 }
-.app .maplibregl-ctrl-group.map-ctrl-text button + button {
-  border-top: 0;
-  border-left: 1px solid var(--c-line);
-}
 .app .map-ctrl-text button[aria-pressed="true"] {
   background: var(--c-accent);
   color: var(--c-on-accent);
@@ -1626,10 +1617,6 @@
   }
   .app .filters .seg-face {
     padding: 0 10px;
-  }
-  .app .filter-note {
-    flex: 1 0 100%;
-    padding-left: 0;
   }
   .app .row {
     min-height: 56px;
@@ -1822,23 +1809,9 @@
     outline-offset: 2px;
   }
 
-  /* Kartans knappar under sökfältet; zoom sköts med fingrarna. */
+  /* Inga kartknappar på mobilen: zoom sköts med fingrarna och 3D är svårt att styra med tummen. */
   .app.has-sheet .maplibregl-ctrl-top-right {
-    top: var(--topbar-h, 116px);
-  }
-  .app.has-sheet .maplibregl-ctrl-top-right .maplibregl-ctrl {
-    margin: 4px var(--gutter-r) 0 0;
-  }
-  .app.has-sheet .maplibregl-ctrl-group:not(.map-ctrl-text) {
     display: none;
-  }
-  .app.has-sheet .maplibregl-ctrl-group.map-ctrl-text {
-    flex-direction: column;
-    border-radius: var(--radius);
-  }
-  .app.has-sheet .maplibregl-ctrl-group.map-ctrl-text button + button {
-    border-left: 0;
-    border-top: 1px solid var(--c-line);
   }
   /* Förklaringen och källorna ligger precis ovanför panelen och följer med när den dras. */
   .app.has-sheet .map-legend .ml-notes {
@@ -1878,6 +1851,9 @@
       0 -1px 3px rgb(26 31 28 / 0.08),
       0 -6px 24px rgb(26 31 28 / 0.1);
     overflow: hidden;
+    /* Eget lager. Annars kan Safari på iOS slå ihop panelen med lagret för kartans etiketter
+       (will-change) och tappa bakgrund, hörn och handtag: innehållet syns men kartan lyser igenom. */
+    transform: translateZ(0);
   }
   .app.has-sheet .panel[data-sheet="half"] {
     height: 50%;
@@ -1966,10 +1942,6 @@
   .app.has-sheet .views .legend-notes {
     margin-top: var(--sp-5);
   }
-  /* 3D är svårt att styra med tummen. */
-  .app.has-sheet .map-ctrl-3d {
-    display: none;
-  }
   .app.has-sheet .tray {
     flex: none;
     position: static;
@@ -2023,9 +1995,13 @@
   .app.has-sheet .budget-max {
     margin-top: var(--sp-2);
   }
+  /* Kikläget slutar vid rubriken. Två rader reserverade, annars växlar den mellan en och två
+     rader när reglaget dras och panelen (med reglagen) hoppar upp och ner. */
   .app.has-sheet [data-view-panel="budget"] .headline {
     margin-top: var(--sp-3);
     font-size: var(--fs-lg);
+    line-height: 1.25;
+    min-height: 2.5em;
   }
 }
 
