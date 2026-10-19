@@ -36,6 +36,25 @@ export interface Stat {
 
 export type StatsByPeriod = Record<Period, Stat>;
 
+/**
+ * SCB-statistik per område (data/scb/kontext.json, DeSO 2025 summerat per område).
+ * Andelar är 0–1. `condos` är antalet bostadsrätter, nämnaren i omsättningsgraden.
+ */
+export interface AreaContext {
+  /** Andel hushåll med barn (sammanboende eller ensamstående). */
+  families: number | null;
+  /** Andel 20 år och äldre i rikets översta fjärdedel för sammanräknad förvärvsinkomst. */
+  highIncome: number | null;
+  /** Andel 25–65 år med eftergymnasial utbildning på 3 år eller mer. */
+  higherEducation: number | null;
+  /** Andel av befolkningen som är 25–44 år. */
+  age25to44: number | null;
+  /** Antal bostadsrätter. */
+  condos: number | null;
+}
+
+export type ContextKey = keyof AreaContext;
+
 export interface Area {
   slug: string;
   name: string;
@@ -53,6 +72,8 @@ export interface Area {
    * "area" när den gäller området självt.
    */
   houseScope: "area" | "city" | null;
+  /** SCB-kontext, eller null om den inte har hämtats. */
+  context: AreaContext | null;
 }
 
 export interface Dataset {
@@ -62,5 +83,11 @@ export interface Dataset {
   periods: Record<Period, string>;
   source: { name: string; url: string };
   county: { name: string; apartment: StatsByPeriod; house: StatsByPeriod };
+  /** Källa, år per mått och länets värden för SCB-kontexten. null om den inte har hämtats. */
+  context: {
+    source: { name: string; url: string };
+    years: Record<ContextKey, string>;
+    county: AreaContext;
+  } | null;
   areas: Area[];
 }

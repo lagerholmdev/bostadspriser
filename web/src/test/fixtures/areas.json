@@ -39,6 +39,7 @@
    }
   }
  },
+ "context": null,
  "areas": [
   {
    "slug": "botkyrka",
@@ -91,7 +92,8 @@
      "change": 2.4
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "bromma-vasterled",
@@ -145,7 +147,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "brannkyrka-skarholmen",
@@ -197,7 +200,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "danderyd",
@@ -250,7 +254,8 @@
      "change": 6.3
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "ekero",
@@ -306,7 +311,8 @@
      "change": -2.6
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "enskede-skarpnack",
@@ -358,7 +364,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "essingen",
@@ -408,7 +415,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "farsta-vantor",
@@ -459,7 +467,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "haninge",
@@ -510,7 +519,8 @@
      "change": 1.0
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "huddinge",
@@ -564,7 +574,8 @@
      "change": 4.7
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "hagersten-liljeholmen",
@@ -618,7 +629,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "hasselby-vallingby",
@@ -668,7 +680,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "jarfalla",
@@ -720,7 +733,8 @@
      "change": 5.4
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "kungsholmen",
@@ -772,7 +786,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "lidingo",
@@ -824,7 +839,8 @@
      "change": 8.5
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "nacka",
@@ -878,7 +894,8 @@
      "change": 9.7
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "norrtalje",
@@ -928,7 +945,8 @@
      "change": 4.0
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "nykvarn",
@@ -981,7 +999,8 @@
      }
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "nynashamn",
@@ -1030,7 +1049,8 @@
      "change": 2.6
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "salem",
@@ -1079,7 +1099,8 @@
      "change": -1.9
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "sigtuna",
@@ -1129,7 +1150,8 @@
      "change": 5.9
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "sollentuna",
@@ -1182,7 +1204,8 @@
      "change": 6.6
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "solna",
@@ -1242,7 +1265,8 @@
      }
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "spanga-kista",
@@ -1294,7 +1318,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "sundbyberg",
@@ -1350,7 +1375,8 @@
      }
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "sodermalm",
@@ -1403,7 +1429,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "sodertalje",
@@ -1454,7 +1481,8 @@
      "change": 5.6
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "tyreso",
@@ -1505,7 +1533,8 @@
      "change": 4.2
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "taby",
@@ -1558,7 +1587,8 @@
      "change": 7.9
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "upplands-vasby",
@@ -1610,7 +1640,8 @@
      "change": 10.8
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "upplands-bro",
@@ -1660,7 +1691,8 @@
      "change": 7.1
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "vallentuna",
@@ -1711,7 +1743,8 @@
      "change": 11.8
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "vasastan-norrmalm",
@@ -1761,7 +1794,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "vaxholm",
@@ -1816,7 +1850,8 @@
      }
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "varmdo",
@@ -1868,7 +1903,8 @@
      "change": 4.4
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   },
   {
    "slug": "ostermalm",
@@ -1920,7 +1956,8 @@
      "change": 7.7
     }
    },
-   "houseScope": "city"
+   "houseScope": "city",
+   "context": null
   },
   {
    "slug": "osteraker",
@@ -1973,7 +2010,8 @@
      "change": 4.7
     }
    },
-   "houseScope": "area"
+   "houseScope": "area",
+   "context": null
   }
  ]
 }

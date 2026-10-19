@@ -14,6 +14,8 @@ python -m prislandskap export       # skriv web/src/generated/areas.json och are
 python -m prislandskap og           # skriv delningsbilder till web/public/og/
 python -m prislandskap all          # export + og
 python -m prislandskap geometry     # bygg om data/geo/areas.geojson (kräver [geo], sällan)
+python -m prislandskap deso         # bygg data/scb/deso.csv, DeSO till område (kräver [geo])
+python -m prislandskap scb          # hämta SCB-statistiken till data/scb/kontext.json (årsvis)
 
 ruff check . && ruff format --check .
 pytest
@@ -45,7 +47,8 @@ pip-compile --extra dev --strip-extras --output-file requirements.lock pyproject
 | `snapshot.py` | Läser, validerar och skriver `data/snapshots/` |
 | `export.py` | Gör om ögonblicksbild och geometri till webbens kontrakt |
 | `og.py`, `palette.py` | Delningsbilder. Färgskalorna läses från `design/scales.json`, samma fil som webben använder |
-| `geometry.py`, `mapping.py` | Bygger områdesgeometrin, med stadsdel → stadsdelsområde |
+| `geometry.py`, `mapping.py` | Bygger områdesgeometrin, med stadsdel → stadsdelsområde och kommunkod → kommun |
+| `deso.py`, `scb.py` | DeSO till område, och SCB:s områdesstatistik summerad per område |
 | `models.py`, `text.py`, `geojson.py` | Typer, svensk text och GeoJSON utan geobibliotek |
 
 Testerna kör mot HTML-fixturer i `tests/fixtures/`, eftersom de inte når Mäklarstatistik.
@@ -53,3 +56,6 @@ Testerna kör mot HTML-fixturer i `tests/fixtures/`, eftersom de inte når Mäkl
 `test_scraper_rebuilds_checked_in_snapshot_from_html` visar att skrapan återskapar den incheckade
 filen exakt. Ändras sidstrukturen hos Mäklarstatistik är det fixturerna och `parse.py` som ska
 uppdateras.
+
+SCB:s API och geodata nås inte alltid från en utvecklarmiljö bakom proxy. Då körs `deso` och `scb`
+i GitHub Actions (`.github/workflows/scb.yml`, manuellt eller årsvis), som checkar in resultatet.

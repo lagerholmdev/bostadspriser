@@ -9,7 +9,10 @@ from prislandskap import export
 from prislandskap.errors import PipelineError
 from prislandskap.text import swedish_sort_key
 
-AREA_KEYS = {"slug", "name", "kind", "label", "neighbours", "bbox", "apartment", "house", "houseScope"}
+AREA_KEYS = {
+    "slug", "name", "kind", "label", "neighbours", "bbox", "apartment", "house", "houseScope", "context",
+}  # fmt: skip
+CONTEXT_KEYS = {"families", "highIncome", "higherEducation", "age25to44", "condos"}
 STAT_KEYS = {"sales", "pricePerSqm", "meanPrice", "change"}
 
 
@@ -45,7 +48,8 @@ def dataset(snapshot, features):
 
 
 def test_dataset_top_level(dataset):
-    assert set(dataset) == {"updated", "periods", "source", "county", "areas"}
+    assert set(dataset) == {"updated", "periods", "source", "county", "context", "areas"}
+    assert dataset["context"] is None  # utan data/scb/kontext.json
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", dataset["updated"])
     assert dataset["periods"] == {"m3": "jul–sep 2026", "m12": "okt 2025–sep 2026"}
     assert set(dataset["source"]) == {"name", "url"} and dataset["source"]["url"].startswith("https://")
@@ -108,6 +112,34 @@ def test_geometry_file_properties(features):
         assert props["kind"] in ("district", "municipality")
 
 
+def fake_context(features) -> dict:
+    values = {"families": 0.3, "highIncome": 0.4, "higherEducation": 0.5, "age25to44": 0.25, "condos": 1000}
+    return {
+        "schema": 1,
+        "fetched": "2026-10-19",
+        "source": {"name": "SCB", "url": "https://www.statistikdatabasen.scb.se/"},
+        "years": {key: "2025" for key in values},
+        "county": values,
+        "areas": {f["properties"]["slug"]: dict(values) for f in features},
+    }
+
+
+def test_context_is_carried_per_area(snapshot, features):
+    dataset = json.loads(json.dumps(export.build_dataset(snapshot, features, fake_context(features))))
+    assert set(dataset["context"]) == {"source", "years", "county"}
+    assert set(dataset["context"]["county"]) == CONTEXT_KEYS
+    for area in dataset["areas"]:
+        assert set(area["context"]) == CONTEXT_KEYS
+        assert type(area["context"]["condos"]) is int
+
+
+def test_context_missing_an_area_is_an_error(snapshot, features):
+    context = fake_context(features)
+    del context["areas"]["essingen"]
+    with pytest.raises(PipelineError, match="SCB-kontexten saknar essingen"):
+        export.build_dataset(snapshot, features, context)
+
+
 def test_geometry_carries_only_slug(features):
     geo = export.build_geometry(features)
     assert geo["type"] == "FeatureCollection"
@@ -124,6 +156,7 @@ def test_coverage_mismatch_is_an_error(snapshot, features):
 
 def test_run_writes_files_idempotently(tmp_path, monkeypatch, snapshot):
     monkeypatch.setattr(export.snapshots, "load_latest", lambda: snapshot)
+    monkeypatch.setattr(export, "load_context", lambda: None)
     paths = export.run(out_dir=tmp_path)
     assert sorted(p.name for p in paths) == ["areas.geojson", "areas.json"]
     before = {p: p.stat().st_mtime_ns for p in paths}

@@ -10,6 +10,7 @@ ett värde saknas. Koden finns i `pipeline/src/prislandskap/`.
 | Bostadspriser | [Svensk Mäklarstatistik](https://www.maklarstatistik.se/omrade/riket/stockholms-lan/), två publika sidor: Stockholms län och Stockholms stad | Får citeras med källhänvisning. Källan anges på varje sida och delningsbild. |
 | Stadsdelsgränser | Stockholms stads stadskarta via [krasch/stockholm-stadsdelar](https://github.com/krasch/stockholm-stadsdelar) | CC0 |
 | Kommungränser | SCB:s DeSO via [stefur/swemaps-data](https://github.com/stefur/swemaps-data), sammanslagna per kommun | Öppna data från SCB |
+| Områdesstatistik | SCB:s [Statistikdatabas](https://www.statistikdatabasen.scb.se/) (PxWebApi 2.0), DeSO 2025, och DeSO-gränserna från [SCB:s öppna geodata](https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/geodata/oppna-geodata/deso--demografiska-statistikomraden/) | CC0 |
 | Typsnitt i delningsbilderna | Familjen Grotesk, `pipeline/src/prislandskap/assets/fonts/` | SIL OFL 1.1 (`OFL.txt`) |
 
 Mäklarstatistik publicerar runt den 8:e varje månad. `deploy.yml` hämtar den 10:e.
@@ -103,6 +104,44 @@ månaderna: `m3.change` mot de tre månaderna innan, `m12.change` mot samma tre 
 Schema 1 (svenska nycklar, före oktober 2026) finns inte kvar. Den enda filen migrerades med
 oförändrade siffror.
 
+## SCB-statistik: `data/scb/`
+
+Hämtas årsvis av `.github/workflows/scb.yml` (och manuellt), aldrig av månadsjobbet. Två filer,
+båda incheckade:
+
+- `deso.csv`, från `python -m prislandskap deso`: varje DeSO (2025) i länet och området den räknas
+  till. Kommunerna följer av DeSO-koden. I Stockholms stad går varje DeSO helt till det
+  stadsdelsområde den överlappar mest, räknat på landytan. Kolumnen `andel` visar hur ren
+  tilldelningen är: 567 av 569 DeSO ligger till minst 90 % i ett område. Kommandot avbryter om
+  under 98 % gör det.
+- `kontext.json`, från `python -m prislandskap scb`: fyra andelar och ett antal per område och
+  för länet, med år per mått.
+
+| Mått | Nyckel | SCB-tabell | Beräkning |
+| --- | --- | --- | --- |
+| Hushåll med barn | `families` | TAB6568 | (sammanboende + ensamstående med barn) / alla hushåll |
+| Hög inkomst | `highIncome` | TAB6679 | andel 20+ år i rikets översta fjärdedel, sammanräknad förvärvsinkomst |
+| Lång eftergymnasial utbildning | `higherEducation` | TAB6534 | 3 år eller mer / alla 25–65 år |
+| 25–44 år | `age25to44` | TAB6574 | 25–44 år / hela befolkningen |
+| Bostadsrätter | `condos` | TAB6638 | antal; nämnaren i omsättningsgraden |
+
+Allt summeras som antal, aldrig som andelar eller medianer, så stadsdelsområdena blir exakta
+summor av sina DeSO. Därför finns ingen medianinkomst: medianer går inte att slå ihop. Kommuner och
+länet hämtas med egna regionkoder där tabellen har dem (bostadsrättstabellen har bara DeSO). SCB
+lägger sedan 2025 in ett litet slumpbrus för att skydda enskilda, så delar summerar inte alltid
+exakt till totalen.
+
+```jsonc
+{
+  "schema": 1,
+  "fetched": "2026-10-19",
+  "source": { "name": "SCB", "url": "https://www.statistikdatabasen.scb.se/" },
+  "years": { "families": "2025", "highIncome": "2024", "higherEducation": "2025", "age25to44": "2025", "condos": "2025" },
+  "county": { "families": 0.3118, "highIncome": 0.34, "higherEducation": 0.398, "age25to44": 0.2931, "condos": … },
+  "areas": { "sodermalm": { … }, … }   // 37 områden
+}
+```
+
 ## Geometri: `data/geo/areas.geojson`
 
 Byggs av `python -m prislandskap geometry` (kräver `pip install -c requirements.lock -e ".[dev,geo]"` i `pipeline/`) och checkas in.
@@ -135,6 +174,7 @@ interface Dataset {
   periods: { m3: string; m12: string };     // { m3: "jul–sep 2026", m12: "okt 2025–sep 2026" }
   source: { name: string; url: string };
   county: { name: string; apartment: StatsByPeriod; house: StatsByPeriod };
+  context: { source: { name: string; url: string }; years: Record<ContextKey, string>; county: AreaContext } | null;
   areas: Area[];                            // 37 st, sorterade på namn i svensk ordning (Å, Ä, Ö sist)
 }
 
@@ -148,6 +188,15 @@ interface Area {
   apartment: StatsByPeriod | null;
   house: StatsByPeriod | null;
   houseScope: "area" | "city" | null;
+  context: AreaContext | null;              // SCB, null om data/scb/kontext.json saknas
+}
+
+interface AreaContext {                     // andelar 0–1, condos ett antal
+  families: number | null;
+  highIncome: number | null;
+  higherEducation: number | null;
+  age25to44: number | null;
+  condos: number | null;
 }
 
 type StatsByPeriod = { m3: Stat; m12: Stat };

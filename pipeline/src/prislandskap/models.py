@@ -61,6 +61,22 @@ class Snapshot(TypedDict):
 # ---------- export (web/src/generated/areas.json) ----------
 
 
+class AreaContext(TypedDict):
+    """SCB-statistik per område (data/scb/kontext.json). Andelar 0–1, condos ett antal."""
+
+    families: float | None
+    highIncome: float | None
+    higherEducation: float | None
+    age25to44: float | None
+    condos: int | None
+
+
+class DatasetContext(TypedDict):
+    source: Source
+    years: dict[str, str]
+    county: AreaContext
+
+
 class Area(TypedDict):
     slug: str
     name: str
@@ -71,6 +87,7 @@ class Area(TypedDict):
     apartment: StatsByPeriod | None
     house: StatsByPeriod | None
     houseScope: HouseScope | None
+    context: AreaContext | None
 
 
 class Dataset(TypedDict):
@@ -78,4 +95,5 @@ class Dataset(TypedDict):
     periods: dict[Period, str]
     source: Source
     county: County
+    context: DatasetContext | None
     areas: list[Area]
